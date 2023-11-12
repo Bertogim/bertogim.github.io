@@ -1,0 +1,82 @@
+
+header {
+    text-align: center;
+    background-color: #41464d;
+    color: white;
+    border: 3px solid #474b4e;
+    border-radius: 30px;
+    padding: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+body {
+    background-color: #25282c;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    font-family: 'Trebuchet MS', sans-serif;
+    text-align: center;
+}
+
+h2 {
+    font-family: 'Trebuchet MS', sans-serif;
+}
+
+a {
+    margin: 0;
+    color: #b7b7b7;
+    text-decoration: underline;
+}
+
+.endiv {
+ float: left;
+ margin-left: 5%;
+}
+
+.esdiv {
+    float: right;
+    margin-right: 5%;
+}
+
+.twwdiv {
+    margin-top: 35%;
+}
+
+.endiv , .esdiv, .twwdiv {
+    text-align: center;
+    width: 40%;
+    height: 90%;
+    background-color: #41464d;
+    color: white;
+    border: 3px solid #474b4e;
+    border-radius: 30px;
+}
+
+.FlagImg {
+    width: 90%;
+    border-radius: 30px;
+    margin-bottom: 5%;
+}
+
+
+.infobox {
+    margin: 10px;
+    padding: 15px;
+    border-radius: 20px;
+    background-color: #424549; /* Cambia este color al que desees */
+    border: 3px solid #474b4e;
+    text-align: left;
+}
+
+.LanguageSelect {
+    float: left;
+    border-radius: 20px;
+    background-color: #4f555c; /* Cambia este color al que desees */
+    border: 2px solid #60666b;
+    text-align: left;
+    color: #ffffff;
+}

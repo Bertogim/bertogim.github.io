@@ -32,6 +32,10 @@ a {
     text-decoration: underline;
 }
 
+iframe {
+    border: 0px;
+}
+
 .endiv {
  float: left;
  margin-left: 5%;

@@ -1,86 +1,173 @@
-
+/* Header styling */
 header {
     text-align: center;
-    background-color: #41464d;
+    background-color: #1a1a1a;
     color: white;
-    border: 3px solid #474b4e;
-    border-radius: 30px;
-    padding: 10px;
-    position: sticky;
-    top: 0;
+    border: 1px solid #f59400;
     z-index: 999;
+    size: 110%;
+    top: -3px;
+    margin-left: -3px;
+    position: fixed;
+    left: 0;
+    width: 100%;
+    padding: 10px;
 }
 
-body {
-    background-color: #25282c;
+header a{
     color: #ffffff;
-    font-family: Arial, sans-serif;
+    text-decoration:none;
 }
 
+header .headertitle {
+    color: #ffffff;
+    text-decoration:none;
+    font-weight: bold;
+}
+
+
+/* Body styling */
+body {
+    background-color: #121212;
+    /* Darker black for a professional look */
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Heading 1 styling */
 h1 {
     font-family: 'Trebuchet MS', sans-serif;
     text-align: center;
 }
 
+/* Heading 2 styling */
 h2 {
     font-family: 'Trebuchet MS', sans-serif;
 }
 
+/* Anchor (Link) styling */
 a {
     margin: 0;
     color: #b7b7b7;
     text-decoration: underline;
 }
 
+/* Iframe styling */
 iframe {
-    border: 0px;
+    border: 0;
 }
 
+/* Float left div styling */
 .endiv {
- float: left;
- margin-left: 5%;
+    float: left;
+    margin-left: 5%;
 }
 
+/* Float right div styling */
 .esdiv {
     float: right;
     margin-right: 5%;
 }
 
+/* Top margin div styling */
 .twwdiv {
     margin-top: 35%;
 }
 
-.endiv , .esdiv, .twwdiv {
+/* Common styling for endiv, esdiv, and twwdiv */
+.endiv,
+.esdiv,
+.twwdiv {
     text-align: center;
     width: 40%;
     height: 90%;
-    background-color: #41464d;
+    background-color: #1a1a1a;
+    /* Darker black for a professional look */
     color: white;
     border: 3px solid #474b4e;
     border-radius: 30px;
 }
 
+/* Flag image styling */
 .FlagImg {
     width: 90%;
     border-radius: 30px;
     margin-bottom: 5%;
 }
 
-
+/* Info box styling */
 .infobox {
     margin: 10px;
     padding: 15px;
     border-radius: 20px;
-    background-color: #424549; /* Cambia este color al que desees */
+    background-color: #1a1a1a;
+    /* Darker black for a professional look */
     border: 3px solid #474b4e;
     text-align: left;
 }
 
+/* Language select styling */
 .LanguageSelect {
     float: left;
     border-radius: 20px;
-    background-color: #4f555c; /* Cambia este color al que desees */
+    background-color: #2a2a2a;
+    /* Slightly lighter black for contrast */
     border: 2px solid #60666b;
     text-align: left;
     color: #ffffff;
+}
+
+/* Additional styles for the overlay image */
+.overlay-image {
+    width: 100%;
+    height: 90vh;
+    overflow: hidden;
+    opacity: 1;
+    margin-top: -5%;
+}
+
+.overlay-image img {
+    width: 100%;
+    height: auto; /* Adjusted to maintain aspect ratio */
+    object-fit:cover;
+}
+
+.overlay-image::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 0vh; /* Ajusta este valor para cambiar la altura de la "pared" */
+    background-color: #1a1a1a;
+    z-index: 1;
+}
+
+.overlay-image h1 {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 5em;
+    z-index: 2;
+    margin-top: 10px; /* Ajusta este valor según sea necesario */
+}
+
+.content-container {
+    display: flex;
+    gap: 20px;
+    max-width: 1200px; /* Ajusta el ancho máximo según tus necesidades */
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#twitch-embed,
+.infobox {
+    flex: 1;
+}
+
+#twitch-embed {
+    text-align: center;
 }

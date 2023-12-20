@@ -7,6 +7,28 @@
     <title es-translation="Bertogim">Bertogim</title>
     <link rel="icon" type="png" target="_blank" href="https://avatars.githubusercontent.com/u/91332073">
     <link rel="stylesheet" type="text/css" href="../styles.css">
+
+
+    <script>
+        // Obtén la altura del header
+        var alturaHeader = document.querySelector('header').offsetHeight;
+
+        // Establece el margen superior del body
+        document.body.style.marginTop = alturaHeader + 'px';
+
+        // Obtén la altura de la imagen de fondo
+        var alturaImagen = document.querySelector('.overlay img').clientHeight;
+
+        // Obtén la altura del h1
+        var alturaH1 = document.querySelector('.overlay-image h1').offsetHeight;
+
+        // Calcula el valor de top
+        var topValue = (alturaImagen / 2) - (alturaH1 / 2);
+
+        // Establece el valor de top en el estilo del h1
+        document.querySelector('.overlay-image h1').style.top = topValue + 'px';
+
+    </script>
 </head>
 
 <body>
@@ -54,7 +76,7 @@
         <div class="infobox" width="" style="float: left;clear: left;">
             <h2 es-translation="Sobre Mí">About Me</h2>
             <p
-                es-translation="📽️ Soy un <span><a target='_blank' href='https://www.youtube.com/@Bertogim'>Youtuber</a></span> y <span><a target='_blank' href='https://www.twitch.tv/bertogim'>Streamer</a></span>">
+                es-translation="📽️ Soy <span><a target='_blank' href='https://www.youtube.com/@Bertogim'>Youtuber</a></span> y <span><a target='_blank' href='https://www.twitch.tv/bertogim'>Streamer</a></span>">
                 📽️ I am a <a style="margin: 0; color: #b7b7b7;" target="_blank"
                     href="https://www.youtube.com/@Bertogim">Youtuber</a> and <a style="margin: 0; color: #b7b7b7;"
                     target="_blank" href="https://www.twitch.tv/bertogim">Streamer</a></p>
@@ -97,12 +119,12 @@
     <div class="Right">
 
         <div id="twitch-embed" class="infobox" width="" style="display:none;">
-    
+
             <h2 es-translation="Estoy en directo!">Im streaming!</h2>
-    
+
             <!-- Load the Twitch embed script -->
             <script src="https://embed.twitch.tv/embed/v1.js"></script>
-    
+
             <!-- Create a Twitch.Embed object that will render within the "twitch-embed" element. -->
             <script type="text/javascript">
                 var embed = new Twitch.Embed("twitch-embed", {
@@ -113,7 +135,7 @@
                     layout: "video",
                     muted: true,
                 });
-    
+
                 embed.addEventListener(Twitch.Embed.VIDEO_PLAY, () => {
                     document.getElementById("twitch-embed").style.display = "grid"
                 });
@@ -127,7 +149,7 @@
             </a>
             <iframe width="100%" height="400px" src="https://discord.com/widget?id=734104333934919741"></iframe>
         </div>
-        
+
     </div>
 
 

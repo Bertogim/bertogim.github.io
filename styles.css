@@ -5,7 +5,6 @@ header {
     color: white;
     border: 0.1vh solid #f59400;
     z-index: 999;
-    size: 110%;
     top: -3px;
     margin-left: -3px;
     position: fixed;
@@ -14,14 +13,14 @@ header {
     padding: 10px;
 }
 
-header a{
+header a {
     color: #ffffff;
-    text-decoration:none;
+    text-decoration: none;
 }
 
 header .headertitle {
     color: #ffffff;
-    text-decoration:none;
+    text-decoration: none;
     font-weight: bold;
 }
 
@@ -58,42 +57,16 @@ iframe {
     border: 0;
 }
 
-/* Float left div styling */
-.endiv {
-    float: left;
-    margin-left: 5%;
+.selected {
+    font-weight: bold;
 }
 
-/* Float right div styling */
-.esdiv {
-    float: right;
-    margin-right: 5%;
-}
-
-/* Top margin div styling */
-.twwdiv {
-    margin-top: 35%;
-}
-
-/* Common styling for endiv, esdiv, and twwdiv */
-.endiv,
-.esdiv,
-.twwdiv {
+.center {
     text-align: center;
-    width: 40%;
-    height: 90%;
-    background-color: #1a1a1a;
-    /* Darker black for a professional look */
-    color: white;
-    border: 3px solid #474b4e;
-    border-radius: 30px;
 }
 
-/* Flag image styling */
-.FlagImg {
-    width: 90%;
-    border-radius: 30px;
-    margin-bottom: 5%;
+.disabled {
+    color: rgba(255, 255, 255, 0.406);
 }
 
 /* Info box styling */
@@ -124,29 +97,35 @@ iframe {
     max-height: 90vh;
     overflow: hidden;
     margin-top: -10%;
-    position: relative; /* Añadido para posicionar correctamente el h1 */
+    position: relative;
+    /* Añadido para posicionar correctamente el h1 */
 }
 
 .overlay-image img {
     width: 100%;
-    height: auto; /* Ajustado para mantener la relación de aspecto */
+    height: auto;
+    /* Ajustado para mantener la relación de aspecto */
+
 }
 
 .overlay-image h1 {
     position: absolute;
-    top: 50%; /* Centrado verticalmente */
+    top: 50%;
+    /* Centrado verticalmente */
     left: 50%;
     transform: translate(-50%, -50%);
     color: white;
     font-size: 5em;
     z-index: 2;
-    margin-top: 10px; /* Ajusta este valor según sea necesario */
+    margin-top: 10px;
+    /* Ajusta este valor según sea necesario */
 }
 
 .content-container {
     display: flex;
     gap: 20px;
-    max-width: 1200px; /* Ajusta el ancho máximo según tus necesidades */
+    max-width: 1200px;
+    /* Ajusta el ancho máximo según tus necesidades */
     margin: 0 auto;
     padding: 20px;
     box-sizing: border-box;
@@ -160,3 +139,26 @@ iframe {
 #twitch-embed {
     text-align: center;
 }
+
+/* Gallery */
+
+.image-container {
+    gap: 1.4ren;
+}
+
+.image-container img {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-radius: 0.7rem;
+
+}
+
+#trucks, #streams, #other {
+    columns: 15rem 2;
+}
+
+#streams2 {
+    columns: 15rem 1;
+}
+
+

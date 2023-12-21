@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title es-translation="Bertogim">Bertogim - Photos</title>
+    <link rel="icon" type="png" target="_blank" href="Image/Icon.png">
+    <link rel="stylesheet" type="text/css" href="../styles.css">
+
+
+
+</head>
+
+<body>
+
+    <header>
+        <div style="display: flex; gap: 20px;">
+            <p class="headertitle" style="margin: 0;" es-translation="Página Web de Bertogim">Bertogim Web Page</p>
+            <p style="margin: 0;">
+                <a href="/" es-translation="Inicio">Home</a>
+            </p>
+            <p style="margin: 0;">
+                <a class="disabled" href="/social" es-translation="Redes Sociales">Social Media</a>
+            </p>
+            <p style="margin: 0;">
+                <a class="disabled" href="/creations" es-translation="Creaciones">Creations</a>
+            </p>
+            <p style="margin: 0;">
+                <a href="/photos" class="selected" es-translation="Fotos">Photos</a>
+            </p>
+            <select class="LanguageSelect">
+                <option value="en" es-translation="English">English</option>
+                <option value="es" es-translation="Español">Español</option>
+            </select>
+        </div>
+    </header>
+
+    <script>
+        window.addEventListener('scroll', function () {
+            var overlay = document.querySelector('.overlay-image img');
+            if (overlay) {
+                overlay.style.transition = 'none';
+                overlay.style.transform = 'translateY(' + window.scrollY + 'px)';
+            }
+        });
+    </script>
+
+    <div class="overlay-image">
+        <img src="Image/Background3.jpg" alt="Bertogim Background Image">
+        <h1 es-translation="Fotos">Photos</h1>
+    </div>
+
+    <h1 es-translation="Fotos del camion, de directos y otros">Photos of the truck, streams photos and more</h1>
+
+    <div class="infobox">
+        <h2 class="center" es-translation="Fotos del camion">Truck images</h2>
+        <div id="trucks" class="image-container">
+            <img src="Image/Background1.jpg">
+            <img src="Image/Background2.jpg">
+            <img src="Image/Background3.jpg">
+            <img src="Image/Background4.jpg">
+            <img src="Image/Background5.jpg">
+            <img src="Image/Background6.jpg">
+        </div>
+    </div>
+
+    <div class="infobox">
+        <h2 class="center" es-translation="Fotos de directos">Streams photos</h2>
+        <p es-translation="Fotos que hago al final de los directos donde aparecen las personas que se han unido">
+            Screenshots with the people that was playing with me in the stream</p>
+        <br>
+        <h3 class="center">2020</h3>
+        <div id="streams" class="image-container">
+            <img src="Image/Streams/stream1.png">
+            <img src="Image/Streams/stream2.png">
+            <img src="Image/Streams/stream3.png">
+            <img src="Image/Streams/stream4.png">
+            <img src="Image/Streams/stream5.png">
+            <img src="Image/Streams/stream6.png">
+            <img src="Image/Streams/stream7.png">
+            <img src="Image/Streams/stream8.png">
+            <img src="Image/Streams/stream9.png">
+            <img src="Image/Streams/stream10.png">
+            <img src="Image/Streams/stream11.png">
+        </div>
+        <h3 class="center">2021</h3>
+        <div id="streams2" class="image-container">
+            <img src="Image/Streams/stream12.png">
+        </div>
+        <h3 class="center">2022</h3>
+        <div id="streams2" class="image-container">
+            <img src="Image/Streams/stream13.png">
+        </div>
+    </div>
+
+
+    <script>
+        // Obtén la altura del header
+        var alturaHeader = document.querySelector('header').offsetHeight;
+
+        // Establece el margen superior del body
+        document.body.style.paddingTop = alturaHeader + 'px';
+    </script>
+
+    <script src="../script.js"></script>
+
+</body>
+
+</html>

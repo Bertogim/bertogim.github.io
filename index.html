@@ -9,26 +9,7 @@
     <link rel="stylesheet" type="text/css" href="../styles.css">
 
 
-    <script>
-        // Obtén la altura del header
-        var alturaHeader = document.querySelector('header').offsetHeight;
 
-        // Establece el margen superior del body
-        document.body.style.marginTop = alturaHeader + 'px';
-
-        // Obtén la altura de la imagen de fondo
-        var alturaImagen = document.querySelector('.overlay img').clientHeight;
-
-        // Obtén la altura del h1
-        var alturaH1 = document.querySelector('.overlay-image h1').offsetHeight;
-
-        // Calcula el valor de top
-        var topValue = (alturaImagen / 2) - (alturaH1 / 2);
-
-        // Establece el valor de top en el estilo del h1
-        document.querySelector('.overlay-image h1').style.top = topValue + 'px';
-
-    </script>
 </head>
 
 <body>
@@ -37,13 +18,16 @@
         <div style="display: flex; gap: 20px;">
             <p class="headertitle" style="margin: 0;" es-translation="Página Web de Bertogim">Bertogim Web Page</p>
             <p style="margin: 0;">
-                <a href="/social" es-translation="Redes Sociales">Social Media</a>
+                <a href="/" class="selected" es-translation="Inicio">Home</a>
             </p>
             <p style="margin: 0;">
-                <a href="/photos" target="" es-translation="Fotos">Photos</a>
+                <a class="disabled" href="/social" es-translation="Redes Sociales">Social Media</a>
             </p>
             <p style="margin: 0;">
-                <a href="/creations" target="" es-translation="Creaciones">Creations</a>
+                <a class="disabled" href="/creations" es-translation="Creaciones">Creations</a>
+            </p>
+            <p style="margin: 0;">
+                <a href="/photos" es-translation="Fotos">Photos</a>
             </p>
             <select class="LanguageSelect">
                 <option value="en" es-translation="English">English</option>
@@ -56,7 +40,7 @@
         window.addEventListener('scroll', function () {
             var overlay = document.querySelector('.overlay-image img');
             if (overlay) {
-                overlay.style.transition = 'none'; // Disable smooth transition
+                overlay.style.transition = 'none';
                 overlay.style.transform = 'translateY(' + window.scrollY + 'px)';
             }
         });
@@ -68,8 +52,6 @@
     </div>
 
     <h1 es-translation="Página Web de Bertogim (En desarollo)">Bertogim Web Page (In development)</h1>
-
-
 
     <div class="Left" style="float: left;clear: left;" width="auto">
 
@@ -152,7 +134,13 @@
 
     </div>
 
+    <script>
+        // Obtén la altura del header
+        var alturaHeader = document.querySelector('header').offsetHeight;
 
+        // Establece el margen superior del body
+        document.body.style.paddingTop = alturaHeader + 'px';
+    </script>
 
     <script src="../script.js"></script>
 

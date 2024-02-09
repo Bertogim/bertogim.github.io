@@ -26,7 +26,7 @@
                 <a href="/" es-translation="Inicio">Home</a>
             </p>
             <p style="margin: 0;">
-                <a class="disabled" href="/social" es-translation="Redes Sociales">Social Media</a>
+                <a href="/social" es-translation="Redes Sociales">Social Media</a>
             </p>
             <p style="margin: 0;">
                 <a class="disabled" href="/creations" es-translation="Creaciones">Creations</a>
@@ -58,7 +58,8 @@
 
     <h1 es-translation="Fotos del camion, de directos y otros">Photos of the truck, streams photos and more</h1>
 
-    <div class="infobox">
+    <center>
+    <div class="infobox" id="imagebox">
         <h2 class="center" es-translation="Fotos del camion">Truck images</h2>
         <div id="trucks" class="image-container">
             <img src="Image/Background1.jpg">
@@ -70,9 +71,9 @@
         </div>
     </div>
 
-    <div class="infobox">
+    <div class="infobox" id="imagebox">
         <h2 class="center" es-translation="Fotos de directos">Streams photos</h2>
-        <p es-translation="Fotos que hago al final de los directos donde aparecen las personas que se han unido">
+        <p class="center" es-translation="Fotos que hago al final de los directos donde aparecen las personas que se han unido">
             Screenshots with the people that was playing with me in the stream</p>
         <br>
         <h3 class="center">2020</h3>
@@ -98,7 +99,7 @@
             <img src="Image/Streams/stream13.png">
         </div>
     </div>
-
+</center>
 
     <script>
         // Obtén la altura del header
@@ -108,7 +109,7 @@
         document.body.style.paddingTop = alturaHeader + 'px';
     </script>
 
-    <script src="../script.js"></script>
+    <script src="../translations.js"></script>
 
 </body>
 

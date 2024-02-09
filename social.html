@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title es-translation="Bertogim">Bertogim - Photos</title>
+    <link rel="icon" type="png" target="_blank" href="Image/Icon.png">
+    <link rel="stylesheet" type="text/css" href="../styles.css">
+
+    <meta content="Bertogim" property="og:title" />
+    <meta content="Bertogim web page" property="og:description" />
+    <meta content="https://bertogim.github.io" property="og:url" />
+    <meta content="https://bertogim.github.io/Image/Icon.png" property="og:image" />
+    <meta name="theme-color" content="#ff0000">
+
+
+</head>
+
+<body>
+
+    <header>
+        <div style="display: flex; gap: 20px;">
+            <p class="headertitle" style="margin: 0;" es-translation="Página Web de Bertogim">Bertogim Web Page</p>
+            <p style="margin: 0;">
+                <a href="/" es-translation="Inicio">Home</a>
+            </p>
+            <p style="margin: 0;">
+                <a href="/social" class="selected" es-translation="Redes Sociales">Social Media</a>
+            </p>
+            <p style="margin: 0;">
+                <a class="disabled" href="/creations" es-translation="Creaciones">Creations</a>
+            </p>
+            <p style="margin: 0;">
+                <a href="/photos" es-translation="Fotos">Photos</a>
+            </p>
+            <select class="LanguageSelect">
+                <option value="en" es-translation="English">English</option>
+                <option value="es" es-translation="Español">Español</option>
+            </select>
+        </div>
+    </header>
+
+    <script>
+        window.addEventListener('scroll', function () {
+            var overlay = document.querySelector('.overlay-image img');
+            if (overlay) {
+                overlay.style.transition = 'none';
+                overlay.style.transform = 'translateY(' + window.scrollY + 'px)';
+            }
+        });
+    </script>
+
+    <div class="overlay-image">
+        <img src="Image/Background5.jpg" alt="Bertogim Background Image">
+        <h1 es-translation="Redes Sociales">Social Media</h1>
+    </div>
+
+    <div class="Left" style="float: left;clear: left;width:40%">
+        <div class="infobox" class="SocialDiv" id="imagebox"
+            style="width: 50vh; float: left;clear: left; align-items: center;width: 100%">
+            <h2 class="center" es-translation="Redes Sociales">Social Media</h2>
+            <div id="social" class="image-container">
+                <a href="https://www.twitch.tv/bertogim" target="_blank"><img src="Image/Social/Twitch.png" class="SocialImage" alt="Twitch"></a>
+                <a href="https://discord.gg/pK3YJYh383" target="_blank"><img src="Image/Social/Discord.png" class="SocialImage" alt="Discord"></a>
+                <a href="https://steamcommunity.com/id/bertogim" target="_blank"><img src="Image/Social/Steam.png" class="SocialImage" alt="Steam"></a>
+                <a href="https://www.youtube.com/@bertogim" target="_blank"><img src="Image/Social/YouTube.png" class="SocialImage" alt="YouTube"></a>
+                <a href="https://www.tiktok.com/@bertogim" target="_blank"><img src="Image/Social/TikTok.png" class="SocialImage" alt="TikTok"></a>
+                <a href="https://twitter.com/bertogim" target="_blank"><img src="Image/Social/Twitter.png" class="SocialImage" alt="Twitter"></a>
+                
+            </div>
+        </div>
+        <div class="infobox" style="float: left ;clear: left ;width: 100%">
+            <h2 es-translation="Servidor de Discord">Discord server</h2>
+            <p es-translation="<p></p>">⚠ The discord server is a spanish server</p>
+            <a target="_blank" href="https://discord.gg/pK3YJYh383">
+                <p es-translation="Unete al servidor de Discord!">Join the discord server!</p>
+            </a>
+            <iframe width="100%" height="400px" src="https://discord.com/widget?id=734104333934919741"></iframe>
+        </div>
+    </div>
+
+    <div class="Right" style="width: 50%;float: right">
+
+        <div id="twitch-embed" class="infobox" style="float: right; width: 100%;">
+
+            <h2 es-translation="Canal de Twitch">Twitch Channel</h2>
+
+            <!-- Load the Twitch embed script -->
+            <script src="https://embed.twitch.tv/embed/v1.js"></script>
+
+            <!-- Create a Twitch.Embed object that will render within the "twitch-embed" element. -->
+            <script type="text/javascript">
+                var embed = new Twitch.Embed("twitch-embed", {
+                    width: "100%",
+                    height: "400px",
+                    channel: "bertogim",
+                    autoplay: true,
+                    layout: "video",
+                    muted: true,
+                });
+            </script>
+        </div>
+
+        <div class="infobox" style="float: right; width: 100%;">
+
+            <h2 es-translation="Twitter">Twitter</h2>
+
+            <a class="twitter-timeline" data-height="1000" data-theme="dark" href="https://twitter.com/Bertogim?ref_src=twsrc%5Etfw">Tweets by Bertogim</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>        
+    </div>
+
+
+    <script>
+        // Obtén la altura del header
+        var alturaHeader = document.querySelector('header').offsetHeight;
+
+        // Establece el margen superior del body
+        document.body.style.paddingTop = alturaHeader + 'px';
+    </script>
+
+    <script src="../translations.js"></script>
+
+</body>
+
+</html>

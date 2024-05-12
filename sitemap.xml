@@ -1,0 +1,14 @@
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>https://bertogim.github.io/</loc>
+<priority>1.00</priority>
+</url>
+<url>
+<loc>https://bertogim.github.io/social</loc>
+<priority>0.80</priority>
+</url>
+<url>
+<loc>https://bertogim.github.io/photos</loc>
+<priority>0.80</priority>
+</url>
+</urlset>

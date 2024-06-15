@@ -73,11 +73,38 @@ iframe {
 .infobox {
     margin: 10px;
     padding: 15px;
+    padding-top: 0px;
     border-radius: 20px;
     background-color: #1a1a1a;
     /* Darker black for a professional look */
     border: 3px solid #474b4e;
     text-align: left;
+}
+
+.card {
+    margin: 10px;
+    padding: 0px;
+    padding-top: 0px;
+    border-radius: 20px;
+    background-color: #232424;
+    /* Darker black for a professional look */
+    border: 3px;
+    text-align: center;
+    align-items: center;
+    overflow: hidden;
+    margin-bottom: 50px;
+}
+
+.card img {
+    height: 200px;
+    width: 100%;
+    padding-right: 5%;
+    object-fit: cover;
+}
+
+.card .text {
+    padding: 10px;
+    padding-top: 0px;
 }
 
 /* Language select styling */
@@ -153,6 +180,32 @@ iframe {
 
 }
 
+.image-container2 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columnas con tamaño igual */
+    gap: 10px; /* Espacio entre las imágenes */
+    margin-top: 20px; /* Ajuste del margen superior */
+}
+
+.image-container2 a {
+    display: block; /* Asegura que cada enlace ocupe todo el espacio disponible */
+    text-align: center; /* Centra el texto (en caso de haber) dentro del enlace */
+}
+
+.SocialImage {
+    width: 100%; /* Ocupa todo el ancho disponible en su contenedor */
+    height: auto; /* Mantiene la proporción original de la imagen */
+    max-width: 150px; /* Establece un ancho máximo para las imágenes */
+    border-radius: 10px; /* Añade bordes redondeados para un aspecto más suave */
+    transition: transform 0.15s ease-in-out; /* Efecto de transición al hacer hover */
+}
+
+.SocialImage:hover {
+    transform: scale(1.1); /* Escala ligeramente la imagen al hacer hover */
+}
+
+
+
 #trucks,
 #streams,
 #other {
@@ -164,17 +217,130 @@ iframe {
 }
 
 #social {
-    columns: 1rem 3;
+    columns: 100px 3;
 }
 
-@media only screen and (max-width: 620px) {
+#imagebox {
+    width: 80%;
+}
 
-    /* For mobile phones: */
-    #imagebox, .SocialDiv, .infobox {
-        width: 100%;
+.header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-nav {
+    display: flex;
+    gap: 20px;
+}
+
+header a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+header .headertitle {
+    font-weight: bold;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0px;
+    box-sizing: border-box;
+}
+
+.overlay-image {
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
+    text-align: center;
+}
+
+.overlay-image img {
+    width: 100%;
+    height: auto;
+}
+
+.overlay-image h1 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 5em;
+    z-index: 2;
+    margin: 0;
+}
+
+.carousel {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    overflow: hidden;
+}
+
+.carousel-inner {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-inner img {
+    width: 100%;
+    display: none;
+}
+
+.info-wrapper {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.info-wrapper75 {
+    display: flex;
+    gap: 20px;
+    width: 75%;
+}
+
+
+/* Media Queries */
+@media only screen and (max-width: 1024px) {
+    .info-wrapper {
+        flex-direction: column;
+    }
+
+    .header-nav {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .content-container {
+        padding: 10px;
+    }
+
+    .overlay-image h1 {
+        font-size: 3em;
+    }
+
+    .infobox {
+        order: 1;
     }
 }
 
-#imagebox, .SocialDiv {
-    width: 80%;
+@media only screen and (min-width: 1025px) {
+    .info-wrapper {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .infobox {
+        width: 90%;
+    }
 }

@@ -57,98 +57,162 @@
     </div>
 
     <h1 es-translation="Página Web de Bertogim (En desarollo)">Bertogim Web Page (In development)</h1>
+    <div class="content-container">
+        <div class="info-wrapper75">
 
-    <div class="Left" style="float: left;clear: left;" width="auto">
+            <div id="twitch-embed" class="infobox" style="display: none;">
 
-        <div class="infobox" width="" style="float: left;clear: left;">
-            <h2 es-translation="Sobre Mí">About Me</h2>
-            <p
-                es-translation="📽️ Soy <span><a target='_blank' href='https://www.youtube.com/@Bertogim'>Youtuber</a></span> y <span><a target='_blank' href='https://www.twitch.tv/bertogim'>Streamer</a></span>">
-                📽️ I am a <a style="margin: 0; color: #b7b7b7;" target="_blank"
-                    href="https://www.youtube.com/@Bertogim">Youtuber</a> and <a style="margin: 0; color: #b7b7b7;"
-                    target="_blank" href="https://www.twitch.tv/bertogim">Streamer</a></p>
-            <p es-translation="⌨️ Puedo programar en Roblox (Lua) y JavaScript">⌨️ I can code in Roblox (Lua) and
-                JavaScript
-            </p>
-            <p
-                es-translation="🗄️ He creado bastantes <span><a href='/creations'>cosas</a></span> (Paginas web, juegos de Roblox etc...)">
-                🗄️ I have created several <a style="margin: 0; color: #b7b7b7;" href="/proyect">things</a> (Web pages,
-                Roblox games etc...)</p>
-            <p
-                es-translation="✨ He ayudado a streamers y contribuido en wikis (<span><a href='/contribuitions'>Contribuciones</a>)">
-                ✨ I have helped streamers and contributed on wikis (<a style="margin: 0; color: #b7b7b7;"
-                    href="/contribuitions">Contribuitions</a>)</p>
+                <h2 es-translation="Estoy en directo!">Im streaming!</h2>
+
+                <!-- Load the Twitch embed script -->
+                <script src="https://embed.twitch.tv/embed/v1.js"></script>
+
+                <!-- Create a Twitch.Embed object that will render within the "twitch-embed" element. -->
+                <script type="text/javascript">
+                    var embed = new Twitch.Embed("twitch-embed", {
+                        width: "100%",
+                        height: "400px",
+                        channel: "bertogim",
+                        autoplay: true,
+                        layout: "video",
+                        muted: true,
+                    });
+
+                    embed.addEventListener(Twitch.Embed.VIDEO_PLAY, () => {
+                        document.getElementById("twitch-embed").style.display = "grid"
+                    });
+                </script>
+            </div>
+
+
         </div>
+    </div>
+    <div class="content-container">
+        <div class="info-wrapper">
+            <div>
+                <div class="infobox">
+                    <h2 es-translation="Sobre Mí">About Me</h2>
+                    <p
+                        es-translation="📽️ Soy <span><a target='_blank' href='https://www.youtube.com/@Bertogim'>Youtuber</a></span> y <span><a target='_blank' href='https://www.twitch.tv/bertogim'>Streamer</a></span>">
+                        📽️ I am a <a style="margin: 0; color: #b7b7b7;" target="_blank"
+                            href="https://www.youtube.com/@Bertogim">Youtuber</a> and <a
+                            style="margin: 0; color: #b7b7b7;" target="_blank"
+                            href="https://www.twitch.tv/bertogim">Streamer</a></p>
+                    <p es-translation="⌨️ Puedo programar en Roblox (Lua) y JavaScript">⌨️ I can code in Roblox (Lua)
+                        and
+                        JavaScript
+                    </p>
+                    <p
+                        es-translation="🗄️ He creado bastantes <span><a href='/creations'>cosas</a></span> (Paginas web, juegos de Roblox etc...)">
+                        🗄️ I have created several <a style="margin: 0; color: #b7b7b7;" href="/proyect">things</a> (Web
+                        pages,
+                        Roblox games etc...)</p>
+                    <p
+                        es-translation="✨ He ayudado a streamers y contribuido en wikis (<span><a href='/contribuitions'>Contribuciones</a>)">
+                        ✨ I have helped streamers and contributed on wikis (<a style="margin: 0; color: #b7b7b7;"
+                            href="/contribuitions">Contribuitions</a>)</p>
+                </div>
+                <div class="infobox">
+                    <h2 es-translation="Logros">Achievements</h2>
+                    <p
+                        es-translation="He llegado a 700 suscriptores en <span><a target='_blank' href='https://www.youtube.com/@Bertogim' a>Youtube</a></span>">
+                        I have reached 700 subscribers on <a target="_blank"
+                            href="https://www.youtube.com/@Bertogim">Youtube</a>
+                    </p>
+                    <p
+                        es-translation="He llegado a 200 seguidores en <span><a target='_blank' href='https://www.twitch.tv/bertogim' a>Twitch</a></span>">
+                        I have reached 200 followers on <a target="_blank"
+                            href="https://www.twitch.tv/bertogim">Twitch</a>
+                    </p>
+                    <p
+                        es-translation="He conseguido el Afliado en mi canal de <span><a target='_blank' href='https://www.twitch.tv/bertogim' a>Twitch</a></span>">
+                        I have the Affiliate on my <span><a target='_blank' href='https://www.twitch.tv/bertogim'
+                                a>Twitch</a></span> channel</p>
+                    <p
+                        es-translation="He hecho un <span><a target='_blank' href='https://www.roblox.com/games/10073716653/Marble-races' a>Juego</a></span> en Roblox que tiene 10k Visitas">
+                        I made a <span><a target='_blank' href='https://www.roblox.com/games/10073716653/Marble-races'
+                                a>Game</a></span> on Roblox that has over 10k Visits</p>
 
-        <div class="infobox" width="" style="float: left;clear: left;">
-            <h2 es-translation="Logros">Achievements</h2>
-            <p
-                es-translation="He llegado a 600 suscriptores en <span><a target='_blank' href='https://www.youtube.com/@Bertogim' a>Youtube</a></span>">
-                I have reached 600 subscribers on <a target="_blank"
-                    href="https://www.youtube.com/@Bertogim">Youtube</a>
-            </p>
-            <p
-                es-translation="He llegado a 200 seguidores en <span><a target='_blank' href='https://www.twitch.tv/bertogim' a>Twitch</a></span>">
-                I have reached 200 followers on <a target="_blank" href="https://www.twitch.tv/bertogim">Twitch</a></p>
-            <p
-                es-translation="He conseguido el Afliado en mi canal de <span><a target='_blank' href='https://www.twitch.tv/bertogim' a>Twitch</a></span> pero no lo tengo activado">
-                I have the Affiliate on my <span><a target='_blank' href='https://www.twitch.tv/bertogim'
-                        a>Twitch</a></span> channel but I do not have it activated</p>
-            <p
-                es-translation="He hecho un <span><a target='_blank' href='https://www.roblox.com/games/10073716653/Marble-races' a>Juego</a></span> en Roblox que tiene 10k Visitas">
-                I made a <span><a target='_blank' href='https://www.roblox.com/games/10073716653/Marble-races'
-                        a>Game</a></span> on Roblox that has over 10k Visits</p>
+                </div>
+                <div class="infobox">
+                    <h2 es-translation="Redes Sociales">Social Media</h2>
+                    <div class="image-container2">
+                        <a href="https://www.twitch.tv/bertogim" target="_blank"><img src="Image/Social/Twitch.png"
+                                class="SocialImage" alt="Twitch"></a>
+                        <a href="https://discord.gg/pK3YJYh383" target="_blank"><img src="Image/Social/Discord.png"
+                                class="SocialImage" alt="Discord"></a>
+                        <a href="https://steamcommunity.com/id/bertogim" target="_blank"><img src="Image/Social/Steam.png"
+                                class="SocialImage" alt="Steam"></a>
+                        <a href="https://www.youtube.com/@bertogim" target="_blank"><img src="Image/Social/YouTube.png"
+                                class="SocialImage" alt="YouTube"></a>
+                        <a href="https://www.tiktok.com/@bertogim" target="_blank"><img src="Image/Social/TikTok.png"
+                                class="SocialImage" alt="TikTok"></a>
+                        <a href="https://twitter.com/bertogim" target="_blank"><img src="Image/Social/Twitter.png"
+                                class="SocialImage" alt="Twitter"></a>
+                    </div>
+                </div>
+                
+                
+                <div class="infobox">
+                    <h2 es-translation="Servidor de Discord">Discord server</h2>
+                    <p es-translation="<p></p>">⚠ The discord server is a spanish server</p>
+                    <a target="_blank" href="https://discord.gg/pK3YJYh383">
+                        <p es-translation="Unete al servidor de Discord!">Join the discord server!</p>
+                    </a>
+                    <iframe width="100%" height="400px" src="https://discord.com/widget?id=734104333934919741"></iframe>
+                </div>
+            </div>
+
+
+            <div class="infobox">
+                <h2 es-translation="Juegos que he creado">Games i created</h2>
+                <div class="card">
+                    <img src="/Image/Games/MarbleRaces.webp">
+                    <h3>Marble Races</h3>
+                    <div class="text">
+                        <p
+                            es-translation="🚀 Bienvenido a Marble Races, ¡experimenta la emoción de las carreras dinámicas de canicas! 🚀">
+                            🚀 Welcome to Marble Races, experience the thrill of dynamic marble racing! 🚀</p>
+                        <p
+                            es-translation="🌟 Mapas generados aleatoriamente mantienen cada carrera única, mientras que nuestra tienda en el juego te permite personalizar tu canica con una variedad de colores. ¡Gana la carrera, supera obstáculos y demuestra que eres el campeón definitivo de las carreras de canicas! 🌟">
+                            🌟 Randomly generated maps keep every race unique, while the shop lets you personalize your
+                            marble with a variety of colors. Win the race, outsmart obstacles, and prove you're the
+                            ultimate marble racing champion! 🌟</p>
+                        <p
+                            es-translation="🏆 Compite con amigos y otros jugadores. ¿Listo para rodar? ¡Que comiencen las carreras! 🏆">
+                            🏆 Compete with friends other players. Ready to roll? Let the races begin! 🏆</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="/Image/Games/RiverSlideII.webp">
+                    <h3>River Slide II</h3>
+                    <div class="text">
+                        <p es-translation="🏞️ River slide, un juego en el que tienes vehículos que puedes generar para ir al río, ¿puedes sobrevivir?">🏞️ River slide, a game where you have vehicles that you can spawn to go in the river, can you survive?</p>
+                        <p es-translation="⚠️ Pero ahora es diferente, hay diferentes objetos como la lava que pueden dañar tu coche">⚠️ But now is different, there are different objects that can damage your car</p>
+                        <p es-translation="🏆 ¿Puedes llegar hasta el final?">🏆 Can you make it to the end?</p>
+                    </div>
+                </div>
+            </div>
 
         </div>
 
     </div>
 
-    <div class="Right">
 
-        <div id="twitch-embed" class="infobox" width="" style="display:none;">
 
-            <h2 es-translation="Estoy en directo!">Im streaming!</h2>
-
-            <!-- Load the Twitch embed script -->
-            <script src="https://embed.twitch.tv/embed/v1.js"></script>
-
-            <!-- Create a Twitch.Embed object that will render within the "twitch-embed" element. -->
-            <script type="text/javascript">
-                var embed = new Twitch.Embed("twitch-embed", {
-                    width: "100%",
-                    height: "400px",
-                    channel: "bertogim",
-                    autoplay: true,
-                    layout: "video",
-                    muted: true,
-                });
-
-                embed.addEventListener(Twitch.Embed.VIDEO_PLAY, () => {
-                    document.getElementById("twitch-embed").style.display = "grid"
-                });
-            </script>
+    <div class="content-container">
+        <div class="info-wrapper">
         </div>
-
-        <div class="infobox" width="" style="float: right;clear: right;">
-            <h2 es-translation="Servidor de Discord">Discord server</h2>
-            <p es-translation="<p></p>">⚠ The discord server is a spanish server</p>
-            <a target="_blank" href="https://discord.gg/pK3YJYh383">
-                <p es-translation="Unete al servidor de Discord!">Join the discord server!</p>
-            </a>
-            <iframe width="100%" height="400px" src="https://discord.com/widget?id=734104333934919741"></iframe>
-        </div>
-
     </div>
-
     <script>
-        // Obtén la altura del header
         var alturaHeader = document.querySelector('header').offsetHeight;
-
-        // Establece el margen superior del body
         document.body.style.paddingTop = alturaHeader + 'px';
     </script>
 
     <script src="../translations.js"></script>
+
+
+
 
 </body>
 

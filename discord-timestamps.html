@@ -31,7 +31,8 @@
             padding-top: 0px;
         }
 
-        h1, h2 {
+        h1,
+        h2 {
             margin-top: 15px;
         }
 
@@ -161,7 +162,8 @@
         <div id="outputList"></div>
     </section>
     <br><br>
-    <p>Atribucion imagen portada > <a href="https://www.flaticon.es/iconos-gratis/calendario" title="calendario iconos">Calendario iconos creados por Erifqi Zetiawan - Flaticon</a></p>
+    <p>Atribucion imagen portada > <a href="https://www.flaticon.es/iconos-gratis/calendario"
+            title="calendario iconos">Calendario iconos creados por Erifqi Zetiawan - Flaticon</a></p>
     <script>
         // Definición de typeFormats
         const typeFormats = {
@@ -358,27 +360,37 @@
         const presetButtons = document.querySelectorAll('.preset');
 
         presetButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        const offset = parseInt(button.getAttribute('data-offset'));
-        const currentDate = new Date();
-        const futureDate = new Date(currentDate.getTime() + (offset * 1000));
+            button.addEventListener('click', () => {
+                const offset = parseInt(button.getAttribute('data-offset'));
+                const currentDate = new Date();
+                const futureDate = new Date(currentDate.getTime() + (offset * 1000));
 
-        // Formatear la fecha y hora en el formato requerido (yyyy-MM-ddThh:mm)
-        const year = futureDate.getFullYear();
-        const month = ('0' + (futureDate.getMonth() + 1)).slice(-2); // Ajustar mes de 0-11 a 1-12
-        const day = ('0' + futureDate.getDate()).slice(-2);
-        const hours = ('0' + futureDate.getHours()).slice(-2);
-        const minutes = ('0' + futureDate.getMinutes()).slice(-2);
-        
-        const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+                // Formatear la fecha y hora en el formato requerido (yyyy-MM-ddThh:mm)
+                const year = futureDate.getFullYear();
+                const month = ('0' + (futureDate.getMonth() + 1)).slice(-2); // Ajustar mes de 0-11 a 1-12
+                const day = ('0' + futureDate.getDate()).slice(-2);
+                const hours = ('0' + futureDate.getHours()).slice(-2);
+                const minutes = ('0' + futureDate.getMinutes()).slice(-2);
 
-        // Actualizar el valor del input de fecha personalizada
-        customDateInput.value = formattedDateTime;
+                const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
 
-        // Generar el timestamp basado en la fecha actualizada
-        generateCustomTimestamp();
-    });
-});
+                // Actualizar el valor del input de fecha personalizada
+                customDateInput.value = formattedDateTime;
+
+                // Generar el timestamp basado en la fecha actualizada
+                generateCustomTimestamp();
+
+                //Hacer scroll automatico hacia output
+                const sectionId = 'output'
+                const section = document.getElementById(sectionId);
+
+                if (section) {
+                    section.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
 
 
 

@@ -152,7 +152,8 @@
         <h2>Custom Timestamp</h2>
         <label for="custom-date">Select date and time:</label><br>
         <input type="datetime-local" id="custom-date"><br><br>
-        <button id="generate-button">Generate Timestamp</button><br><br>
+        <button id="generate-button">Generate Timestamp</button>
+        <button onclick="ToNowTime()">Reset</button><br><br>
     </section>
 
 
@@ -187,12 +188,24 @@
             generateCustomTimestamp();
         });
 
+
         // Evento para el botón de generar timestamp personalizado
         const generateButton = document.getElementById('generate-button');
-        generateButton.addEventListener('click', generateCustomTimestamp);
+        generateButton.addEventListener('click', GenButtonClicked);
+
+        
+        function GenButtonClicked() {
+            generateButton.textContent = 'Generated!'
+                setTimeout(() => {
+                    generateButton.textContent = 'Generate Timestamp';
+                }, 1000);
+                generateCustomTimestamp()
+        }
 
         // Función para generar un timestamp personalizado
         function generateCustomTimestamp() {
+
+
             const selectedDate = new Date(customDateInput.value);
             const timestamps = generateTimestamps(selectedDate);
             updateOutputList(timestamps);
@@ -229,10 +242,9 @@
 
         // Función para actualizar la lista de salida de timestamps en el DOM
         function updateOutputList(timestamps) {
-
-
             function createP(item, text, bold, spanishTranslation) {
                 const ElementP = document.createElement('p');
+                let ElementB
 
                 if (bold === true) {
                     const ElementB = document.createElement('b');
@@ -254,6 +266,12 @@
                 }
 
                 item.appendChild(ElementP);
+
+                if (bold === true) {
+                    return ElementB
+                } else {
+                    return ElementP
+                }
             }
 
 
@@ -273,9 +291,11 @@
                 item.classList.add('timestamp-item');
 
 
+
+
                 createP(item, getTypeName(timestamp.type))
 
-                createP(item, timestamp.outputText.split(' - ')[1])
+                let previewText = createP(item, timestamp.outputText.split(' - ')[1])
 
                 createP(item, timestamp.rawTimestamp)
 
@@ -291,6 +311,19 @@
                 item.appendChild(copyButton);
 
                 outputList.appendChild(item);
+
+                const selectedDate = new Date(customDateInput.value);
+
+
+                if (getTypeName(timestamp.type) === "Relative Time") {
+                    // Actualizar el texto cada segundo
+                    setInterval(() => {
+                        const timestamps = generateTimestamps(selectedDate);
+
+                        previewText.textContent = timestamps[0].outputText.split(' - ')[1]
+                    }, 1000);
+                }
+
             });
         }
 
@@ -359,27 +392,26 @@
         // Selecciona todos los botones de preset por su clase '.preset'
         const presetButtons = document.querySelectorAll('.preset');
 
-        presetButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const offset = parseInt(button.getAttribute('data-offset'));
-                const currentDate = new Date();
-                const futureDate = new Date(currentDate.getTime() + (offset * 1000));
+        function PresetDatesFunction(dataOffset, silent) {
+            const currentDate = new Date();
+            const futureDate = new Date(currentDate.getTime() + (dataOffset * 1000));
 
-                // Formatear la fecha y hora en el formato requerido (yyyy-MM-ddThh:mm)
-                const year = futureDate.getFullYear();
-                const month = ('0' + (futureDate.getMonth() + 1)).slice(-2); // Ajustar mes de 0-11 a 1-12
-                const day = ('0' + futureDate.getDate()).slice(-2);
-                const hours = ('0' + futureDate.getHours()).slice(-2);
-                const minutes = ('0' + futureDate.getMinutes()).slice(-2);
+            // Formatear la fecha y hora en el formato requerido (yyyy-MM-ddThh:mm)
+            const year = futureDate.getFullYear();
+            const month = ('0' + (futureDate.getMonth() + 1)).slice(-2); // Ajustar mes de 0-11 a 1-12
+            const day = ('0' + futureDate.getDate()).slice(-2);
+            const hours = ('0' + futureDate.getHours()).slice(-2);
+            const minutes = ('0' + futureDate.getMinutes()).slice(-2);
 
-                const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+            const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
 
-                // Actualizar el valor del input de fecha personalizada
-                customDateInput.value = formattedDateTime;
+            // Actualizar el valor del input de fecha personalizada
+            customDateInput.value = formattedDateTime;
 
-                // Generar el timestamp basado en la fecha actualizada
-                generateCustomTimestamp();
+            // Generar el timestamp basado en la fecha actualizada
+            generateCustomTimestamp();
 
+            if (!silent === true) {
                 //Hacer scroll automatico hacia output
                 const sectionId = 'output'
                 const section = document.getElementById(sectionId);
@@ -389,6 +421,19 @@
                         behavior: 'smooth'
                     });
                 }
+            }
+        }
+
+        PresetDatesFunction(0, true)
+
+        function ToNowTime() {
+            PresetDatesFunction(0, true)
+        }
+
+        presetButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const offset = parseInt(button.getAttribute('data-offset'));
+                PresetDatesFunction(offset)
             });
         });
 

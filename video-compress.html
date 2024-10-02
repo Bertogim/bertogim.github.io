@@ -329,6 +329,8 @@
             await worker.remove(videoInput.name);
             await worker.remove(outputFileName);
             loader.style.display = 'none';
+            document.getElementById('estimatedTime').style.display = 'none';
+            document.getElementById('progress').textContent = `Progreso: 100.00%`;
         });
     </script>
 </body>

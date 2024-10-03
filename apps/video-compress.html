@@ -310,7 +310,7 @@
 
             const targetSizeBits = targetSizeMB * 8 * 1024 * 1024;
             const bitrate = Math.floor(targetSizeBits / videoDuration);
-            const bitrateKbps = Math.floor(bitrate / 1000);
+            const bitrateKbps = Math.floor(bitrate / 1000)*0.95; //We multiply 0.95 in case the output is a bit bigger
 
             console.log(`Bitrate calculado: ${bitrateKbps} kbps`);
 

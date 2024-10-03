@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compresor de Video</title>
+    <script defer src="/header.js"></script>
+
     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.7.0/dist/ffmpeg.min.js"></script>
     <style>
         body {
@@ -137,17 +139,17 @@
             }
         }
     </style>
-    <link rel="icon" type="png" target="_blank" href="Image/Icon.png">
+    <link rel="icon" type="png" target="_blank" href="/Image/Icon.png">
 
     <meta content="Bertogim" property="og:title" />
-    <meta content="Bertogim web page" property="og:description" />
+    <meta content="Bertogim's Website" property="og:description" />
     <meta content="https://bertogim.github.io" property="og:url" />
     <meta content="https://bertogim.github.io/Image/Icon.png" property="og:image" />
     <meta name="theme-color" content="#ff0000">
 
 </head>
-
 <body>
+    <header id="header-container"></header>
     <center>
         <h1>Compresor de Video</h1>
         <div class="input-container">
@@ -156,8 +158,8 @@
         </div>
         <br>
         <select id="qualitySelect">
-            <option value="high">Más calidad</option>
-            <option value="smooth">Más fluido</option>
+            <option value="high">Prioridad en calidad</option>
+            <option value="smooth">Prioridad en fluidez</option>
         </select>
         <br><br>
         <input type="number" id="sizeInput" placeholder="Tamaño objetivo en MB" step="0.1">

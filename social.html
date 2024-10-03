@@ -6,40 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title es-translation="Bertogim">Bertogim - Photos</title>
     <link rel="icon" type="png" target="_blank" href="Image/Icon.png">
-    <link rel="stylesheet" type="text/css" href="../styles.css">
+    <link rel="stylesheet" type="text/css" href="/styles.css">
 
     <meta content="Bertogim" property="og:title" />
-    <meta content="Bertogim web page" property="og:description" />
+    <meta content="Bertogim's Website" property="og:description" />
     <meta content="https://bertogim.github.io" property="og:url" />
     <meta content="https://bertogim.github.io/Image/Icon.png" property="og:image" />
     <meta name="theme-color" content="#ff0000">
 
 
+    <script defer src="/translations.js"></script>
+    <script defer src="/header.js"></script>
 </head>
-
 <body>
-
-    <header>
-        <div style="display: flex; gap: 20px;">
-            <p class="headertitle" style="margin: 0;" es-translation="Página Web de Bertogim">Bertogim Web Page</p>
-            <p style="margin: 0;">
-                <a href="/" es-translation="Inicio">Home</a>
-            </p>
-            <p style="margin: 0;">
-                <a href="/social" class="selected" es-translation="Redes Sociales">Social Media</a>
-            </p>
-            <p style="margin: 0;">
-                <a class="disabled" href="/creations" es-translation="Creaciones">Creations</a>
-            </p>
-            <p style="margin: 0;">
-                <a href="/photos" es-translation="Fotos">Photos</a>
-            </p>
-            <select class="LanguageSelect">
-                <option value="en" es-translation="English">English</option>
-                <option value="es" es-translation="Español">Español</option>
-            </select>
-        </div>
-    </header>
+    <header id="header-container"></header>
 
     <script>
         window.addEventListener('scroll', function () {

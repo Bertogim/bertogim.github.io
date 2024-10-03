@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Notepad</title>
+    <style>
+        body, html {
+            margin: 0;
+            height: 100%;
+        }
+        textarea {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            resize: none;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="editor" placeholder="Escribe aquí..."></textarea>
+
+    <script>
+        // Obtener la referencia del textarea
+        const editor = document.getElementById('editor');
+
+        // Cargar el contenido guardado si existe
+        editor.value = localStorage.getItem('contenido') || '';
+
+        // Guardar el contenido automáticamente mientras se escribe
+        editor.addEventListener('input', () => {
+            localStorage.setItem('contenido', editor.value);
+        });
+    </script>
+</body>
+</html>

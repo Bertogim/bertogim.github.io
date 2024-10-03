@@ -1,0 +1,169 @@
+body {
+    margin-top: 50px;
+}
+
+/* Estilos generales del header */
+header {
+    text-align: center;
+    background-color: #131615;
+    color: white;
+    border-bottom: 0.1vh solid #f59400;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    width: calc(100% - 20px);
+    padding: 10px;
+    position: fixed;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+}
+
+header a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: 0.3s ease;
+}
+
+header .headertitle {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.navbar {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar a:hover {
+    color: #f59400;
+}
+
+.selected {
+    font-weight: bold;
+    color: #f59400;
+}
+
+.LanguageSelect {
+    background-color: #333;
+    border: 2px solid #f59400;
+    color: #fff;
+    padding: 5px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* Dropdown */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: #131615;
+    border: 1px solid #f59400;
+    border-radius: 5px;
+    top: 100%;
+    left: 0;
+    width: max-content;
+    flex-direction: column;
+    z-index: 1000;
+}
+
+.dropdown-menu a {
+    padding: 10px 20px;
+    text-align: left;
+    display: block;
+}
+
+.dropdown-menu.show {
+    display: flex;
+}
+
+.dropdown-menu a:hover {
+    background-color: #262b29;
+}
+
+/* Mobile menu styles */
+.mobile-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 250px;
+    background-color: #1a1a1a;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.mobile-menu a {
+    color: #fff;
+    text-decoration: none;
+    padding: 15px;
+    display: block;
+    transition: background-color 0.3s ease;
+}
+
+.mobile-menu a:hover {
+    background-color: #333;
+}
+
+.mobile-menu .dropdown .dropdown-toggle {
+    border-left: 3px dotted #f59400;
+}
+
+.mobile-menu .dropdown-menu a {
+    border-left: 6px solid #f59400;
+}
+
+.mobile-menu .dropdown-menu {
+    border: none;
+}
+
+.mobile-menu .dropdown {
+    background-color: #131615;
+    border: 1px solid #333;
+}
+
+/* Menu toggle button for mobile */
+.menu-toggle {
+    display: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar {
+        display: none;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .mobile-menu.active {
+        display: flex;
+    }
+
+    .dropdown-menu {
+        position: static;
+        width: 100%;
+        display: block;
+    }
+
+    .dropdown-menu a {
+        padding: 10px;
+        text-align: center;
+        border-left: 3px solid transparent;
+    }
+
+    .dropdown-menu a:hover {
+        border-left-color: #f59400;
+    }
+}

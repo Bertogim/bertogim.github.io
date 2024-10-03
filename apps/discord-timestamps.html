@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bertogim</title>
+    <link rel="icon" type="image/png" href="/Image/Icon.png">
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+
+    <meta content="Bertogim" property="og:title" />
+    <meta content="Bertogim's Website" property="og:description" />
+    <meta content="https://bertogim.github.io" property="og:url" />
+    <meta content="https://bertogim.github.io/Image/Icon.png" property="og:image" />
+    <meta name="theme-color" content="#ff0000">
+
+    <style>
+        /* Styling for clarity, adjust as needed */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        section {
+
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #4b4b4e;
+            border-radius: 20px;
+            background-color: #2b2c2c;
+            padding-top: 0px;
+        }
+
+        h1,
+        h2 {
+            margin-top: 15px;
+        }
+
+        h3 {
+            margin-bottom: 5px;
+        }
+
+        #outputList {
+            display: grid;
+            gap: 10px;
+        }
+
+        .timestamp-item {
+            padding: 10px;
+            border: 1px solid #4b4b4e;
+            border-radius: 5px;
+            background-color: #3b3c3c;
+        }
+
+        .timestamp-item p {
+            width: 30%;
+            float: left;
+            margin: 0px;
+            text-align: center;
+        }
+
+        .timestamp-item button {
+            float: right;
+            margin: -9px;
+            align-items: center;
+            padding: 9px;
+        }
+
+        button {
+            border: 1px solid #4b4b4e;
+            border-radius: 5px;
+            background-color: #297dd7;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+        }
+    </style>
+    <script defer src="/translations.js"></script>
+    <script defer src="/header.js"></script>
+</head>
+<body>
+    <header id="header-container"></header>
+
+
+
+    <div style="width: 100%;
+        max-height: 90vh;
+        overflow: hidden;
+        margin-top: -10%;
+        position: relative;background-color: white;">
+        <img style="width: 50%; height: auto; padding-left: 25%;"
+            src="https://cdn-icons-png.flaticon.com/512/8403/8403154.png" alt="Background Image">
+    </div>
+
+    <h1>Discord Timestamp Generator</h1>
+
+    <section id="presets">
+        <h2>Presets</h2>
+
+        <h3>Years</h3>
+        <button class="preset" data-offset="31536000">In 1 year</button>
+        <button class="preset" data-offset="63072000">In 2 years</button>
+        <button class="preset" data-offset="94608000">In 3 years</button>
+        <button class="preset" data-offset="126144000">In 4 years</button>
+        <button class="preset" data-offset="157680000">In 5 years</button>
+        <button class="preset" data-offset="189216000">In 6 years</button>
+        <button class="preset" data-offset="220752000">In 7 years</button>
+        <button class="preset" data-offset="252288000">In 8 years</button>
+        <button class="preset" data-offset="283824000">In 9 years</button>
+        <button class="preset" data-offset="315360000">In 10 years</button>
+        <button class="preset" data-offset="473040000">In 15 years</button>
+        <button class="preset" data-offset="630720000">In 20 years</button>
+        <button class="preset" data-offset="1576800000">In 50 years</button>
+
+        <h3>Months</h3>
+        <button class="preset" data-offset="2592000">In 1 month</button>
+        <button class="preset" data-offset="5184000">In 2 months</button>
+        <button class="preset" data-offset="7776000">In 3 months</button>
+        <button class="preset" data-offset="10368000">In 4 months</button>
+        <button class="preset" data-offset="12960000">In 5 months</button>
+        <button class="preset" data-offset="15552000">In 6 months</button>
+        <button class="preset" data-offset="18144000">In 7 months</button>
+        <button class="preset" data-offset="20736000">In 8 months</button>
+        <button class="preset" data-offset="23328000">In 9 months</button>
+        <button class="preset" data-offset="25920000">In 10 months</button>
+        <button class="preset" data-offset="28512000">In 11 months</button>
+
+        <h3>Weeks</h3>
+        <button class="preset" data-offset="604800">In 1 week</button>
+        <button class="preset" data-offset="1209600">In 2 weeks</button>
+        <button class="preset" data-offset="1814400">In 3 weeks</button>
+
+        <h3>Days</h3>
+        <button class="preset" data-offset="86400">In 1 day</button>
+        <button class="preset" data-offset="172800">In 2 days</button>
+        <button class="preset" data-offset="259200">In 3 days</button>
+        <button class="preset" data-offset="345600">In 4 days</button>
+        <button class="preset" data-offset="432000">In 5 days</button>
+        <button class="preset" data-offset="518400">In 6 days</button>
+
+        <h3>Hours</h3>
+        <button class="preset" data-offset="3600">In 1 hour</button>
+        <button class="preset" data-offset="7200">In 2 hours</button>
+        <button class="preset" data-offset="10800">In 3 hours</button>
+        <button class="preset" data-offset="14400">In 4 hours</button>
+        <button class="preset" data-offset="18000">In 5 hours</button>
+        <button class="preset" data-offset="36000">In 10 hours</button>
+        <button class="preset" data-offset="54000">In 15 hours</button>
+        <button class="preset" data-offset="72000">In 20 hours</button>
+
+        <h3>Minutes</h3>
+        <button class="preset" data-offset="60">In 1 minute</button>
+        <button class="preset" data-offset="120">In 2 minute</button>
+        <button class="preset" data-offset="180">In 3 minute</button>
+        <button class="preset" data-offset="240">In 4 minute</button>
+        <button class="preset" data-offset="300">In 5 minutes</button>
+        <button class="preset" data-offset="600">In 10 minutes</button>
+        <button class="preset" data-offset="900">In 15 minutes</button>
+        <button class="preset" data-offset="1200">In 20 minutes</button>
+        <button class="preset" data-offset="1800">In 30 minutes</button>
+        <button class="preset" data-offset="2400">In 40 minutes</button>
+        <button class="preset" data-offset="3000">In 50 minutes</button>
+    
+    </section>
+
+    <section id="custom">
+        <h2>Custom Timestamp</h2>
+        <label for="custom-date">Select date and time:</label><br>
+        <input type="datetime-local" id="custom-date"><br><br>
+        <button id="generate-button">Generate Timestamp</button>
+        <button onclick="ToNowTime()">Reset</button><br><br>
+    </section>
+
+
+    <!--Ir aqui-->
+    <section id="output">
+        <h2>Output</h2>
+        <div id="outputList"></div>
+    </section>
+    <br><br>
+    <p>Atribucion imagen portada > <a href="https://www.flaticon.es/iconos-gratis/calendario"
+            title="calendario iconos">Calendario iconos creados por Erifqi Zetiawan - Flaticon</a></p>
+    <script>
+        // Definición de typeFormats
+        const typeFormats = {
+            'R': { style: 'long', numeric: 'auto' },
+            't': { timeStyle: 'short' },
+            'T': { timeStyle: 'medium' },
+            'd': { dateStyle: 'short' },
+            'D': { dateStyle: 'long' },
+            'f': { dateStyle: 'long', timeStyle: 'short' },
+            'F': { dateStyle: 'full', timeStyle: 'short' },
+        };
+
+        // Selector del elemento de entrada de fecha personalizada
+        const customDateInput = document.getElementById('custom-date');
+
+        // Selector del contenedor de salida de timestamps
+        const outputList = document.getElementById('outputList');
+
+        // Evento al cargar la página para generar el timestamp personalizado inicial
+        window.addEventListener('load', () => {
+            generateCustomTimestamp();
+        });
+
+
+        // Evento para el botón de generar timestamp personalizado
+        const generateButton = document.getElementById('generate-button');
+        generateButton.addEventListener('click', GenButtonClicked);
+
+        
+        function GenButtonClicked() {
+            generateButton.textContent = 'Generated!'
+                setTimeout(() => {
+                    generateButton.textContent = 'Generate Timestamp';
+                }, 1000);
+                generateCustomTimestamp()
+        }
+
+        // Función para generar un timestamp personalizado
+        function generateCustomTimestamp() {
+
+
+            const selectedDate = new Date(customDateInput.value);
+            const timestamps = generateTimestamps(selectedDate);
+            updateOutputList(timestamps);
+        }
+
+        // Función para generar timestamps basados en una fecha dada
+        function generateTimestamps(date) {
+            const types = ['R', 't', 'T', 'd', 'D', 'f', 'F'];
+            const timestamps = [];
+
+            types.forEach(type => {
+                try {
+                    const ts = date.getTime().toString();
+                    const rawTimestamp = `<t:${ts.substr(0, ts.length - 3)}:${type}>`;
+                    let preview = '';
+                    if (['R'].includes(type)) {
+                        const format = automaticRelativeDifference(date);
+                        preview = formatPreview(type, format.duration, format.unit);
+                    } else {
+                        const formatter = new Intl.DateTimeFormat(navigator.language || 'en', typeFormats[type] || {});
+                        preview = formatter.format(date);
+                    }
+                    const outputText = `${getTypeName(type)}: ${rawTimestamp} - ${preview}`;
+                    timestamps.push({ type, rawTimestamp, outputText });
+                } catch (error) {
+                    console.error('Error generating timestamp:', error);
+                }
+            });
+
+            return timestamps;
+        }
+
+
+
+        // Función para actualizar la lista de salida de timestamps en el DOM
+        function updateOutputList(timestamps) {
+            function createP(item, text, bold, spanishTranslation) {
+                const ElementP = document.createElement('p');
+                let ElementB
+
+                if (bold === true) {
+                    const ElementB = document.createElement('b');
+                    ElementB.textContent = text;
+
+                    // Verifica si se debe añadir el atributo 'es-translation'
+                    if (spanishTranslation) {
+                        ElementB.setAttribute('es-translation', spanishTranslation); // Agrega la traducción literal aquí
+                    }
+
+                    ElementP.appendChild(ElementB);
+                } else {
+                    ElementP.textContent = text;
+
+                    // Verifica si se debe añadir el atributo 'es-translation'
+                    if (spanishTranslation) {
+                        ElementP.setAttribute('es-translation', spanishTranslation); // Agrega la traducción literal aquí
+                    }
+                }
+
+                item.appendChild(ElementP);
+
+                if (bold === true) {
+                    return ElementB
+                } else {
+                    return ElementP
+                }
+            }
+
+
+            outputList.innerHTML = '';
+
+            const leyendaItem = document.createElement('div');
+            leyendaItem.classList.add('timestamp-item');
+            outputList.appendChild(leyendaItem)
+
+            //Leyenda
+            createP(leyendaItem, "Type", true, 'Tipo')
+            createP(leyendaItem, "Preview", true, 'Vista previa')
+            createP(leyendaItem, "Plain text", true, 'Texto sin formato')
+
+            timestamps.forEach(timestamp => {
+                const item = document.createElement('div');
+                item.classList.add('timestamp-item');
+
+
+
+
+                createP(item, getTypeName(timestamp.type))
+
+                let previewText = createP(item, timestamp.outputText.split(' - ')[1])
+
+                createP(item, timestamp.rawTimestamp)
+
+                const copyButton = document.createElement('button');
+                copyButton.textContent = 'Copy';
+                copyButton.addEventListener('click', () => {
+                    copyToClipboard(timestamp.rawTimestamp);
+                    copyButton.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyButton.textContent = 'Copy';
+                    }, 1000);
+                });
+                item.appendChild(copyButton);
+
+                outputList.appendChild(item);
+
+                const selectedDate = new Date(customDateInput.value);
+
+
+                if (getTypeName(timestamp.type) === "Relative Time") {
+                    // Actualizar el texto cada segundo
+                    setInterval(() => {
+                        const timestamps = generateTimestamps(selectedDate);
+
+                        previewText.textContent = timestamps[0].outputText.split(' - ')[1]
+                    }, 1000);
+                }
+
+            });
+        }
+
+        // Función para copiar un texto al portapapeles
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                console.log('Copied to clipboard:', text);
+            }).catch(err => {
+                console.error('Unable to copy:', err);
+            });
+        }
+
+        // Función para obtener el nombre del tipo de timestamp
+        function getTypeName(type) {
+            switch (type) {
+                case 't':
+                    return 'Short Time';
+                case 'T':
+                    return 'Medium Time';
+                case 'd':
+                    return 'Short Date';
+                case 'D':
+                    return 'Long Date';
+                case 'f':
+                    return 'Long Date, Short Time';
+                case 'F':
+                    return 'Full Date, Short Time';
+                case 'R':
+                    return 'Relative Time';
+                default:
+                    return '';
+            }
+        }
+
+        // Función para formatear la vista previa de tiempo relativo
+        function formatPreview(type, duration, unit) {
+            if (type === 'R') {
+                const formatter = new Intl.RelativeTimeFormat(navigator.language || 'en', typeFormats[type] || {});
+                return formatter.format(duration, unit);
+            }
+            return '';
+        }
+
+        // Función para calcular la diferencia de tiempo automática relativa
+        function automaticRelativeDifference(d) {
+            const diff = -((new Date().getTime() - d.getTime()) / 1000) | 0;
+            const absDiff = Math.abs(diff);
+            if (absDiff > 86400 * 30 * 10) {
+                return { duration: Math.round(diff / (86400 * 365)), unit: 'years' };
+            }
+            if (absDiff > 86400 * 25) {
+                return { duration: Math.round(diff / (86400 * 30)), unit: 'months' };
+            }
+            if (absDiff > 3600 * 21) {
+                return { duration: Math.round(diff / 86400), unit: 'days' };
+            }
+            if (absDiff > 60 * 44) {
+                return { duration: Math.round(diff / 3600), unit: 'hours' };
+            }
+            if (absDiff > 30) {
+                return { duration: Math.round(diff / 60), unit: 'minutes' };
+            }
+            return { duration: diff, unit: 'seconds' };
+        }
+
+        // Selecciona todos los botones de preset por su clase '.preset'
+        const presetButtons = document.querySelectorAll('.preset');
+
+        function PresetDatesFunction(dataOffset, silent) {
+            const currentDate = new Date();
+            const futureDate = new Date(currentDate.getTime() + (dataOffset * 1000));
+
+            // Formatear la fecha y hora en el formato requerido (yyyy-MM-ddThh:mm)
+            const year = futureDate.getFullYear();
+            const month = ('0' + (futureDate.getMonth() + 1)).slice(-2); // Ajustar mes de 0-11 a 1-12
+            const day = ('0' + futureDate.getDate()).slice(-2);
+            const hours = ('0' + futureDate.getHours()).slice(-2);
+            const minutes = ('0' + futureDate.getMinutes()).slice(-2);
+
+            const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+            // Actualizar el valor del input de fecha personalizada
+            customDateInput.value = formattedDateTime;
+
+            // Generar el timestamp basado en la fecha actualizada
+            generateCustomTimestamp();
+
+            if (!silent === true) {
+                //Hacer scroll automatico hacia output
+                const sectionId = 'output'
+                const section = document.getElementById(sectionId);
+
+                if (section) {
+                    section.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        }
+
+        PresetDatesFunction(0, true)
+
+        function ToNowTime() {
+            PresetDatesFunction(0, true)
+        }
+
+        presetButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const offset = parseInt(button.getAttribute('data-offset'));
+                PresetDatesFunction(offset)
+            });
+        });
+
+
+
+    </script>
+
+    <script src="translations.js"></script>
+
+</body>
+
+</html>

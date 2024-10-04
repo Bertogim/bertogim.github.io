@@ -85,7 +85,7 @@
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
-            width: 100%;
+            width: 96%;
             font-size: 1.2em;
         }
 
@@ -134,6 +134,53 @@
             cursor: not-allowed;
         }
 
+        #infoDiv {
+            display: none;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        #infoDiv p {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .input-container {
+            border: 1px solid #585858;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #444;
+        }
+
+
+
+
+
+
+
+
+        #infoDivOutput {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        #infoDivOutput p {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        #output-container {
+            display: none;
+            border: 1px solid #585858;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #444;
+        }
 
         @keyframes spin {
             0% {
@@ -162,11 +209,20 @@
         <div class="input-container">
             <input type="file" id="videoInput" accept="video/*">
             <video id="uploadedVideo" controls style="display: none;"></video>
+            <div id="infoDiv">
+                <p id="size"></p>
+                <p id="duration"></p>
+            </div>
         </div>
         <br>
         <select id="qualitySelect">
             <option value="high">Prioridad en calidad</option>
             <option value="smooth">Prioridad en fluidez</option>
+        </select>
+        <br><br>
+        <select id="speedSelect">
+            <option value="ultrafast">Procesado mas rapido pero menos calidad</option>
+            <option value="veryfast">Procesado menos rapido pero mas calidad</option>
         </select>
         <br><br>
         <input type="number" id="sizeInput" placeholder="Tamaño objetivo en MB" step="0.1">
@@ -181,7 +237,13 @@
         <div id="estimatedTime"></div>
         <br><br>
         <a id="downloadButton" download="output_video.mp4">Descargar Video Comprimido</a>
-        <video id="outputVideo" controls style="display: none;"></video>
+        <div id="output-container">
+            <video id="outputVideo" controls style="display: none;"></video>
+            <div id="infoDivOutput">
+                <p id="sizeOutput"></p>
+                <p id="durationOutput"></p>
+            </div>
+        </div>
     </center>
     <script>
         const { createWorker } = FFmpeg;
@@ -226,6 +288,10 @@
                         document.getElementById('manualDuration').style.display = 'none';
                         document.getElementById('manualDurationError').style.display = 'none';
                         document.getElementById('compressButton').disabled = false;
+
+                        document.getElementById('infoDiv').style.display = 'flex'
+                        document.getElementById('size').textContent = 'Tamaño: ' + Math.floor(videoFile.size / 1000000 * 100) / 100 + 'MB'
+                        document.getElementById('duration').textContent = 'Duracion: ' + Math.floor(videoDuration) + 's'
                     }
                 });
 
@@ -310,7 +376,7 @@
 
             const targetSizeBits = targetSizeMB * 8 * 1024 * 1024;
             const bitrate = Math.floor(targetSizeBits / videoDuration);
-            const bitrateKbps = Math.floor(bitrate / 1000)*0.95; //We multiply 0.95 in case the output is a bit bigger
+            const bitrateKbps = Math.floor(bitrate / 1000) * 0.95; //We multiply 0.95 in case the output is a bit bigger
 
             console.log(`Bitrate calculado: ${bitrateKbps} kbps`);
 
@@ -323,25 +389,54 @@
             outputFileName = `${fileNameWithoutExt}-compressed.mp4`;
 
             const fps = document.getElementById('qualitySelect').value === 'smooth' ? 50 : 24;
+            const preset = document.getElementById('speedSelect').value;
             startTime = Date.now();
-            await worker.run(`-i ${videoInput.name} -threads 24 -r ${fps} -b:v ${bitrateKbps}k ${outputFileName}`);
-
+            await worker.run(`-hwaccel auto -i ${videoInput.name} -threads 24 -r ${fps} -b:v ${bitrateKbps}k -preset ${preset} ${outputFileName}`);
+            // Leer el video comprimido
             const { data } = await worker.read(outputFileName);
-            const videoURL = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+            const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
+            const videoURL = URL.createObjectURL(videoBlob);
+
+            // Actualizar el elemento de video y botón de descarga
             const outputVideo = document.getElementById('outputVideo');
             outputVideo.src = videoURL;
             outputVideo.style.display = 'block';
 
             const downloadButton = document.getElementById('downloadButton');
             downloadButton.href = videoURL;
+            downloadButton.download = "output_video.mp4"; // Asegurar el nombre correcto
             downloadButton.style.display = 'block';
+
+            // Actualizar el contenedor de salida
+            const sizeOutput = Math.floor(videoBlob.size / 1000000 * 100) / 100; // Tamaño en MB
+            const durationOutput = await getVideoDuration(videoBlob); // Obtener duración (definir esta función)
+
+            document.getElementById('sizeOutput').textContent = 'Tamaño: ' + sizeOutput + ' MB';
+            document.getElementById('durationOutput').textContent = 'Duración: ' + Math.floor(durationOutput) + ' s';
 
             await worker.remove(videoInput.name);
             await worker.remove(outputFileName);
             loader.style.display = 'none';
             document.getElementById('estimatedTime').style.display = 'none';
             document.getElementById('progress').textContent = `Progreso: 100.00%`;
+
+            // Mostrar contenedor de salida
+            document.getElementById('output-container').style.display = 'block';
         });
+
+        // Función para obtener la duración del video comprimido
+        async function getVideoDuration(videoBlob) {
+            return new Promise((resolve) => {
+                const videoElement = document.createElement('video');
+                videoElement.src = URL.createObjectURL(videoBlob);
+
+                videoElement.addEventListener('loadedmetadata', () => {
+                    resolve(videoElement.duration);
+                });
+
+                videoElement.load();
+            });
+        }
     </script>
 </body>
 

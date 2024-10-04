@@ -11,8 +11,8 @@ document.getElementById('header-container').innerHTML = `
                 <a href="/creations" class="dropdown-toggle" es-translation="Creaciones">Creations</a>
                 <div class="dropdown-menu">
                     <a href="/apps/discord-timestamps" es-translation="Discord Timestamps">Discord Timestamps</a>
-                    <a target="_blank" href="/apps/notepad" es-translation="Notepad">Notepad</a>
-                    <a href="/apps/video-compress" es-translation="Video Compress">Video Compress</a>
+                    <a target="_blank" href="/apps/notepad" es-translation="Bloc de Notas">Notepad</a>
+                    <a href="/apps/video-compress" es-translation="Compresor de Video">Video Compressor</a>
                 </div>
             </div>
 

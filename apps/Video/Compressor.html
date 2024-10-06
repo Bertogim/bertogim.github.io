@@ -227,7 +227,7 @@
         <br><br>
         <select id="speedSelect">
             <option value="ultrafast">Procesado mas rapido pero menos calidad</option>
-            <option value="fast">Procesado menos rapido pero mas calidad</option>
+            <option value="superfast">Procesado menos rapido pero mas calidad</option>
         </select>
         <br><br>
         <input type="number" id="sizeInput" placeholder="Tamaño objetivo en MB" step="0.1">
@@ -400,9 +400,7 @@
 
             try {
                 await worker.run(
-                    '-hwaccel', 'auto',
                     '-i', 'input.mp4',
-                    '-threads', navigator.hardwareConcurrency.toString(),
                     '-r', fps.toString(),
                     '-b:v', `${bitrateKbps}k`,
                     '-preset', preset,

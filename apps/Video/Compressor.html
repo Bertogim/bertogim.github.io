@@ -5,10 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compresor de Video</title>
+    <script src="coi-serviceworker.js"></script>
+    
     <script defer src="/header.js"></script>
     <script src="/translations.js"></script>
 
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.7.0/dist/ffmpeg.min.js"></script>
+
+
+    <script src="./ffmpeg/ffmpeg.min.js"></script>
+    <!--<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.0/dist/ffmpeg.min.js"></script>-->
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -222,7 +227,7 @@
         <br><br>
         <select id="speedSelect">
             <option value="ultrafast">Procesado mas rapido pero menos calidad</option>
-            <option value="veryfast">Procesado menos rapido pero mas calidad</option>
+            <option value="fast">Procesado menos rapido pero mas calidad</option>
         </select>
         <br><br>
         <input type="number" id="sizeInput" placeholder="Tamaño objetivo en MB" step="0.1">
@@ -246,18 +251,9 @@
         </div>
     </center>
     <script>
-        const { createWorker } = FFmpeg;
-        const worker = createWorker({
-            logger: m => {
-                console.log(m);
-                if (typeof m.message === 'string') {  // Verificar si m.message es una cadena
-                    const frameMatch = m.message.match(/frame=\s*(\d+)/);
-                    if (frameMatch) {
-                        const processedFrames = parseInt(frameMatch[1], 10);
-                        updateProgress(processedFrames);
-                    }
-                }
-            }
+        const { createFFmpeg, fetchFile } = FFmpeg;
+        const worker = createFFmpeg({
+            log: true
         });
 
         let videoDuration = 0;
@@ -330,21 +326,24 @@
             return fps_rounder.length ? fps_rounder.reduce((a, b) => a + b) / fps_rounder.length : defaultFps;
         }
 
-        function updateProgress(processedFrames) {
-            const percent = (processedFrames / totalFrames) * 100;
-            document.getElementById('progress').textContent = `Progreso: ${percent.toFixed(2)}%`;
-            if (percent <= 35) {
-                document.getElementById('estimatedTime').textContent = `Tiempo estimado restante: Calculando...`;
-            } else {
-                if (processedFrames > 0 && startTime) {
-                    const elapsedTime = (Date.now() - startTime) / 1000;
-                    const estimatedTotalTime = (elapsedTime / processedFrames) * totalFrames;
-                    const remainingTime = estimatedTotalTime - elapsedTime;
-                    const remainingMinutes = Math.floor(remainingTime / 60);
-                    const remainingSeconds = Math.floor(remainingTime % 60);
-                    document.getElementById('estimatedTime').textContent = `Tiempo estimado restante: ${remainingMinutes}m ${remainingSeconds}s`;
+        function updateProgress() {
+            worker.setProgress(({ ratio }) => {
+                const percent = ratio * 100
+
+                document.getElementById('progress').textContent = `Progreso: ${percent.toFixed(2)}%`;
+                if (percent <= 5) {
+                    document.getElementById('estimatedTime').textContent = `Tiempo estimado restante: Calculando...`;
+                } else {
+                    if (startTime) {
+                        const elapsedTime = (Date.now() - startTime) / 1000;
+                        const estimatedTotalTime = (elapsedTime / ratio) * 1;
+                        const remainingTime = estimatedTotalTime - elapsedTime;
+                        const remainingMinutes = Math.floor(remainingTime / 60);
+                        const remainingSeconds = Math.floor(remainingTime % 60);
+                        document.getElementById('estimatedTime').textContent = `Tiempo estimado restante: ${remainingMinutes}m ${remainingSeconds}s`;
+                    }
                 }
-            }
+            });
         }
 
         document.getElementById('compressButton').addEventListener('click', async () => {
@@ -376,26 +375,46 @@
 
             const targetSizeBits = targetSizeMB * 8 * 1024 * 1024;
             const bitrate = Math.floor(targetSizeBits / videoDuration);
-            const bitrateKbps = Math.floor(bitrate / 1000) * 0.95; //We multiply 0.95 in case the output is a bit bigger
+            const bitrateKbps = Math.floor((bitrate / 1000) * 0.95); //We multiply 0.95 in case the output is a bit bigger
 
-            console.log(`Bitrate calculado: ${bitrateKbps} kbps`);
+            console.log(`Bitrate: ${bitrateKbps} kbps`);
+            console.log(`threads: ` + navigator.hardwareConcurrency.toString())
 
             loader.style.display = 'block';
             await worker.load();
             const arrayBuffer = await videoInput.arrayBuffer();
-            await worker.write(videoInput.name.replace(/ /g, '_'), new Uint8Array(arrayBuffer));
+            await worker.FS('writeFile', 'input.mp4', new Uint8Array(arrayBuffer));
 
 
             const fileNameWithoutExt = videoInput.name.split('.').slice(0, -1).join('.').replace(/ /g, '_');
             outputFileName = `${fileNameWithoutExt}-compressed.mp4`;
             console.log(outputFileName)
 
+
             const fps = document.getElementById('qualitySelect').value === 'smooth' ? 50 : 24;
             const preset = document.getElementById('speedSelect').value;
             startTime = Date.now();
-            await worker.run(`-hwaccel auto -i ${videoInput.name.replace(/ /g, '_')} -threads 24 -r ${fps} -b:v ${bitrateKbps}k -preset ${preset} ${outputFileName}`);
+
+            const intervalId = setInterval(updateProgress, 100);
+
+            try {
+                await worker.run(
+                    '-hwaccel', 'auto',
+                    '-i', 'input.mp4',
+                    '-threads', navigator.hardwareConcurrency.toString(),
+                    '-r', fps.toString(),
+                    '-b:v', `${bitrateKbps}k`,
+                    '-preset', preset,
+                    'output.mp4'
+                );
+            } catch (error) {
+                console.error("Error during video processing:", error);
+            } finally {
+                // Limpia el intervalo una vez que el trabajo ha terminado
+                clearInterval(intervalId);
+            }
             // Leer el video comprimido
-            const { data } = await worker.read(outputFileName);
+            const data = worker.FS('readFile', 'output.mp4');
             const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
             const videoURL = URL.createObjectURL(videoBlob);
 
@@ -416,11 +435,13 @@
             document.getElementById('sizeOutput').textContent = 'Tamaño: ' + sizeOutput + ' MB';
             document.getElementById('durationOutput').textContent = 'Duración: ' + Math.floor(durationOutput) + ' s';
 
-            await worker.remove(videoInput.name);
-            await worker.remove(outputFileName);
+            //await worker.remove(videoInput.name);
+            //await worker.remove(outputFileName);
             loader.style.display = 'none';
             document.getElementById('estimatedTime').style.display = 'none';
             document.getElementById('progress').textContent = `Progreso: 100.00%`;
+
+
 
             // Mostrar contenedor de salida
             document.getElementById('output-container').style.display = 'block';

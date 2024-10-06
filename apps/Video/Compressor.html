@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Compresor de Video</title>
     <script src="coi-serviceworker.js"></script>
-    
+
     <script defer src="/header.js"></script>
     <script src="/translations.js"></script>
 
@@ -340,6 +340,7 @@
                         const remainingTime = estimatedTotalTime - elapsedTime;
                         const remainingMinutes = Math.floor(remainingTime / 60);
                         const remainingSeconds = Math.floor(remainingTime % 60);
+                        document.getElementById('estimatedTime').style.display = 'block';
                         document.getElementById('estimatedTime').textContent = `Tiempo estimado restante: ${remainingMinutes}m ${remainingSeconds}s`;
                     }
                 }
@@ -369,19 +370,19 @@
 
             // Si no se obtuvo la duración automáticamente, la tomamos del campo manual
             if (!durationObtained) {
-                videoDuration = parseManualDuration(manualDurationStr);
+                videoDuration = parseManualDuration(manualDurationStr)-1;
                 totalFrames = Math.floor(videoDuration * getAverageFps());
             }
 
             const targetSizeBits = targetSizeMB * 8 * 1024 * 1024;
-            const bitrate = Math.floor(targetSizeBits / videoDuration);
-            const bitrateKbps = Math.floor((bitrate / 1000) * 0.95); //We multiply 0.95 in case the output is a bit bigger
+            const bitrate = targetSizeBits / videoDuration;
+            const bitrateKbps = Math.floor((bitrate / 1000) * 0.85); //We multiply 0.9 in case the output is a bit bigger
 
             console.log(`Bitrate: ${bitrateKbps} kbps`);
             console.log(`threads: ` + navigator.hardwareConcurrency.toString())
 
             loader.style.display = 'block';
-            await worker.load();
+            if (!worker.isLoaded()) { await worker.load() }
             const arrayBuffer = await videoInput.arrayBuffer();
             await worker.FS('writeFile', 'input.mp4', new Uint8Array(arrayBuffer));
 

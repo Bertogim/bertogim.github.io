@@ -1,0 +1,204 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #222;
+    color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+    text-align: center;
+}
+
+h1 {
+    color: #28a745;
+    text-shadow: 1px 1px 2px #000;
+    font-size: 2.5em;
+}
+
+.input-container {
+    border: 1px solid #585858;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #444;
+}
+
+input[type="file"],
+input[type="number"],
+select {
+    margin: 0px 0;
+    padding: 10px;
+    width: calc(100% - 24px);
+    box-sizing: border-box;
+    border: none;
+    background-color: #444;
+    color: #f4f4f4;
+}
+
+header select.LanguageSelect {
+    width: 100px;
+}
+
+
+button {
+    padding: 10px 15px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 100%;
+    font-size: 1.2em;
+    margin: 5px;
+}
+
+button:hover {
+    margin: 1px;
+    background-color: #218838;
+}
+
+#compressButton {
+    background-color: #28a745;
+}
+
+#previewButton {
+    background-color: #167b8d;
+    width: 50%;
+}
+
+#compressButtons {
+    display: flex;
+}
+
+#progress,
+#estimatedTime {
+    margin-top: 20px;
+    font-size: 1.5em;
+    color: #f4f4f4;
+}
+
+#downloadButton {
+    display: none;
+    padding: 10px 15px;
+    background-color: #0071eb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    width: 95%;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+#downloadButton:hover {
+    background-color: #0056b3;
+}
+
+video {
+    width: 100%;
+    border: 0px;
+    border-radius: 4px;
+    display: none;
+    /* Se ocultará hasta que se suba un video */
+}
+
+.loader {
+    display: none;
+    margin: 20px auto;
+    border: 8px solid #444;
+    border-top: 8px solid #28a745;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+#manualDurationError {
+    color: #ff0000;
+    font-size: 1.2em;
+    margin-top: 10px;
+    display: none;
+}
+
+#manualDuration {
+    margin-top: 10px;
+    padding: 10px;
+    width: calc(100% - 24px);
+    box-sizing: border-box;
+    border: none;
+    background-color: #444;
+    color: #f4f4f4;
+}
+
+#compressButton:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+#infoDiv {
+    display: none;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+#infoDiv p {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+.input-container {
+    border: 1px solid #585858;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #444;
+}
+
+
+
+
+
+
+
+
+#infoDivOutput {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+#infoDivOutput p {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+
+#output-container {
+    display: none;
+    border: 1px solid #585858;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #444;
+}
+
+#output-video {
+    align-items: center;
+}
+
+.videoSeparator {
+    margin-bottom: 30px;
+    margin-top: 30px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

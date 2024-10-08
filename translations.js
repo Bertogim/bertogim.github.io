@@ -33,7 +33,7 @@ function translate(language) {
     var elementsToTranslate = document.querySelectorAll('*[es-translation]:not(script):not(style)');
 
     elementsToTranslate.forEach(function (element) {
-        const translatedText = element.getAttribute("es-translation-" + language) || element.getAttribute("es-translation");
+        const translatedText = element.getAttribute(language+"-translation")
         element.innerHTML = translatedText;
     });
 

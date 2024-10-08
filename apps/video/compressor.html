@@ -28,46 +28,53 @@
 <body>
     <header id="header-container"></header>
     <center>
-        <h1>Compresor de Video</h1>
+        <h1 es-translation="Compresor de Video">Video Compressor</h1>
         <div class="input-container">
             <input type="file" id="videoInput" accept="video/*">
             <video id="uploadedVideo" controls style="display: none;"></video>
             <div id="infoDiv">
-                <p id="size"></p>
-                <p id="duration"></p>
+                <p id="size" es-translation="Tamaño">Size</p>
+                <p id="duration" es-translation="Duración">Duration</p>
             </div>
         </div>
         <br>
         <select id="qualitySelect">
-            <option selected value="5">Prioridad en calidad++ (5FPS)</option>
-            <option selected value="10">Prioridad en calidad+ (10FPS)</option>
-            <option selected value="24">Prioridad en calidad (24FPS)</option>
-            <option value="50">Prioridad en fluidez (50FPS)</option>
+            <option selected value="5" es-translation="Prioridad en calidad++ (5FPS)">Quality Priority++ (5FPS)</option>
+            <option value="10" es-translation="Prioridad en calidad+ (10FPS)">Quality Priority+ (10FPS)</option>
+            <option value="24" es-translation="Prioridad en calidad (24FPS)">Quality Priority (24FPS)</option>
+            <option value="50" es-translation="Prioridad en fluidez (50FPS)">Smoothness Priority (50FPS)</option>
         </select>
         <br><br>
         <select id="speedSelect">
-            <option value="ultrafast">Procesado mas rapido pero menos calidad</option>
-            <option value="superfast">Procesado menos rapido pero mas calidad</option>
+            <option value="ultrafast" es-translation="Procesado más rápido pero menos calidad">Faster processing but
+                less quality</option>
+            <option value="superfast" es-translation="Procesado menos rápido pero más calidad">Slower processing but
+                more quality</option>
         </select>
         <br><br>
-        <input type="number" id="sizeInput" placeholder="Tamaño objetivo en MB" step="0.1">
+        <input type="number" id="sizeInput" placeholder="Target size in MB" step="0.1"
+            es-translation="Tamaño objetivo en MB">
         <br><br>
-        <input type="number" id="videoParts" placeholder="Partes en las que dividir el video (Deja en blanco para 1)"
-            step="1" min="1">
+        <input type="number" id="videoParts" placeholder="Parts to split the video (Leave blank for 1)" step="1" min="1"
+            es-translation="Partes en las que dividir el video (Deja en blanco para 1)">
         <br><br>
         <!-- Campo para la duración manual -->
-        <p id="manualDurationError">Error al conseguir la duración del video. Por favor, introducela manualmente.</p>
-        <input type="text" id="manualDuration" placeholder="Duración manual (ej. 1h 1m 1s)" style="display:none;">
+        <p id="manualDurationError"
+            es-translation="Error al conseguir la duración del video. Por favor, introdúcela manualmente.">Error
+            retrieving video duration. Please enter it manually.</p>
+        <input type="text" id="manualDuration" placeholder="Manual duration (e.g. 1h 1m 1s)" style="display:none;"
+            es-translation="Duración manual (ej. 1h 1m 1s)">
         <br><br>
         <div id="compressButtons">
-            <button id="compressButton">Comprimir Video</button>
-            <button id="previewButton">Vista previa (10s)</button>
+            <button id="compressButton" es-translation="Comprimir Video">Compress Video</button>
+            <button id="previewButton" es-translation="Vista previa (10s)">Preview (10s)</button>
         </div>
         <div class="loader" id="loader"></div>
         <div id="progress"></div>
         <div id="estimatedTime"></div>
         <br><br>
-        <div id="output-container">
+        <div id="output-container"></div>
+
 
         </div>
     </center>
@@ -112,8 +119,10 @@
                         document.getElementById('compressButton').disabled = false;
 
                         document.getElementById('infoDiv').style.display = 'flex'
-                        document.getElementById('size').textContent = 'Tamaño: ' + Math.floor(videoFile.size / 1000000 * 100) / 100 + 'MB'
-                        document.getElementById('duration').textContent = 'Duracion: ' + Math.floor(videoDuration) + 's'
+                        document.getElementById('size').textContent = 'Size: ' + Math.floor(videoFile.size / 1000000 * 100) / 100 + 'MB'
+                        document.getElementById('size').setAttribute("es-translation", 'Tamaño: ' + Math.floor(videoFile.size / 1000000 * 100) / 100 + 'MB');
+                        document.getElementById('duration').textContent = 'Duration: ' + Math.floor(videoDuration) + 's'
+                        document.getElementById('size').setAttribute("es-translation", 'Duracion: ' + Math.floor(videoDuration) + 's');
                     }
                 });
 
@@ -168,20 +177,22 @@
             const percent = (localProcessedFrames / totalFrames) * 100;
             document.getElementById('progress').textContent = `Progreso: ${percent.toFixed(2)}%`;
             if (percent <= 5) {
-                document.getElementById('estimatedTime').textContent = `Tiempo estimado restante: Calculando...`;
+                document.getElementById('estimatedTime').textContent = `Estimated time remaining: Calculating...`;
+                document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: Calculando...`);
             } else {
                 if (localProcessedFrames > 0 && startTime) {
                     const elapsedTime = (Date.now() - startTime) / 1000;
                     const estimatedTotalTime = (elapsedTime / localProcessedFrames) * totalFrames;
                     let remainingTime = 0
                     if (videoParts == 1) {
-                    remainingTime = estimatedTotalTime - elapsedTime + (MidWaitTimeBetweenParts * (videoParts - currentPart));
-                } else {
-                    remainingTime = estimatedTotalTime - elapsedTime;
+                        remainingTime = estimatedTotalTime - elapsedTime + (MidWaitTimeBetweenParts * (videoParts - currentPart));
+                    } else {
+                        remainingTime = estimatedTotalTime - elapsedTime;
                     }
                     const remainingMinutes = Math.floor(remainingTime / 60);
                     const remainingSeconds = Math.floor(remainingTime % 60);
-                    document.getElementById('estimatedTime').textContent = `Tiempo estimado restante: ${remainingMinutes}m ${remainingSeconds}s`;
+                    document.getElementById('estimatedTime').textContent = `Estimated time remaining: ${remainingMinutes}m ${remainingSeconds}s`;
+                    document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: ${remainingMinutes}m ${remainingSeconds}s`);
                 }
             }
             console.log(localProcessedFrames + ' / ' + totalFrames + ' | ' + percent.toFixed(3) + '%')
@@ -196,20 +207,51 @@
             videoParts = Number(document.getElementById('videoParts').value);
             if (videoParts == "") { videoParts = 1 }
 
+            // Definir mensajes de alerta en ambos idiomas
+            const messages = {
+                videoInputMissing: {
+                    en: 'Please upload a video.',
+                    es: 'Por favor, sube un video.'
+                },
+                durationMissing: {
+                    en: 'Please enter the video duration.',
+                    es: 'Por favor, introduce la duración del video.'
+                },
+                invalidTargetSize: {
+                    en: 'Please enter a valid target size in MB.',
+                    es: 'Por favor, introduce un tamaño objetivo válido en MB.'
+                }
+            };
+
+            // Función para obtener el idioma actual
+            function getCurrentLanguage() {
+                // Si el idioma no está en localStorage, establecemos uno por defecto (inglés)
+                return localStorage.getItem('selectedLanguage');
+            }
+
+            // Función para obtener el mensaje traducido
+            function getTranslatedMessage(key) {
+                const language = getCurrentLanguage(); // Obtener el idioma actual
+                return messages[key][language];        // Retornar el mensaje traducido
+            }
+
+            // Validaciones con mensajes en el idioma seleccionado
             if (!videoInput) {
-                alert('Por favor, sube un video.');
+                alert(getTranslatedMessage('videoInputMissing')); // Mostrar mensaje traducido
                 return;
             }
 
             if (!durationObtained && !manualDurationStr) {
-                alert('Por favor, introduce la duración del video.');
+                alert(getTranslatedMessage('durationMissing')); // Mostrar mensaje traducido
                 return;
             }
 
             if (isNaN(targetSizeMB) || targetSizeMB <= 0) {
-                alert('Por favor, introduce un tamaño objetivo válido en MB.');
+                alert(getTranslatedMessage('invalidTargetSize')); // Mostrar mensaje traducido
                 return;
             }
+
+
 
             // Si no se obtuvo la duración automáticamente, la tomamos del campo manual
             if (!durationObtained) {

@@ -1,3 +1,7 @@
+
+// Bandera para evitar bucles infinitos
+let isTranslating = false;
+
 document.addEventListener("DOMContentLoaded", function () {
     var languageSelect = document.querySelector('.LanguageSelect');
 
@@ -14,28 +18,52 @@ document.addEventListener("DOMContentLoaded", function () {
         translate(selectedValue);
         // guarda el idioma en localStorage
         localStorage.setItem('selectedLanguage', selectedValue);
+    });
 
-        // Si el idioma seleccionado es "en", recarga la página
-        if (selectedValue === "en") {
-            window.location.reload();
+    // Configura el MutationObserver para detectar cambios en el DOM
+    const observer = new MutationObserver(() => {
+        if (!isTranslating) {
+            translate(languageSelect.value); // Vuelve a traducir cada vez que hay un cambio
         }
+    });
+
+    // Observa el cuerpo del documento para cambios en hijos y atributos
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['es-translation', 'en-translation']
     });
 });
 
 // Función para traducir el contenido de la página
 function translate(language) {
     console.log("Selected language: " + language);
-    // Si el idioma es "en", no hacer nada a menos que esté en "es" porque la página está en inglés
-    if (language === "en" && document.documentElement.lang !== "es") {
-        return;
-    }
+    isTranslating = true; // Marca el inicio de la traducción
 
-    var elementsToTranslate = document.querySelectorAll('*[es-translation]:not(script):not(style)');
+    var elementsToTranslate = document.querySelectorAll('*[es-translation], *[en-translation]:not(script):not(style)');
 
     elementsToTranslate.forEach(function (element) {
-        const translatedText = element.getAttribute(language+"-translation")
-        element.innerHTML = translatedText;
+        let translatedText;
+        if (language === "es") {
+            translatedText = element.getAttribute("es-translation");
+            // Si hay traducción, se guarda en es-translation y se elimina en-translation
+            if (translatedText) {
+                element.setAttribute("en-translation", element.textContent);
+                element.removeAttribute("es-translation");
+                element.innerHTML = translatedText; // Actualiza el contenido del elemento
+            }
+        } else if (language === "en") {
+            translatedText = element.getAttribute("en-translation");
+            // Si hay traducción, se guarda en en-translation y se elimina es-translation
+            if (translatedText) {
+                element.setAttribute("es-translation", element.textContent);
+                element.removeAttribute("en-translation");
+                element.innerHTML = translatedText; // Actualiza el contenido del elemento
+            }
+        }
     });
 
-    document.documentElement.lang = language;
+    document.documentElement.lang = language; // Cambia el idioma del documento
+    isTranslating = false; // Marca el fin de la traducción
 }

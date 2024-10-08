@@ -159,12 +159,9 @@
                 }
             });
 
-            let localProcessedFrames = 0
+            let localProcessedFrames = processedFrames
             if (videoParts !== 1) {
                 localProcessedFrames = processedFrames + (totalFrames / videoParts) * (currentPart - 1)
-            }
-            if (previewing == true) {
-                localProcessedFrames = processedFrames
             }
 
 
@@ -176,7 +173,12 @@
                 if (localProcessedFrames > 0 && startTime) {
                     const elapsedTime = (Date.now() - startTime) / 1000;
                     const estimatedTotalTime = (elapsedTime / localProcessedFrames) * totalFrames;
-                    const remainingTime = estimatedTotalTime - elapsedTime + (MidWaitTimeBetweenParts * (videoParts - currentPart));
+                    let remainingTime = 0
+                    if (videoParts == 1) {
+                    remainingTime = estimatedTotalTime - elapsedTime + (MidWaitTimeBetweenParts * (videoParts - currentPart));
+                } else {
+                    remainingTime = estimatedTotalTime - elapsedTime;
+                    }
                     const remainingMinutes = Math.floor(remainingTime / 60);
                     const remainingSeconds = Math.floor(remainingTime % 60);
                     document.getElementById('estimatedTime').textContent = `Tiempo estimado restante: ${remainingMinutes}m ${remainingSeconds}s`;

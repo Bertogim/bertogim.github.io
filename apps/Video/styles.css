@@ -161,7 +161,12 @@ video {
 
 
 
-
+hr {
+    height: 2px;
+    border-color: transparent;
+    background-color: #585858;
+    border-radius: 2px;
+}
 
 #infoDivOutput {
     display: flex;

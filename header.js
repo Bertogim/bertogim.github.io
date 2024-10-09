@@ -24,7 +24,7 @@ link.addEventListener('load', () => {
                 <a href="/apps/discord-timestamps" es-translation="Discord Timestamps">Discord Timestamps</a>
                 <a target="_blank" href="/apps/notepad" es-translation="Notepad">Notepad</a>
                 <div class="dropdown">
-                    <a href="/apps/video" class="dropdown-toggle" es-translation="Herramientas de Video">Video Tools</a>
+                    <a href="/apps/video/" class="dropdown-toggle" es-translation="Herramientas de Video">Video Tools</a>
                     <div class="dropdown-menu">
                         <a href="/apps/video/compressor" es-translation="Video Compress">Video Compress</a>
                     </div>

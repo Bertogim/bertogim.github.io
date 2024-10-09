@@ -3,38 +3,54 @@
 let isTranslating = false;
 
 document.addEventListener("DOMContentLoaded", function () {
-    var languageSelect = document.querySelector('.LanguageSelect');
+    // Función para esperar a que el elemento esté disponible
+    function waitForElement(selector, callback) {
+        const observer = new MutationObserver(() => {
+            const element = document.querySelector(selector);
+            if (element) {
+                observer.disconnect(); // Detener el observer
+                callback(element); // Llamar al callback con el elemento encontrado
+            }
+        });
 
-    // Carga el idioma seleccionado, o el idioma del navegador si no hay ninguno guardado
-    var storedLanguage = localStorage.getItem('selectedLanguage') || navigator.language.slice(0, 2);
-    languageSelect.value = storedLanguage;
+        // Configurar el observer para observar el cuerpo del documento
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
 
-    // Llama a la función translate con el idioma seleccionado
-    translate(storedLanguage);
+    // Uso de la función
+    waitForElement('.LanguageSelect', (languageSelect) => {
+        // Carga el idioma seleccionado, o el idioma del navegador si no hay ninguno guardado
+        var storedLanguage = localStorage.getItem('selectedLanguage') || navigator.language.slice(0, 2);
+        languageSelect.value = storedLanguage;
 
-    // Agrega un evento al cambio de idioma
-    languageSelect.addEventListener("change", function () {
-        var selectedValue = languageSelect.value;
-        translate(selectedValue);
-        // guarda el idioma en localStorage
-        localStorage.setItem('selectedLanguage', selectedValue);
-    });
+        // Llama a la función translate con el idioma seleccionado
+        translate(storedLanguage);
 
-    // Configura el MutationObserver para detectar cambios en el DOM
-    const observer = new MutationObserver(() => {
-        if (!isTranslating) {
-            translate(languageSelect.value); // Vuelve a traducir cada vez que hay un cambio
-        }
-    });
+        // Agrega un evento al cambio de idioma
+        languageSelect.addEventListener("change", function () {
+            var selectedValue = languageSelect.value;
+            translate(selectedValue);
+            // guarda el idioma en localStorage
+            localStorage.setItem('selectedLanguage', selectedValue);
+        });
 
-    // Observa el cuerpo del documento para cambios en hijos y atributos
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['es-translation', 'en-translation']
+        // Configura el MutationObserver para detectar cambios en el DOM
+        const observer = new MutationObserver(() => {
+            if (!isTranslating) {
+                translate(languageSelect.value); // Vuelve a traducir cada vez que hay un cambio
+            }
+        });
+
+        // Observa el cuerpo del documento para cambios en hijos y atributos
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['es-translation', 'en-translation']
+        });
     });
 });
+
 
 // Función para traducir el contenido de la página
 function translate(language) {
@@ -49,17 +65,31 @@ function translate(language) {
             translatedText = element.getAttribute("es-translation");
             // Si hay traducción, se guarda en es-translation y se elimina en-translation
             if (translatedText) {
-                element.setAttribute("en-translation", element.textContent);
-                element.removeAttribute("es-translation");
-                element.innerHTML = translatedText; // Actualiza el contenido del elemento
+                placeholder = element.getAttribute("placeholder")
+                if (placeholder) {
+                    element.setAttribute("en-translation", placeholder);
+                    element.removeAttribute("es-translation");
+                    element.setAttribute("placeholder", translatedText);
+                } else {
+                    element.setAttribute("en-translation", element.textContent);
+                    element.removeAttribute("es-translation");
+                    element.innerHTML = translatedText; // Actualiza el contenido del elemento
+                }
             }
         } else if (language === "en") {
             translatedText = element.getAttribute("en-translation");
             // Si hay traducción, se guarda en en-translation y se elimina es-translation
             if (translatedText) {
-                element.setAttribute("es-translation", element.textContent);
-                element.removeAttribute("en-translation");
-                element.innerHTML = translatedText; // Actualiza el contenido del elemento
+                placeholder = element.getAttribute("placeholder")
+                if (placeholder) {
+                    element.setAttribute("es-translation", placeholder);
+                    element.removeAttribute("en-translation");
+                    element.setAttribute("placeholder", translatedText);
+                } else {
+                    element.setAttribute("es-translation", element.textContent);
+                    element.removeAttribute("en-translation");
+                    element.innerHTML = translatedText; // Actualiza el contenido del elemento
+                }
             }
         }
     });

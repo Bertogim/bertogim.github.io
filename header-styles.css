@@ -72,10 +72,17 @@ header .headertitle {
     z-index: 1000;
 }
 
+.dropdown-menu .dropdown-menu {
+    border-radius: 5px;
+    top: 0;
+    left: 100%;
+}
+
 .dropdown-menu a {
     padding: 10px 20px;
     text-align: left;
     display: block;
+    border-radius: 5px;
 }
 
 .dropdown-menu.show {

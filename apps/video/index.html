@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido al Compresor de Video</title>
+    <link rel="stylesheet" type="text/css" href="./styles.css">
+    <link rel="icon" type="png" target="_blank" href="/Image/Icon.png">
+
+    <meta content="Bertogim" property="og:title" />
+    <meta content="Bertogim's Website" property="og:description" />
+    <meta content="https://bertogim.github.io" property="og:url" />
+    <meta content="https://bertogim.github.io/Image/Icon.png" property="og:image" />
+    <meta name="theme-color" content="#ff0000">
+
+    <script defer src="/translations.js"></script>
+    <script defer src="/header.js"></script>
+    <style>
+        body {
+            background-color: #222;
+            color: white;
+            font-family: Arial, sans-serif;
+            max-width: 90%;
+
+        }
+
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        video {
+            margin: 0px;
+            border-radius: 10px;
+            background-color: #000;
+            display: block;
+        }
+
+        .arrow {
+            font-size: 24px;
+            margin: 0 10px;
+            color: #00ff00;
+            padding-bottom: 30px;
+        }
+
+        .size-info {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            text-align: center;
+            /* Centrar títulos */
+        }
+
+        /* Estilo para el contenedor principal */
+        .input-container {
+            text-align: center;
+            /* Centrar el texto en el contenedor */
+            margin: 20px;
+            /* Margen */
+            padding: 3px;
+            /* Relleno */
+            background-color: #333;
+            /* Fondo gris oscuro */
+            border-radius: 10px;
+            /* Bordes redondeados */
+
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .input-container .video-container p {
+            margin-bottom: 0px;
+        }
+
+        .credits {
+            bottom: 10px;
+            right: 20px;
+            text-align: right;
+            margin-top: 0px;
+            margin-bottom: 5px;
+        }
+
+        .link {
+            font-size: 40px;
+            color: #28a7a7;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <center>
+        <h1 style="font-size: 50px;" es-translation="Herramientas de Video">Video Tools</h1>
+        <p
+            es-translation="Estas herramientas de video son extremadamente útiles, ya que permiten realizar diversas tareas de procesamiento sin necesidad de subir archivos a la nube.<br> Todo el procesamiento se lleva a cabo directamente en tu ordenador, lo que garantiza una mayor seguridad y privacidad.<br><br>Además, son muy fáciles de usar, con interfaces simples que te permiten realizar compresiones y otros ajustes de video de manera rápida y eficiente, sin complicaciones.">
+            These video tools are extremely useful, as they allow you to perform various processing tasks without the
+            need to upload files to the cloud.<br>All processing is done directly on your computer, ensuring greater
+            security and privacy.<br><br>Additionally, they are very easy to use, with simple interfaces that let
+            you perform video compressions and other adjustments quickly and efficiently, without hassle.
+        </p>
+        <br><br>
+        <h1 es-translation="1. Compresor de Video">1. Video Compressor</h1>
+        <p
+            es-translation="Una util herramienta de compresión de video. Esta aplicación te permite subir videos y <b>comprimirlos a los MB que quieras</b>.">
+            A useful video compression tool.<br>This application allows you to upload videos and <b>compress them to the
+                MB you want</b>.
+        </p>
+
+        <div class="input-container">
+            <h3 es-translation="Ejemplo:">Example:</h3>
+            <div>
+                <div class="video-container">
+                    <div class="video">
+                        <video controls>
+                            <source src="./examples/loot_delicioso.mp4" type="video/mp4">
+                            Your browser does not support the video element.
+                        </video>
+                        <p es-translation="Tamaño original: <strong>91.84 MB</strong>">Original size: <strong>91.84
+                                MB</strong></p>
+                    </div>
+                    <span class="arrow">➡️</span>
+                    <div class="video">
+                        <video controls>
+                            <source src="./examples/loot_delicioso.mp4" type="video/mp4">
+                            Your browser does not support the video element.
+                        </video>
+                        <p es-translation="Tamaño comprimido: <strong>8.56 MB</strong>">Compressed size: <strong>8.56
+                                MB</strong></p>
+                    </div>
+                </div>
+                <p class="credits"
+                    es-translation='Creditos del video a <a style="color: #b7b7b7;" target="_blank" href="https://www.youtube.com/channel/UCXZl3qQWKV1sUU5p_HvTFzw">daviddrm52</a>'>
+                    Video credits to <a style="color: #b7b7b7;" target="_blank"
+                        href="https://www.youtube.com/channel/UCXZl3qQWKV1sUU5p_HvTFzw">daviddrm52</a>
+                </p>
+            </div>
+        </div>
+
+        <h2 es-translation="¿Cómo Funciona?">How Does It Work?</h2>
+        <p
+            es-translation="La herramienta utiliza <strong>FFmpeg</strong>, una biblioteca de procesamiento de video, para realizar la compresión. Puedes ajustar la calidad y la velocidad de compresión según tus preferencias.">
+            The tool uses <strong>FFmpeg</strong>, a video processing library, to perform compression.<br>You can adjust
+            the quality and compression speed according to your preferences.
+        </p>
+        <h2><a class="link" href="./compressor.html" es-translation="Pruebalo">Try it</a></h2>
+        <br><br><br><br><br><br>
+        <h1 es-translation="2. Futuras herramientas">2. Future Tools</h1>
+        <p
+            es-translation="Estamos trabajando en más funcionalidades para mejorar tu experiencia con el procesamiento de videos. Mantente atento a futuras actualizaciones que incluirán herramientas como edición de video, conversión de formatos y mucho más.">
+            We are working on more features to improve your video processing experience. Stay tuned for future updates
+            that will include tools like video editing, format conversion, and much more.
+        </p>
+    </center>
+</body>
+
+
+</html>

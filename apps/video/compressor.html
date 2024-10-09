@@ -26,7 +26,7 @@
 </head>
 
 <body>
-    <header id="header-container"></header>
+
     <center>
         <h1 es-translation="Compresor de Video">Video Compressor</h1>
         <div class="input-container">
@@ -41,7 +41,7 @@
         <select id="qualitySelect">
             <option selected value="5" es-translation="Prioridad en calidad++ (5FPS)">Quality Priority++ (5FPS)</option>
             <option value="10" es-translation="Prioridad en calidad+ (10FPS)">Quality Priority+ (10FPS)</option>
-            <option value="24" es-translation="Prioridad en calidad (24FPS)">Quality Priority (24FPS)</option>
+            <option selected value="24" es-translation="Prioridad en calidad (24FPS)">Quality Priority (24FPS)</option>
             <option value="50" es-translation="Prioridad en fluidez (50FPS)">Smoothness Priority (50FPS)</option>
         </select>
         <br><br>
@@ -122,7 +122,7 @@
                         document.getElementById('size').textContent = 'Size: ' + Math.floor(videoFile.size / 1000000 * 100) / 100 + 'MB'
                         document.getElementById('size').setAttribute("es-translation", 'Tamaño: ' + Math.floor(videoFile.size / 1000000 * 100) / 100 + 'MB');
                         document.getElementById('duration').textContent = 'Duration: ' + Math.floor(videoDuration) + 's'
-                        document.getElementById('size').setAttribute("es-translation", 'Duracion: ' + Math.floor(videoDuration) + 's');
+                        document.getElementById('duration').setAttribute("es-translation", 'Duracion: ' + Math.floor(videoDuration) + 's');
                     }
                 });
 
@@ -158,7 +158,7 @@
         function updateProgress() {
             document.getElementById('estimatedTime').style.display = 'block';
 
-            const MidWaitTimeBetweenParts = 11
+            const MidWaitTimeBetweenParts = 8
 
             worker.setLogger(({ type, message }) => {
                 if (type == 'fferr') {
@@ -175,7 +175,9 @@
 
 
             const percent = (localProcessedFrames / totalFrames) * 100;
-            document.getElementById('progress').textContent = `Progreso: ${percent.toFixed(2)}%`;
+            document.getElementById('progress').textContent = `Progress: ${percent.toFixed(2)}%`;
+            document.getElementById('progress').setAttribute("es-translation", `Progreso: ${percent.toFixed(2)}%`);
+
             if (percent <= 5) {
                 document.getElementById('estimatedTime').textContent = `Estimated time remaining: Calculating...`;
                 document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: Calculando...`);
@@ -184,7 +186,7 @@
                     const elapsedTime = (Date.now() - startTime) / 1000;
                     const estimatedTotalTime = (elapsedTime / localProcessedFrames) * totalFrames;
                     let remainingTime = 0
-                    if (videoParts == 1) {
+                    if (videoParts !== 1) {
                         remainingTime = estimatedTotalTime - elapsedTime + (MidWaitTimeBetweenParts * (videoParts - currentPart));
                     } else {
                         remainingTime = estimatedTotalTime - elapsedTime;
@@ -259,8 +261,8 @@
             }
 
             const targetSizeBits = targetSizeMB * 8 * 1024 * 1024;
-            const bitrate = targetSizeBits / videoDuration;
-            const bitrateKbps = Math.floor((bitrate / 1000) * 0.85) * videoParts; //We multiply 0.9 in case the output is a bit bigger
+            const bitrate = (targetSizeBits / videoDuration) * 0.825; //We multiply 0.8 in case the output is a bit bigger
+            const bitrateKbps = Math.floor((bitrate / 1000)) * videoParts;
 
             let preset = document.getElementById('speedSelect').value;
             const fps = document.getElementById('qualitySelect').value.toString();
@@ -309,7 +311,7 @@
                 const videoDiv = document.createElement('div');
                 videoDiv.id = 'output-video';
                 videoDiv.innerHTML = `
-                    <a id="downloadButton" download="output_video.mp4">Descargar Video Comprimido</a>
+                    <a id="downloadButton" download="output_video.mp4" es-translation="Descargar Video Comprimido">Download Compressed Video</a>
                     <video id="outputVideo" controls></video>
                     <div id="infoDivOutput">
                         <p id="sizeOutput"></p>
@@ -347,10 +349,12 @@
 
                 // Actualizar el contenedor de salida
                 const sizeOutput = Math.floor(videoBlob.size / 1000000 * 100) / 100; // Tamaño en MB
-                videoDiv.querySelector('#sizeOutput').textContent = 'Tamaño: ' + sizeOutput + ' MB';
+                videoDiv.querySelector('#sizeOutput').textContent = 'Size: ' + sizeOutput + ' MB';
+                videoDiv.querySelector('#sizeOutput').setAttribute("es-translation", 'Tamaño: ' + sizeOutput + ' MB');
 
                 const durationOutput = await getVideoDuration(videoBlob); // Obtener duración
-                videoDiv.querySelector('#durationOutput').textContent = 'Duración: ' + Math.floor(durationOutput) + ' s';
+                videoDiv.querySelector('#durationOutput').textContent = 'Duration: ' + Math.floor(durationOutput) + ' s';
+                videoDiv.querySelector('#durationOutput').setAttribute("es-translation", 'Duración: ' + Math.floor(durationOutput) + ' s');
             }
 
 
@@ -443,7 +447,8 @@
             //await worker.remove(outputFileName);
             loader.style.display = 'none';
             document.getElementById('estimatedTime').style.display = 'none';
-            document.getElementById('progress').textContent = `Progreso: 100.00%`;
+            document.getElementById('progress').textContent = `Progress: 100.00%`;
+            document.getElementById('progress').setAttribute("es-translation", `Progreso: 100.00%`);
 
             previewing = false
 

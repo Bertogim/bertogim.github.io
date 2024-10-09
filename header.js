@@ -1,22 +1,47 @@
-document.getElementById('header-container').innerHTML = `
+// Create the link element for the stylesheet
+const link = document.createElement('link');
+link.rel = 'stylesheet';
+link.href = '/header-styles.css';
+
+// Append the link to the head
+document.head.appendChild(link);
+
+// Wait for the stylesheet to load
+link.addEventListener('load', () => {
+
+    const header = document.createElement('header');
+    header.id = 'header-container';
+
+
+    const innerNav = `
+        <a href="/" es-translation="Inicio">Home</a>
+            <a href="/social" es-translation="Redes Sociales">Social Media</a>
+
+            <!-- Dropdown for Creations -->
+        <div class="dropdown">
+            <a href="#" class="dropdown-toggle" es-translation="Creaciones">Creations</a>
+            <div class="dropdown-menu">
+                <a href="/apps/discord-timestamps" es-translation="Discord Timestamps">Discord Timestamps</a>
+                <a target="_blank" href="/apps/notepad" es-translation="Notepad">Notepad</a>
+                <div class="dropdown">
+                    <a href="/apps/video" class="dropdown-toggle" es-translation="Herramientas de Video">Video Tools</a>
+                    <div class="dropdown-menu">
+                        <a href="/apps/video/compressor" es-translation="Video Compress">Video Compress</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <a href="/photos" es-translation="Fotos">Photos</a>
+`
+
+
+    header.innerHTML = `
     <div style="display: flex; align-items: center; gap: 20px; justify-content: space-between;">
         <p class="headertitle" style="margin: 0;" es-translation="Página Web de Bertogim">Bertogim's Website</p>
 
         <nav class="navbar">
-            <a href="/" es-translation="Inicio">Home</a>
-            <a href="/social" es-translation="Redes Sociales">Social Media</a>
-
-            <!-- Dropdown for Creations -->
-            <div class="dropdown">
-                <a href="/creations" class="dropdown-toggle" es-translation="Creaciones">Creations</a>
-                <div class="dropdown-menu">
-                    <a href="/apps/discord-timestamps" es-translation="Discord Timestamps">Discord Timestamps</a>
-                    <a target="_blank" href="/apps/notepad" es-translation="Bloc de Notas">Notepad</a>
-                    <a href="/apps/video/compressor" es-translation="Compresor de Video">Video Compressor</a>
-                </div>
-            </div>
-
-            <a href="/photos" es-translation="Fotos">Photos</a>
+            ${innerNav}
         </nav>
 
         <!-- Language Selector -->
@@ -31,47 +56,72 @@ document.getElementById('header-container').innerHTML = `
 
     <!-- Mobile menu overlay -->
     <div class="mobile-menu">
-        <a href="/" es-translation="Inicio">Home</a>
-        <a href="/social" es-translation="Redes Sociales">Social Media</a>
-
-        <div class="dropdown">
-            <a href="#" class="dropdown-toggle" es-translation="Creaciones">Creations</a>
-            <div class="dropdown-menu">
-                <a href="/apps/discord-timestamps" es-translation="Discord Timestamps">Discord Timestamps</a>
-                <a href="/apps/notepad" es-translation="Notepad">Notepad</a>
-                <a href="/apps/video/compressor" es-translation="Video Compress">Video Compress</a>
-            </div>
-        </div>
-
-        <a href="/photos" es-translation="Fotos">Photos</a>
+        ${innerNav}
     </div>
-`;
+    `
 
-// Añadir la clase 'selected' al enlace actual
-const currentPage = window.location.pathname;
-document.querySelectorAll('nav a, .mobile-menu a').forEach(link => {
-    if (link.getAttribute('href') === currentPage) {
-        link.classList.add('selected');
-    }
+    document.body.prepend(header);
+
+    // Añadir la clase 'selected' al enlace actual
+    const currentPage = window.location.pathname;
+    document.querySelectorAll('nav a, .mobile-menu a').forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+            link.classList.add('selected');
+        }
+    });
+
+    // Selecciona todos los dropdowns
+    const dropdowns = document.querySelectorAll('.dropdown');
+
+    dropdowns.forEach(dropdown => {
+        const dropdownMenu = dropdown.querySelector('.dropdown-menu');
+
+        // Agrega evento mouseenter al dropdown principal
+        dropdown.addEventListener('mouseenter', function () {
+            dropdownMenu.classList.add('show');
+        });
+
+        // Agrega evento mouseleave al dropdown principal
+        dropdown.addEventListener('mouseleave', function () {
+            dropdownMenu.classList.remove('show');
+        });
+    });
+
+    // Selecciona todos los submenús
+    const subDropdowns = document.querySelectorAll('.dropdown-menu .dropdown');
+
+    subDropdowns.forEach(subDropdown => {
+        const subDropdownMenu = subDropdown.querySelector('.dropdown-menu');
+
+        // Agrega evento mouseenter a los submenús
+        subDropdown.addEventListener('mouseenter', function () {
+            subDropdownMenu.classList.add('show');
+
+            // Comprobar si el submenú se sale de la pantalla
+            const rect = subDropdownMenu.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                subDropdownMenu.style.left = 'auto'; // Anula la propiedad 'left'
+                subDropdownMenu.style.right = '100%'; // Cambia a la izquierda del menú principal
+            } else {
+                subDropdownMenu.style.left = '100%'; // Mantiene la posición a la derecha
+                subDropdownMenu.style.right = 'auto'; // Asegúrate de que 'right' esté desactivado
+            }
+        });
+
+        // Agrega evento mouseleave a los submenús
+        subDropdown.addEventListener('mouseleave', function () {
+            subDropdownMenu.classList.remove('show');
+        });
+    });
+
+
+
+
 });
 
-// Dropdown hover events
-document.querySelector('.dropdown').addEventListener('mouseenter', function () {
-    this.querySelector('.dropdown-menu').classList.add('show');
-});
-
-document.querySelector('.dropdown').addEventListener('mouseleave', function () {
-    this.querySelector('.dropdown-menu').classList.remove('show');
-});
 
 // Toggle mobile menu
 function toggleMenu() {
     const mobileMenu = document.querySelector('.mobile-menu');
     mobileMenu.classList.toggle('active');
 }
-
-// Apply header CSS
-const link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = '/header-styles.css';
-document.head.appendChild(link);

@@ -20,7 +20,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Uso de la función
     waitForElement('.LanguageSelect', (languageSelect) => {
         // Carga el idioma seleccionado, o el idioma del navegador si no hay ninguno guardado
-        var storedLanguage = localStorage.getItem('selectedLanguage') || navigator.language.slice(0, 2);
+        var storedLanguage = localStorage.getItem('selectedLanguage')
+        if (!storedLanguage) {
+            storedLanguage = navigator.language.slice(0, 2);
+            localStorage.setItem('selectedLanguage', storedLanguage);
+        }
         languageSelect.value = storedLanguage;
 
         // Llama a la función translate con el idioma seleccionado
@@ -71,7 +75,7 @@ function translate(language) {
                     element.removeAttribute("es-translation");
                     element.setAttribute("placeholder", translatedText);
                 } else {
-                    element.setAttribute("en-translation", element.textContent);
+                    element.setAttribute("en-translation", element.innerHTML);
                     element.removeAttribute("es-translation");
                     element.innerHTML = translatedText; // Actualiza el contenido del elemento
                 }
@@ -86,7 +90,7 @@ function translate(language) {
                     element.removeAttribute("en-translation");
                     element.setAttribute("placeholder", translatedText);
                 } else {
-                    element.setAttribute("es-translation", element.textContent);
+                    element.setAttribute("es-translation", element.innerHTML);
                     element.removeAttribute("en-translation");
                     element.innerHTML = translatedText; // Actualiza el contenido del elemento
                 }

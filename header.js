@@ -29,6 +29,7 @@ link.addEventListener('load', () => {
                         <a href="/apps/video/compressor" es-translation="Video Compress">Video Compress</a>
                     </div>
                 </div>
+                <a href="/apps/mp4-to-mp3" es-translation="MP4 a MP3">MP4 to MP3</a>
             </div>
         </div>
 

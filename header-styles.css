@@ -114,6 +114,7 @@ header .headertitle {
     padding: 15px;
     display: block;
     transition: background-color 0.3s ease;
+    border-radius: 0;
 }
 
 .mobile-menu a:hover {
@@ -122,10 +123,16 @@ header .headertitle {
 
 .mobile-menu .dropdown .dropdown-toggle {
     border-left: 3px dotted #f59400;
+    border-radius: 0px;
+}
+
+.mobile-menu .dropdown .dropdown {
+    border: none;
+    border-left: 3px solid #f59400;
 }
 
 .mobile-menu .dropdown-menu a {
-    border-left: 6px solid #f59400;
+    border-left: 3px solid #f59400;
 }
 
 .mobile-menu .dropdown-menu {

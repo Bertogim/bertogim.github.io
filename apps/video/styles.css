@@ -61,6 +61,15 @@ button:hover {
     background-color: #28a745;
 }
 
+#convertButton {
+    background-color: #28a745;
+    margin: 5px;
+}
+
+#convertButton:hover {
+    padding: 12px;
+}
+
 #previewButton {
     background-color: #167b8d;
     width: 50%;
@@ -206,4 +215,20 @@ hr {
     100% {
         transform: rotate(360deg);
     }
+}
+
+
+
+#downloadSimple {
+    
+    border: 1px solid #585858;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #444;
+    color: #cacaca;
+}
+
+#output {
+    margin-top: 20px;
+    display: grid;
 }

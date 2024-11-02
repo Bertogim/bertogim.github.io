@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector de estadisticas de servidores de minecraft</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+        }
+
+        #inputArea {
+            width: 100%;
+            max-width: 800px;
+            height: 150px;
+            margin-bottom: 20px;
+            padding: 10px;
+            font-size: 1rem;
+            border: 2px solid #007BFF;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #grapharea {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        label {
+            margin-right: 10px;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        input[type="date"] {
+            border: 2px solid #007BFF;
+            border-radius: 5px;
+            padding: 5px;
+            margin-right: 10px;
+            font-size: 1rem;
+        }
+
+        input[type="date"]:focus {
+            border-color: #0056b3;
+            outline: none;
+        }
+
+        .inputDiv {
+            display: table-row;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Lector de estadisticas de servidores de minecraft</h1>
+    <div class="inputDiv">
+    <textarea id="inputArea" rows="10" cols="80" placeholder='Pega aquí los datos JSON...'></textarea><br>
+    <button id="saveData">Guardar Datos</button>
+    <button id="loadData">Cargar Datos</button>
+</div>
+    <br>
+
+    <div class="inputDiv">
+
+    <h2>Filtro de Fechas</h2>
+    <label for="startDate">Fecha de Inicio:</label>
+    <input type="date" id="startDate">
+    <label for="endDate">Fecha de Fin:</label>
+    <input type="date" id="endDate">
+    </div>
+    <br>
+    <button id="generateChart">Generar Gráfica</button>
+    <div id="grapharea">
+        <canvas id="playerChart"></canvas>
+    </div>
+
+    <script>
+        const DaysColorsPallete = [
+            'rgba(54, 162, 235, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(0, 188, 212, 1)',
+            'rgba(33, 150, 243, 1)',
+            'rgba(139, 195, 74, 1)',
+            'rgba(255, 235, 59, 1)',
+            'rgba(255, 87, 34, 1)',
+            'rgba(96, 125, 139, 1)',
+        ];
+
+        let playerChart;
+
+        // Load data from local storage on page load
+        window.onload = function () {
+            const savedData = localStorage.getItem('minecraftData');
+            if (savedData) {
+                document.getElementById('inputArea').value = savedData;
+                generateChart();
+            }
+        };
+
+        document.getElementById('generateChart').onclick = function () {
+            generateChart();
+        };
+
+        document.getElementById('saveData').onclick = function () {
+            const inputData = document.getElementById('inputArea').value;
+            localStorage.setItem('minecraftData', inputData);
+            //alert('Datos guardados correctamente.');
+        };
+
+        document.getElementById('loadData').onclick = function () {
+            const savedData = localStorage.getItem('minecraftData');
+            if (savedData) {
+                document.getElementById('inputArea').value = savedData;
+                generateChart();
+            } else {
+                //alert('No hay datos guardados.');
+            }
+        };
+
+        function generateChart() {
+            const input = document.getElementById('inputArea').value;
+            const data = JSON.parse(input);
+
+            // Prepare data for the chart
+            const labels = data.map(entry => new Date(entry.timestamp).toLocaleString());
+            const playerCounts = data.map(entry => entry.players.online);
+            const maxPlayerCounts = data.map(entry => entry.players.max); // Get max players
+            const latenciesInSeconds = data.map(entry => (entry.latency / 1000).toFixed(2)); // Convert latency to seconds
+
+            // Filter by date if specified
+            const startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value) : null;
+            const endDate = document.getElementById('endDate').value ? new Date(document.getElementById('endDate').value) : null;
+
+            const filteredData = data.filter(entry => {
+                const entryDate = new Date(entry.timestamp);
+                return (!startDate || entryDate >= startDate) && (!endDate || entryDate <= endDate);
+            });
+
+            const filteredLabels = filteredData.map(entry => new Date(entry.timestamp).toLocaleString());
+            const filteredPlayerCounts = filteredData.map(entry => entry.players.online);
+            const filteredMaxPlayerCounts = filteredData.map(entry => entry.players.max); // Filtered max players
+            const filteredLatencies = filteredData.map(entry => (entry.latency / 1000).toFixed(2)); // Convert latency to seconds
+
+            // Destroy the previous chart if it exists
+            if (playerChart) {
+                playerChart.destroy();
+            }
+
+            // Create color mapping based on the day of the month
+            const colorsByDay = filteredData.map(entry => {
+                const dayOfMonth = new Date(entry.timestamp).getDate(); // Get the day of the month (1-31)
+                return DaysColorsPallete[(dayOfMonth - 1) % DaysColorsPallete.length]; // Use (day - 1) to index colors
+            });
+
+            const ctx = document.getElementById('playerChart').getContext('2d');
+            playerChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: filteredLabels,
+                    datasets: [
+                        {
+                            label: 'Latencia (s)',
+                            data: filteredLatencies,
+                            type: 'line', // Add a line chart for latency
+                            borderColor: 'rgba(255, 99, 132, 1)', // Nuevo color rojo para la línea de latencia
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)', // Fondo ligero rojo para la línea de latencia
+                        },
+                        {
+                            label: 'Máximo de Jugadores',
+                            data: filteredMaxPlayerCounts,
+                            type: 'line', // Add a line chart for max players
+                            borderColor: 'rgba(54, 162, 235, 1)', // Color para la línea de máximo de jugadores
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)', // Fondo ligero para la línea de máximo de jugadores
+                        },
+                        {
+                            label: 'Jugadores Activos',
+                            data: filteredPlayerCounts,
+                            backgroundColor: colorsByDay,
+                            borderColor: colorsByDay,
+                        }
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jugadores / Latencia (s)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>

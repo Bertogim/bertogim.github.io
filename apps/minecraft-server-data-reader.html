@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lector de estadisticas de servidores de minecraft</title>
+    <title>Lector de estadísticas de servidores de Minecraft</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -87,6 +87,19 @@
             outline: none;
         }
 
+        select#timeInterval {
+            border: 2px solid #007BFF;
+            border-radius: 5px;
+            padding: 5px;
+            margin-right: 10px;
+            font-size: 1rem;
+        }
+        
+        select#timeInterval:focus {
+            border-color: #0056b3;
+            outline: none;
+        }
+
         .inputDiv {
             display: table-row;
         }
@@ -94,23 +107,33 @@
 </head>
 
 <body>
-    <h1>Lector de estadisticas de servidores de minecraft</h1>
+    <h1>Lector de estadísticas de servidores de Minecraft</h1>
     <div class="inputDiv">
-    <textarea id="inputArea" rows="10" cols="80" placeholder='Pega aquí los datos JSON...'></textarea><br>
-    <button id="saveData">Guardar Datos</button>
-    <button id="loadData">Cargar Datos</button>
-</div>
-    <br>
-
-    <div class="inputDiv">
-
-    <h2>Filtro de Fechas</h2>
-    <label for="startDate">Fecha de Inicio:</label>
-    <input type="date" id="startDate">
-    <label for="endDate">Fecha de Fin:</label>
-    <input type="date" id="endDate">
+        <textarea id="inputArea" rows="10" cols="80" placeholder='Pega aquí los datos JSON...'></textarea><br>
+        <button id="saveData">Guardar Datos</button>
+        <button id="loadData">Cargar Datos</button>
     </div>
     <br>
+
+    <div class="inputDiv">
+        <h2>Filtro de Fechas</h2>
+        <label for="startDate">Fecha de Inicio:</label>
+        <input type="date" id="startDate">
+        <label for="endDate">Fecha de Fin:</label>
+        <input type="date" id="endDate">
+    </div>
+    <br>
+
+    <div class="inputDiv">
+        <label for="timeInterval">Intervalo de Tiempo:</label>
+        <select id="timeInterval">
+            <option value="minute">Minuto</option>
+            <option value="hour">Hora</option>
+            <option value="day">Día</option>
+        </select>
+    </div>
+    <br>
+
     <button id="generateChart">Generar Gráfica</button>
     <div id="grapharea">
         <canvas id="playerChart"></canvas>
@@ -163,66 +186,119 @@
             }
         };
 
+        document.getElementById('timeInterval').addEventListener('change', function() {
+            generateChart();
+        });
+
         function generateChart() {
             const input = document.getElementById('inputArea').value;
             const data = JSON.parse(input);
 
-            // Prepare data for the chart
-            const labels = data.map(entry => new Date(entry.timestamp).toLocaleString());
-            const playerCounts = data.map(entry => entry.players.online);
-            const maxPlayerCounts = data.map(entry => entry.players.max); // Get max players
-            const latenciesInSeconds = data.map(entry => (entry.latency / 1000).toFixed(2)); // Convert latency to seconds
+            let previousMax = 30; // Initial value, used if there's no previous data
+            const selectedInterval = document.getElementById('timeInterval').value;
 
-            // Filter by date if specified
-            const startDate = document.getElementById('startDate').value ? new Date(document.getElementById('startDate').value) : null;
-            const endDate = document.getElementById('endDate').value ? new Date(document.getElementById('endDate').value) : null;
-
-            const filteredData = data.filter(entry => {
-                const entryDate = new Date(entry.timestamp);
-                return (!startDate || entryDate >= startDate) && (!endDate || entryDate <= endDate);
+            // Map over data to prepare entries with fallback to previousMax
+            const processedData = data.map(entry => {
+                if (entry.players && entry.players.max !== undefined) {
+                    // Update previousMax if current entry has max player data
+                    previousMax = entry.players.max;
+                    return { ...entry, players: { online: entry.players.online, max: entry.players.max }, latency: entry.latency };
+                } else {
+                    // For offline entries, use previousMax
+                    return {
+                        ...entry,
+                        players: { online: 0, max: previousMax }, // Use previousMax for offline
+                        isOffline: true, // Add a flag to identify offline entries
+                        latency: null // Set latency as null for offline entries
+                    };
+                }
             });
 
-            const filteredLabels = filteredData.map(entry => new Date(entry.timestamp).toLocaleString());
-            const filteredPlayerCounts = filteredData.map(entry => entry.players.online);
-            const filteredMaxPlayerCounts = filteredData.map(entry => entry.players.max); // Filtered max players
-            const filteredLatencies = filteredData.map(entry => (entry.latency / 1000).toFixed(2)); // Convert latency to seconds
+            // Filter data based on the selected time interval
+            const filteredData = {};
+            processedData.forEach(entry => {
+                const date = new Date(entry.timestamp);
+                const key = selectedInterval === 'minute' ? date.toISOString().slice(0, 16) : selectedInterval === 'hour' ? date.toISOString().slice(0, 13) : date.toISOString().slice(0, 10);
 
-            // Destroy the previous chart if it exists
+                if (!filteredData[key]) {
+                    filteredData[key] = { timestamp: entry.timestamp, players: { online: 0, max: 0 }, latency: null, isOffline: true }; // Initialize for max tracking
+                }
+
+                // Update max values
+                filteredData[key].players.online = Math.max(filteredData[key].players.online, entry.players.online);
+                filteredData[key].players.max = Math.max(filteredData[key].players.max, entry.players.max);
+
+                // Calculate max latency if exists
+                if (entry.latency !== null) {
+                    filteredData[key].latency = filteredData[key].latency === null ? entry.latency : Math.max(filteredData[key].latency, entry.latency);
+                    filteredData[key].isOffline = false; // Update to online if there's latency data
+                }
+            });
+
+            // Convert filtered data to an array
+            const aggregatedData = Object.values(filteredData);
+
+            // Continue with chart generation...
+            const labels = aggregatedData.map(entry => {
+                const labelDate = new Date(entry.timestamp).toLocaleDateString() + ' ' +
+                    new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                return entry.isOffline ? `${labelDate} (Server offline)` : labelDate;
+            });
+
+            const playerCounts = aggregatedData.map(entry => entry.players.online);
+            const maxPlayerCounts = aggregatedData.map(entry => entry.players.max);
+            const latenciesInSeconds = aggregatedData.map(entry => entry.latency ? (entry.latency / 1000).toFixed(2) : null);
+
+            // Destroy previous chart if it exists
             if (playerChart) {
                 playerChart.destroy();
             }
 
-            // Create color mapping based on the day of the month
-            const colorsByDay = filteredData.map(entry => {
-                const dayOfMonth = new Date(entry.timestamp).getDate(); // Get the day of the month (1-31)
-                return DaysColorsPallete[(dayOfMonth - 1) % DaysColorsPallete.length]; // Use (day - 1) to index colors
+            // Color mapping and chart creation
+            const colorsByDay = aggregatedData.map(entry => {
+                if (entry.isOffline) {
+                    return 'rgba(255, 0, 0, 1)'; // Red for offline entries
+                }
+                const dayOfMonth = new Date(entry.timestamp).getDate();
+                return DaysColorsPallete[(dayOfMonth - 1) % DaysColorsPallete.length];
+            });
+
+            // Cambiamos el color del fondo y borde si el servidor estaba offline
+            const maxPlayerColors = aggregatedData.map(entry => {
+                return entry.isOffline ? 'rgba(255, 0, 0, 1)' : 'rgba(54, 162, 235, 1)'; // Rojo si está offline, azul si está online
+            });
+
+            // En el caso del background
+            const maxPlayerBackgroundColors = aggregatedData.map(entry => {
+                return entry.isOffline ? 'rgba(255, 0, 0, 0.2)' : 'rgba(54, 162, 235, 0.2)'; // Rojo claro si está offline, azul claro si está online
             });
 
             const ctx = document.getElementById('playerChart').getContext('2d');
             playerChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: filteredLabels,
+                    labels: labels,
                     datasets: [
                         {
                             label: 'Latencia (s)',
-                            data: filteredLatencies,
-                            type: 'line', // Add a line chart for latency
-                            borderColor: 'rgba(255, 99, 132, 1)', // Nuevo color rojo para la línea de latencia
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)', // Fondo ligero rojo para la línea de latencia
+                            data: latenciesInSeconds,
+                            type: 'line',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
                         },
                         {
                             label: 'Máximo de Jugadores',
-                            data: filteredMaxPlayerCounts,
-                            type: 'line', // Add a line chart for max players
-                            borderColor: 'rgba(54, 162, 235, 1)', // Color para la línea de máximo de jugadores
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)', // Fondo ligero para la línea de máximo de jugadores
+                            data: maxPlayerCounts,
+                            type: 'line',
+                            borderColor: maxPlayerColors,
+                            backgroundColor: maxPlayerBackgroundColors,
+                            stepped: true // Esto hace que la línea sea de tipo escalonado o cuadrado
                         },
                         {
                             label: 'Jugadores Activos',
-                            data: filteredPlayerCounts,
-                            backgroundColor: colorsByDay,
-                            borderColor: colorsByDay,
+                            data: playerCounts,
+                            backgroundColor: colorsByDay, // Usar colores por día (rojo si offline)
+                            borderColor: colorsByDay, // Usar los mismos colores para el borde
                         }
                     ],
                 },

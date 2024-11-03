@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lector de estadísticas de servidores de Minecraft</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -94,7 +95,7 @@
             margin-right: 10px;
             font-size: 1rem;
         }
-        
+
         select#timeInterval:focus {
             border-color: #0056b3;
             outline: none;
@@ -102,6 +103,13 @@
 
         .inputDiv {
             display: table-row;
+        }
+
+        .info-text {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #555;
+            text-align: center;
         }
     </style>
 </head>
@@ -115,13 +123,6 @@
     </div>
     <br>
 
-    <div class="inputDiv">
-        <h2>Filtro de Fechas</h2>
-        <label for="startDate">Fecha de Inicio:</label>
-        <input type="date" id="startDate">
-        <label for="endDate">Fecha de Fin:</label>
-        <input type="date" id="endDate">
-    </div>
     <br>
 
     <div class="inputDiv">
@@ -138,6 +139,7 @@
     <div id="grapharea">
         <canvas id="playerChart"></canvas>
     </div>
+    <p class="info-text">Usa el mouse para hacer zoom en la gráfica</p>
 
     <script>
         const DaysColorsPallete = [
@@ -186,7 +188,7 @@
             }
         };
 
-        document.getElementById('timeInterval').addEventListener('change', function() {
+        document.getElementById('timeInterval').addEventListener('change', function () {
             generateChart();
         });
 
@@ -242,7 +244,7 @@
             const labels = aggregatedData.map(entry => {
                 const labelDate = new Date(entry.timestamp).toLocaleDateString() + ' ' +
                     new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                return entry.isOffline ? `${labelDate} (Server offline)` : labelDate;
+                return labelDate;
             });
 
             const playerCounts = aggregatedData.map(entry => entry.players.online);
@@ -292,13 +294,13 @@
                             type: 'line',
                             borderColor: maxPlayerColors,
                             backgroundColor: maxPlayerBackgroundColors,
-                            stepped: true // Esto hace que la línea sea de tipo escalonado o cuadrado
+                            stepped: true
                         },
                         {
                             label: 'Jugadores Activos',
                             data: playerCounts,
-                            backgroundColor: colorsByDay, // Usar colores por día (rojo si offline)
-                            borderColor: colorsByDay, // Usar los mismos colores para el borde
+                            backgroundColor: colorsByDay,
+                            borderColor: colorsByDay,
                         }
                     ],
                 },
@@ -307,6 +309,21 @@
                     plugins: {
                         legend: {
                             display: true
+                        },
+                        zoom: {
+                            pan: {
+                                enabled: true,
+                                mode: 'x'
+                            },
+                            zoom: {
+                                wheel: {
+                                    enabled: true
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'x'
+                            }
                         }
                     },
                     scales: {

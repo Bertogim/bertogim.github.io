@@ -324,6 +324,25 @@
                                 },
                                 mode: 'x'
                             }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const entry = aggregatedData[context.dataIndex];
+                                    let label = context.dataset.label || '';
+
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.raw; // Valor actual
+
+                                    // Agrega (Servidor Offline) si está offline en ese punto específico
+                                    if (entry.isOffline) {
+                                        label = 'Servidor Offline';
+                                    }
+                                    return label;
+                                }
+                            }
                         }
                     },
                     scales: {

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lector de estadísticas de servidores de Minecraft</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
     <style>
         body {
@@ -29,12 +30,17 @@
             width: 100%;
             max-width: 800px;
             height: 150px;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
             padding: 10px;
             font-size: 1rem;
             border: 2px solid #007BFF;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #entryCount {
+            margin-top: 5px;
+            margin-bottom: 20px;
         }
 
         button {
@@ -118,17 +124,23 @@
     <h1>Lector de estadísticas de servidores de Minecraft</h1>
     <div class="inputDiv">
         <textarea id="inputArea" rows="10" cols="80" placeholder='Pega aquí los datos JSON...'></textarea><br>
+        <p id="entryCount" style="font-size: 0.9rem; color: #555; text-align: left;">
+            Entradas: 0
+        </p>
         <button id="saveData">Guardar Datos</button>
         <button id="loadData">Cargar Datos</button>
+        <input type="file" id="fileInput" accept=".json" style="display: none;">
+        <button id="uploadFile">Subir Archivo JSON</button>
     </div>
-    <br>
-
     <br>
 
     <div class="inputDiv">
         <label for="timeInterval">Intervalo de Tiempo:</label>
         <select id="timeInterval">
             <option value="minute">Minuto</option>
+            <option value="5min">5 Minutos</option>
+            <option value="10min">10 Minutos</option>
+            <option value="30min">30 Minutos</option>
             <option value="hour">Hora</option>
             <option value="day">Día</option>
         </select>
@@ -139,7 +151,7 @@
     <div id="grapharea">
         <canvas id="playerChart"></canvas>
     </div>
-    <p class="info-text">Usa el mouse para hacer zoom en la gráfica</p>
+    <p class="info-text">Usa el mouse para hacer zoom y moverte por la gráfica.</p>
 
     <script>
         const DaysColorsPallete = [
@@ -159,11 +171,40 @@
 
         let playerChart;
 
-        // Load data from local storage on page load
+        function UpdateEntryText() {
+            try {
+                const data = JSON.parse(inputArea.value);
+                entryCount.textContent = `Entradas: ${Array.isArray(data) ? data.length : 1}`;
+                updateTimeInterval(data.length);
+            } catch (e) {
+                entryCount.textContent = 'Entradas: 0 (JSON no válido)';
+                document.getElementById('timeInterval').value = 'minute'; // Reset to default if JSON is invalid
+            }
+        }
+
+        function updateTimeInterval(entryCount) {
+            const timeIntervalSelect = document.getElementById('timeInterval');
+            if (entryCount > 5000) {
+                timeIntervalSelect.value = '10min';
+            } else if (entryCount > 2500) {
+                timeIntervalSelect.value = '5min';
+            } else {
+                timeIntervalSelect.value = 'minute'; // Reset to default for less than or equal to 2500
+            }
+        }
+
+        const inputArea = document.getElementById('inputArea');
+        const entryCount = document.getElementById('entryCount');
+
+        inputArea.addEventListener('input', function () {
+            UpdateEntryText()
+        });
+
         window.onload = function () {
             const savedData = localStorage.getItem('minecraftData');
             if (savedData) {
                 document.getElementById('inputArea').value = savedData;
+                UpdateEntryText();
                 generateChart();
             }
         };
@@ -175,17 +216,43 @@
         document.getElementById('saveData').onclick = function () {
             const inputData = document.getElementById('inputArea').value;
             localStorage.setItem('minecraftData', inputData);
-            //alert('Datos guardados correctamente.');
+
+            const OriginalText = document.getElementById('saveData').innerHTML
+            document.getElementById('saveData').innerHTML = "Guardado!"
+            setTimeout(function () {
+                document.getElementById('saveData').innerHTML = OriginalText
+            }, 1000);
         };
 
         document.getElementById('loadData').onclick = function () {
             const savedData = localStorage.getItem('minecraftData');
             if (savedData) {
                 document.getElementById('inputArea').value = savedData;
+                UpdateEntryText(); // Update entry count and interval
                 generateChart();
-            } else {
-                //alert('No hay datos guardados.');
+
+
+                const OriginalText = document.getElementById('loadData').innerHTML
+                document.getElementById('loadData').innerHTML = "Cargado!"
+                setTimeout(function () {
+                    document.getElementById('loadData').innerHTML = OriginalText
+                }, 1000);
             }
+        };
+
+        document.getElementById('uploadFile').onclick = function () {
+            document.getElementById('fileInput').click();
+        };
+
+        document.getElementById('fileInput').onchange = function (event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const fileContent = e.target.result;
+                document.getElementById('inputArea').value = fileContent;
+                UpdateEntryText(); // Update entry count and interval
+            };
+            reader.readAsText(file);
         };
 
         document.getElementById('timeInterval').addEventListener('change', function () {
@@ -196,84 +263,70 @@
             const input = document.getElementById('inputArea').value;
             const data = JSON.parse(input);
 
-            let previousMax = 30; // Initial value, used if there's no previous data
+            let previousMax = 30;
             const selectedInterval = document.getElementById('timeInterval').value;
 
-            // Map over data to prepare entries with fallback to previousMax
+            const intervalMapping = {
+                'minute': 1,
+                '5min': 5,
+                '10min': 10,
+                '30min': 30,
+                'hour': 60,
+                'day': 1440
+            };
+
             const processedData = data.map(entry => {
                 if (entry.players && entry.players.max !== undefined) {
-                    // Update previousMax if current entry has max player data
                     previousMax = entry.players.max;
                     return { ...entry, players: { online: entry.players.online, max: entry.players.max }, latency: entry.latency };
                 } else {
-                    // For offline entries, use previousMax
                     return {
                         ...entry,
-                        players: { online: 0, max: previousMax }, // Use previousMax for offline
-                        isOffline: true, // Add a flag to identify offline entries
-                        latency: null // Set latency as null for offline entries
+                        players: { online: 0, max: previousMax },
+                        isOffline: true,
+                        latency: null
                     };
                 }
             });
 
-            // Filter data based on the selected time interval
             const filteredData = {};
             processedData.forEach(entry => {
                 const date = new Date(entry.timestamp);
-                const key = selectedInterval === 'minute' ? date.toISOString().slice(0, 16) : selectedInterval === 'hour' ? date.toISOString().slice(0, 13) : date.toISOString().slice(0, 10);
+                const intervalMinutes = intervalMapping[selectedInterval];
+                const keyDate = new Date(Math.floor(date.getTime() / (intervalMinutes * 60 * 1000)) * intervalMinutes * 60 * 1000);
+                const key = keyDate.toISOString();
 
                 if (!filteredData[key]) {
-                    filteredData[key] = { timestamp: entry.timestamp, players: { online: 0, max: 0 }, latency: null, isOffline: true }; // Initialize for max tracking
+                    filteredData[key] = { timestamp: entry.timestamp, players: { online: 0, max: 0 }, latency: null, isOffline: true };
                 }
 
-                // Update max values
                 filteredData[key].players.online = Math.max(filteredData[key].players.online, entry.players.online);
                 filteredData[key].players.max = Math.max(filteredData[key].players.max, entry.players.max);
 
-                // Calculate max latency if exists
                 if (entry.latency !== null) {
                     filteredData[key].latency = filteredData[key].latency === null ? entry.latency : Math.max(filteredData[key].latency, entry.latency);
-                    filteredData[key].isOffline = false; // Update to online if there's latency data
+                    filteredData[key].isOffline = false;
                 }
             });
 
-            // Convert filtered data to an array
             const aggregatedData = Object.values(filteredData);
 
-            // Continue with chart generation...
             const labels = aggregatedData.map(entry => {
-                const labelDate = new Date(entry.timestamp).toLocaleDateString() + ' ' +
+                return new Date(entry.timestamp).toLocaleDateString() + ' ' +
                     new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                return labelDate;
             });
 
             const playerCounts = aggregatedData.map(entry => entry.players.online);
             const maxPlayerCounts = aggregatedData.map(entry => entry.players.max);
             const latenciesInSeconds = aggregatedData.map(entry => entry.latency ? (entry.latency / 1000).toFixed(2) : null);
 
-            // Destroy previous chart if it exists
             if (playerChart) {
                 playerChart.destroy();
             }
 
-            // Color mapping and chart creation
-            const colorsByDay = aggregatedData.map(entry => {
-                if (entry.isOffline) {
-                    return 'rgba(255, 0, 0, 1)'; // Red for offline entries
-                }
-                const dayOfMonth = new Date(entry.timestamp).getDate();
-                return DaysColorsPallete[(dayOfMonth - 1) % DaysColorsPallete.length];
-            });
-
-            // Cambiamos el color del fondo y borde si el servidor estaba offline
-            const maxPlayerColors = aggregatedData.map(entry => {
-                return entry.isOffline ? 'rgba(255, 0, 0, 1)' : 'rgba(54, 162, 235, 1)'; // Rojo si está offline, azul si está online
-            });
-
-            // En el caso del background
-            const maxPlayerBackgroundColors = aggregatedData.map(entry => {
-                return entry.isOffline ? 'rgba(255, 0, 0, 0.2)' : 'rgba(54, 162, 235, 0.2)'; // Rojo claro si está offline, azul claro si está online
-            });
+            const colorsByDay = aggregatedData.map(entry => entry.isOffline ? 'rgba(255, 0, 0, 1)' : DaysColorsPallete[new Date(entry.timestamp).getDate() % DaysColorsPallete.length]);
+            const maxPlayerColors = aggregatedData.map(entry => entry.isOffline ? 'rgba(255, 0, 0, 1)' : 'rgba(54, 162, 235, 1)');
+            const maxPlayerBackgroundColors = aggregatedData.map(entry => entry.isOffline ? 'rgba(255, 0, 0, 0.2)' : 'rgba(54, 162, 235, 0.2)');
 
             const ctx = document.getElementById('playerChart').getContext('2d');
             playerChart = new Chart(ctx, {
@@ -313,7 +366,7 @@
                         zoom: {
                             pan: {
                                 enabled: true,
-                                mode: 'x'
+                                mode: 'x',
                             },
                             zoom: {
                                 wheel: {
@@ -334,9 +387,8 @@
                                     if (label) {
                                         label += ': ';
                                     }
-                                    label += context.raw; // Valor actual
+                                    label += context.raw;
 
-                                    // Agrega (Servidor Offline) si está offline en ese punto específico
                                     if (entry.isOffline) {
                                         label = 'Servidor Offline';
                                     }
@@ -358,7 +410,7 @@
             });
         }
     </script>
-
 </body>
+
 
 </html>

@@ -40,7 +40,7 @@
 
         #entryCount {
             margin-top: 5px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         button {
@@ -124,15 +124,15 @@
     <h1>Lector de estadísticas de servidores de Minecraft</h1>
     <div class="inputDiv">
         <textarea id="inputArea" rows="10" cols="80" placeholder='Pega aquí los datos JSON...'></textarea><br>
-        <p id="entryCount" style="font-size: 0.9rem; color: #555; text-align: left;">
-            Entradas: 0
-        </p>
+
         <button id="saveData">Guardar Datos</button>
         <button id="loadData">Cargar Datos</button>
         <input type="file" id="fileInput" accept=".json" style="display: none;">
         <button id="uploadFile">Subir Archivo JSON</button>
+        <p id="entryCount" style="font-size: 0.9rem; color: #555; text-align: left;">
+            Entradas: 0
+        </p>
     </div>
-    <br>
 
     <div class="inputDiv">
         <label for="timeInterval">Intervalo de Tiempo:</label>
@@ -146,8 +146,9 @@
         </select>
     </div>
     <br>
-
     <button id="generateChart">Generar Gráfica</button>
+    <br>
+
     <div id="grapharea">
         <canvas id="playerChart"></canvas>
     </div>

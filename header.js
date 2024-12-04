@@ -26,10 +26,12 @@ link.addEventListener('load', () => {
                 <div class="dropdown">
                     <a href="/apps/video/" class="dropdown-toggle" es-translation="Herramientas de Video">Video Tools</a>
                     <div class="dropdown-menu">
-                        <a href="/apps/video/compressor" es-translation="Video Compress">Video Compress</a>
+                        <a href="/apps/video/compressor" es-translation="Compresor de Video">Video Compress</a>
+                        <a href="/apps/video/conversor" es-translation="Conversor de Video">Video Conversor</a>
+                        <a href="/apps/mp4-to-mp3" es-translation="MP4 a MP3">MP4 to MP3</a>
                     </div>
                 </div>
-                <a href="/apps/mp4-to-mp3" es-translation="MP4 a MP3">MP4 to MP3</a>
+                
             </div>
         </div>
 

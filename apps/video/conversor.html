@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title es-translation="Conversor de Video">Video Converter</title>
+    <title es-translation="Conversor de Archivos">File Converter</title>
     <script src="/apps/coi-serviceworker.js"></script>
     <script defer src="/header.js"></script>
     <script src="/translations.js"></script>
@@ -20,7 +20,7 @@
 
 <body>
     <center>
-        <h1 es-translation="Conversor de Video">Video Converter</h1>
+        <h1 es-translation="Conversor de Archivos">File Converter</h1>
         <div class="input-container">
             <input type="file" id="videoInput" accept="video/*">
             <video id="uploadedVideo" controls style="display: none;"></video>
@@ -31,21 +31,52 @@
         </div>
         <br>
         <select id="outputFormat">
-            <option value="mp4" es-translation="MP4">MP4</option>
-            <option value="avi" es-translation="AVI">AVI</option>
-            <option value="mkv" es-translation="MKV">MKV</option>
-            <option value="mov" es-translation="MOV">MOV</option>
+            <!-- Video formats -->
+            <option value="" es-translation="--- FORMATOS DE VIDEO ---">--- VIDEO FORMATS ---</option>
+            <option selected value="mp4" es-translation="Convertir a MP4">Convert to MP4</option>
+            <option value="avi" es-translation="Convertir a AVI">Convert to AVI</option>
+            <option value="mkv" es-translation="Convertir a MKV">Convert to MKV</option>
+            <option value="mov" es-translation="Convertir a MOV">Convert to MOV</option>
+            <option value="webm" es-translation="Convertir a WEBM">Convert to WEBM</option>
+            <option value="flv" es-translation="Convertir a FLV">Convert to FLV</option>
+            <option value="wmv" es-translation="Convertir a WMV">Convert to WMV</option>
+            <option value="mpeg" es-translation="Convertir a MPEG">Convert to MPEG</option>
+            <option value="3gp" es-translation="Convertir a 3GP">Convert to 3GP</option>
+            <option value="ogv" es-translation="Convertir a OGV">Convert to OGV</option>
+
+            <!-- Audio formats -->
+            <option value="" es-translation=""></option>
+            <option value="" es-translation="--- FORMATOS DE AUDIO ---">--- AUDIO FORMATS ---</option>
+            <option value="mp3" es-translation="Convertir a MP3">Convert to MP3</option>
+            <option value="wav" es-translation="Convertir a WAV">Convert to WAV</option>
+            <option value="aac" es-translation="Convertir a AAC">Convert to AAC</option>
+            <option value="ogg" es-translation="Convertir a OGG">Convert to OGG</option>
+            <option value="flac" es-translation="Convertir a FLAC">Convert to FLAC</option>
+            <option value="m4a" es-translation="Convertir a M4A">Convert to M4A</option>
+            <option value="wma" es-translation="Convertir a WMA">Convert to WMA</option>
+            <option value="opus" es-translation="Convertir a OPUS">Convert to OPUS</option>
+
+            <!-- Image formats -->
+            <option value="" es-translation=""></option>
+            <option value="" es-translation="--- FORMATOS DE IMAGEN ---">--- IMAGE FORMATS ---</option>
+            <option value="jpg" es-translation="Convertir a JPG">Convert to JPG</option>
+            <option value="png" es-translation="Convertir a PNG">Convert to PNG</option>
+            <option value="gif" es-translation="Convertir a GIF">Convert to GIF</option>
+            <option value="bmp" es-translation="Convertir a BMP">Convert to BMP</option>
+            <option value="webp" es-translation="Convertir a WEBP">Convert to WEBP</option>
+            <option value="tiff" es-translation="Convertir a TIFF">Convert to TIFF</option>
+            <option value="svg" es-translation="Convertir a SVG">Convert to SVG</option>
         </select>
         <br><br>
         <select id="speedSelect">
             <option value="ultrafast" es-translation="Procesado más rápido pero menos calidad">Faster processing but a
                 bit of quality loss</option>
-            <option selected value="superfast" es-translation="Procesado menos rápido pero más calidad">Slower
+            <option selected value="fast" es-translation="Procesado menos rápido pero más calidad">Slower
                 processing but no quality loss</option>
         </select>
         <br><br>
         <div id="convertButtons">
-            <button id="convertButton" es-translation="Convertir Video">Convert Video</button>
+            <button id="convertButton" es-translation="Convertir">Convert</button>
         </div>
         <div class="loader" id="loader"></div>
         <div id="progress"></div>
@@ -128,6 +159,20 @@
                     document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: ${remainingMinutes}m ${remainingSeconds}s`);
                 }
             }
+
+            if (percent > 100) {
+                document.getElementById('progress').textContent = `Progress: ${localProcessedFrames} / ?`;
+                document.getElementById('progress').setAttribute("es-translation", `Progreso: ${localProcessedFrames} / ?`);
+
+                document.getElementById('estimatedTime').textContent = `Estimated time remaining: ?`;
+                document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: ?`);
+
+            }
+
+            //if (percent > 100) {
+            //    const loader = document.getElementById('loader');
+            //    loader.style.display = 'none';
+            //}
             console.log(localProcessedFrames + ' / ' + totalFrames + ' | ' + percent.toFixed(3) + '%')
         }
 
@@ -180,22 +225,41 @@
 
             const fileNameWithoutExt = videoInput.name.split('.').slice(0, -1).join('.');
             outputFileName = `${fileNameWithoutExt}.${outputFormat}`;
+            let data, videoBlob, videoURL
+            try {
+                const args = [
+                    '-i', 'input.mp4',
+                    '-preset', preset,
+                    `output.${outputFormat}`
+                ];
 
-            const args = [
-                '-i', 'input.mp4',
-                '-c:v', 'libx264',
-                '-preset', preset,
-                `output.${outputFormat}`
-            ];
+                await worker.run(...args);
 
-            await worker.run(...args);
+                data = worker.FS('readFile', `output.${outputFormat}`);
+                videoBlob = new Blob([data.buffer], { type: `video/${outputFormat}` });
+                videoURL = URL.createObjectURL(videoBlob);
 
-            const data = worker.FS('readFile', `output.${outputFormat}`);
-            const videoBlob = new Blob([data.buffer], { type: `video/${outputFormat}` });
-            const videoURL = URL.createObjectURL(videoBlob);
+            } catch (error2) {
+                document.getElementById('progress').textContent = `Can't convert file.`;
+                document.getElementById('progress').setAttribute("es-translation", `No se puede convertir el archivo.`);
+            }
 
             const outputContainer = document.getElementById("output-container")
             outputContainer.innerHTML = ''
+
+                    // Función para obtener la duración del video comprimido
+        async function getVideoDuration(videoBlob) {
+            return new Promise((resolve) => {
+                const videoElement = document.createElement('video');
+                videoElement.src = URL.createObjectURL(videoBlob);
+
+                videoElement.addEventListener('loadedmetadata', () => {
+                    resolve(videoElement.duration);
+                });
+
+                videoElement.load();
+            });
+        }
 
             async function addVideo(data, videoPart) {
                 // Leer el video comprimido
@@ -203,16 +267,88 @@
                 const videoURL = URL.createObjectURL(videoBlob);
 
                 // Crear un div para el video y su contenido
+                // Supongamos que `data.name` contiene el nombre del archivo, por ejemplo: "video.mp4", "audio.mp3", "image.png"
+                const fileName = outputFileName; // Nombre del archivo
+                const fileExtension = fileName.split('.').pop().toLowerCase(); // Extraer la extensión y convertirla a minúsculas
+
+                // Mapeo de extensiones a tipos MIME
+                const mimeTypes = {
+                    mp4: 'video/mp4',
+                    avi: 'video/x-msvideo',
+                    mkv: 'video/x-matroska',
+                    mov: 'video/quicktime',
+                    webm: 'video/webm',
+                    flv: 'video/x-flv',
+                    wmv: 'video/x-ms-wmv',
+                    mpeg: 'video/mpeg',
+                    '3gp': 'video/3gpp',
+                    ogv: 'video/ogg',
+                    mp3: 'audio/mpeg',
+                    wav: 'audio/wav',
+                    aac: 'audio/aac',
+                    ogg: 'audio/ogg',
+                    flac: 'audio/flac',
+                    m4a: 'audio/mp4',
+                    wma: 'audio/x-ms-wma',
+                    opus: 'audio/opus',
+                    jpg: 'image/jpeg',
+                    jpeg: 'image/jpeg',
+                    png: 'image/png',
+                    gif: 'image/gif',
+                    bmp: 'image/bmp',
+                    webp: 'image/webp',
+                    tiff: 'image/tiff',
+                    svg: 'image/svg+xml',
+                };
+
+                // Obtener el tipo MIME basado en la extensión del archivo
+                const mimeType = mimeTypes[fileExtension] || 'application/octet-stream'; // Usar un tipo genérico si la extensión no está en la lista
+
+                // Crear el Blob con el tipo MIME correcto
+                const fileBlob = new Blob([data.buffer], { type: mimeType });
+                const fileURL = URL.createObjectURL(fileBlob);
+
+                // Crear un div para el archivo y su contenido
                 const videoDiv = document.createElement('div');
                 videoDiv.id = 'output-video';
-                videoDiv.innerHTML = `
-                    <a id="downloadButton" download="output_video.mp4" es-translation="Descargar Video Comprimido">Download Compressed Video</a>
-                    <video id="outputVideo" controls></video>
-                    <div id="infoDivOutput">
-                        <p id="sizeOutput"></p>
-                        <p id="durationOutput"></p>
-                    </div>
-                `;
+
+                // Determinar el contenido del div basado en el tipo de archivo
+                if (mimeType.startsWith('video/')) {
+                    // Si es un video
+                    videoDiv.innerHTML = `
+        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
+        <video id="outputVideo" style="display: block" controls src="${videoURL}"></video>
+        <div id="infoDivOutput">
+            <p id="sizeOutput"></p>
+            <p id="durationOutput"></p>
+        </div>
+    `;
+                } else if (mimeType.startsWith('audio/')) {
+                    // Si es un audio
+                    videoDiv.innerHTML = `
+        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
+        <audio id="outputAudio" controls src="${videoURL}"></audio>
+        <div id="infoDivOutput">
+            <p id="sizeOutput"></p>
+            <p id="durationOutput"></p>
+        </div>
+    `;
+                } else if (mimeType.startsWith('image/')) {
+                    // Si es una imagen
+                    videoDiv.innerHTML = `
+        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
+        <img id="outputImage" src="${videoURL}" alt="${fileName}" style="max-width: 100%; height: auto;">
+        <div id="infoDivOutput">
+            <p id="sizeOutput"></p>
+        </div>
+    `;
+                } else {
+                    // Si es un tipo desconocido
+                    videoDiv.innerHTML = `
+        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
+        <p>Unsupported file type: ${fileExtension}</p>
+    `;
+                }
                 const localCurrentPart = videoPart + 1
 
                 if (videoParts !== 1) {
@@ -228,11 +364,6 @@
                 // Agregar el div al contenedor de salida
                 document.getElementById('output-container').appendChild(videoDiv);
 
-                // Actualizar el elemento de video y botón de descarga
-                const outputVideo = videoDiv.querySelector('#outputVideo');
-                outputVideo.src = videoURL;
-                outputVideo.style.display = 'block';
-
                 const downloadButton = videoDiv.querySelector('#downloadButton');
                 downloadButton.href = videoURL;
                 if (videoParts !== 1) {
@@ -247,22 +378,34 @@
                 videoDiv.querySelector('#sizeOutput').textContent = 'Size: ' + sizeOutput + ' MB';
                 videoDiv.querySelector('#sizeOutput').setAttribute("es-translation", 'Tamaño: ' + sizeOutput + ' MB');
 
-                const durationOutput = await getVideoDuration(videoBlob); // Obtener duración
-                videoDiv.querySelector('#durationOutput').textContent = 'Duration: ' + Math.floor(durationOutput) + ' s';
-                videoDiv.querySelector('#durationOutput').setAttribute("es-translation", 'Duración: ' + Math.floor(durationOutput) + ' s');
+                try {
+                    const durationOutput = await getVideoDuration(videoBlob); // Obtener duración
+                    if (videoDiv.querySelector('#durationOutput')) {
+                        videoDiv.querySelector('#durationOutput').textContent = 'Duration: ' + Math.floor(durationOutput) + ' s';
+                        videoDiv.querySelector('#durationOutput').setAttribute("es-translation", 'Duración: ' + Math.floor(durationOutput) + ' s');
+                    }
+                } catch (error1) {
+                    console.warn("Error al obtener la duración del video:", error1);
+                    // Puedes manejar el error aquí, por ejemplo, mostrar un mensaje al usuario o establecer un valor predeterminado.
+                    if (videoDiv.querySelector('#durationOutput')) {
+                        videoDiv.querySelector('#durationOutput').textContent = 'Duration: Unknown';
+                        videoDiv.querySelector('#durationOutput').setAttribute("es-translation", 'Duración: Desconocida');
+                    }
+                }
             }
             outputContainer.style.display = 'block'
             clearInterval(intervalId);
             loader.style.display = 'none';
             addVideo(data);
             console.log("Finished")
-
-            await worker.remove(videoInput.name);
-            //await worker.remove(outputFileName);
             loader.style.display = 'none';
             document.getElementById('estimatedTime').style.display = 'none';
             document.getElementById('progress').textContent = `Progress: 100.00%`;
             document.getElementById('progress').setAttribute("es-translation", `Progreso: 100.00%`);
+
+            await worker.remove(videoInput.name);
+            //await worker.remove(outputFileName);
+
 
             // Mostrar contenedor de salida
             document.getElementById('output-container').style.display = 'block';

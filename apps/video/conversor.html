@@ -247,19 +247,19 @@
             const outputContainer = document.getElementById("output-container")
             outputContainer.innerHTML = ''
 
-                    // Función para obtener la duración del video comprimido
-        async function getVideoDuration(videoBlob) {
-            return new Promise((resolve) => {
-                const videoElement = document.createElement('video');
-                videoElement.src = URL.createObjectURL(videoBlob);
+            // Función para obtener la duración del video comprimido
+            async function getVideoDuration(videoBlob) {
+                return new Promise((resolve) => {
+                    const videoElement = document.createElement('video');
+                    videoElement.src = URL.createObjectURL(videoBlob);
 
-                videoElement.addEventListener('loadedmetadata', () => {
-                    resolve(videoElement.duration);
+                    videoElement.addEventListener('loadedmetadata', () => {
+                        resolve(videoElement.duration);
+                    });
+
+                    videoElement.load();
                 });
-
-                videoElement.load();
-            });
-        }
+            }
 
             async function addVideo(data, videoPart) {
                 // Leer el video comprimido

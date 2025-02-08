@@ -22,7 +22,7 @@
     <center>
         <h1 es-translation="Conversor de Archivos">File Converter</h1>
         <div class="input-container">
-            <input type="file" id="videoInput" accept="video/*">
+            <input type="file" id="videoInput" accept="*" multiple>
             <video id="uploadedVideo" controls style="display: none;"></video>
             <div id="infoDiv">
                 <p id="size" es-translation="Tamaño">Size</p>
@@ -69,9 +69,12 @@
         </select>
         <br><br>
         <select id="speedSelect">
-            <option value="ultrafast" es-translation="++ Velocidad de procesado / - Calidad">++ Processing speed / - Quality</option>
-            <option value="veryfast" es-translation="+ Velocidad de procesado / - Calidad">+ Processing speed / - Quality</option>
-            <option selected value="fast" es-translation="Velocidad de procesado normal / Calidad original">Normal processing speed / Original quality</option>
+            <option value="ultrafast" es-translation="++ Velocidad de procesado / - Calidad">++ Processing speed / -
+                Quality</option>
+            <option value="veryfast" es-translation="+ Velocidad de procesado / Posible perdida de calidad">+ Processing
+                speed / Posible quality loss</option>
+            <option selected value="fast" es-translation="Velocidad de procesado normal / Calidad original">Normal
+                processing speed / Original quality</option>
         </select>
         <br><br>
         <div id="convertButtons">
@@ -97,22 +100,16 @@
         let currentPart = 1
 
         document.getElementById('videoInput').addEventListener('change', (event) => {
-            const videoFile = event.target.files[0];
-            if (videoFile) {
-                const videoURL = URL.createObjectURL(videoFile);
-                const uploadedVideo = document.getElementById('uploadedVideo');
-                uploadedVideo.src = videoURL;
-                uploadedVideo.style.display = 'block';
+            const videoFiles = event.target.files;
+            const outputContainer = document.querySelector("#infoDiv")
+            outputContainer.innerHTML = "";
+            videoParts = videoFiles.length
 
-                const videoElement = document.createElement('video');
-                videoElement.src = videoURL;
+            for (let i = 0; i < videoFiles.length; i++) {
+                const data = videoFiles[i];
+                const videoPart = i + 1
 
-                videoElement.addEventListener('loadedmetadata', () => {
-                    videoDuration = videoElement.duration;
-                    document.getElementById('infoDiv').style.display = 'flex';
-                    document.getElementById('size').textContent = 'Size: ' + (videoFile.size / 1000000).toFixed(2) + ' MB';
-                    document.getElementById('duration').textContent = 'Duration: ' + Math.floor(videoDuration) + 's';
-                });
+                addVideo(data, outputContainer, videoPart);
             }
         });
 
@@ -130,14 +127,18 @@
             });
 
             let localProcessedFrames = processedFrames
+            //if (videoParts !== 1) {
+            //localProcessedFrames = processedFrames + (totalFrames / videoParts) * (currentPart - 1)
+            //}
+
+            let textToAdd = ""
             if (videoParts !== 1) {
-                localProcessedFrames = processedFrames + (totalFrames / videoParts) * (currentPart - 1)
+                textToAdd = " (" + currentPart + "/" + videoParts + ")"
             }
 
-
             const percent = (localProcessedFrames / totalFrames) * 100;
-            document.getElementById('progress').textContent = `Progress: ${percent.toFixed(2)}%`;
-            document.getElementById('progress').setAttribute("es-translation", `Progreso: ${percent.toFixed(2)}%`);
+            document.getElementById('progress').textContent = `Progress: ${percent.toFixed(2)}%` + textToAdd;
+            document.getElementById('progress').setAttribute("es-translation", `Progreso: ${percent.toFixed(2)}%` + textToAdd);
 
             if (percent <= 5) {
                 document.getElementById('estimatedTime').textContent = `Estimated time remaining: Calculating...`;
@@ -147,11 +148,11 @@
                     const elapsedTime = (Date.now() - startTime) / 1000;
                     const estimatedTotalTime = (elapsedTime / localProcessedFrames) * totalFrames;
                     let remainingTime = 0
-                    if (videoParts !== 1) {
-                        remainingTime = estimatedTotalTime - elapsedTime + (MidWaitTimeBetweenParts * (videoParts - currentPart));
-                    } else {
-                        remainingTime = estimatedTotalTime - elapsedTime;
-                    }
+
+
+
+                    remainingTime = estimatedTotalTime - elapsedTime;
+
                     const remainingMinutes = Math.floor(remainingTime / 60);
                     const remainingSeconds = Math.floor(remainingTime % 60);
                     document.getElementById('estimatedTime').textContent = `Estimated time remaining: ${remainingMinutes}m ${remainingSeconds}s`;
@@ -160,8 +161,8 @@
             }
 
             if (percent > 100) {
-                document.getElementById('progress').textContent = `Progress: ${localProcessedFrames} / ?`;
-                document.getElementById('progress').setAttribute("es-translation", `Progreso: ${localProcessedFrames} / ?`);
+                document.getElementById('progress').textContent = `Progress: ${localProcessedFrames} / ?` + textToAdd;
+                document.getElementById('progress').setAttribute("es-translation", `Progreso: ${localProcessedFrames} / ?` + textToAdd);
 
                 document.getElementById('estimatedTime').textContent = `Estimated time remaining: ?`;
                 document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: ?`);
@@ -175,8 +176,183 @@
             console.log(localProcessedFrames + ' / ' + totalFrames + ' | ' + percent.toFixed(3) + '%')
         }
 
+
+        // Función para obtener la duración del video comprimido
+        async function getVideoDuration(videoBlob) {
+            return new Promise((resolve) => {
+                const videoElement = document.createElement('video');
+                videoElement.src = URL.createObjectURL(videoBlob);
+
+                videoElement.addEventListener('loadedmetadata', () => {
+                    resolve(videoElement.duration);
+                });
+
+                videoElement.load();
+            });
+        }
+
+        // Mapeo de extensiones a tipos MIME
+        const mimeTypes = {
+            mp4: 'video/mp4',
+            avi: 'video/x-msvideo',
+            mkv: 'video/x-matroska',
+            mov: 'video/quicktime',
+            webm: 'video/webm',
+            flv: 'video/x-flv',
+            wmv: 'video/x-ms-wmv',
+            mpeg: 'video/mpeg',
+            '3gp': 'video/3gpp',
+            ogv: 'video/ogg',
+            mp3: 'audio/mpeg',
+            wav: 'audio/wav',
+            aac: 'audio/aac',
+            ogg: 'audio/ogg',
+            flac: 'audio/flac',
+            m4a: 'audio/mp4',
+            wma: 'audio/x-ms-wma',
+            opus: 'audio/opus',
+            jpg: 'image/jpeg',
+            jpeg: 'image/jpeg',
+            png: 'image/png',
+            gif: 'image/gif',
+            bmp: 'image/bmp',
+            webp: 'image/webp',
+            tiff: 'image/tiff',
+            svg: 'image/svg+xml',
+        };
+
+
+
+        async function addVideo(data, parentElement, videoPart) {
+            // Supongamos que `data.name` contiene el nombre del archivo, por ejemplo: "video.mp4", "audio.mp3", "image.png"
+            let IsPreview = true
+            let fileName = data.name; // Nombre del archivo
+            if (fileName === undefined) {
+                fileName = outputFileName
+                IsPreview = false
+            }
+            const fileExtension = fileName.split('.').pop().toLowerCase(); // Extraer la extensión y convertirla a minúsculas
+
+            // Leer el video comprimido
+            let videoBlob
+            if (IsPreview === true) {
+                videoBlob = new Blob([data], { type: 'video/mp4' });
+            } else {
+                videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
+            }
+
+            // Obtener el tipo MIME basado en la extensión del archivo
+            const mimeType = mimeTypes[fileExtension] || 'application/octet-stream'; // Usar un tipo genérico si la extensión no está en la lista
+
+            // Crear el Blob con el tipo MIME correcto
+            const fileBlob = new Blob([data.buffer], { type: mimeType });
+
+            // Crear un div para el video y su contenido
+
+
+            let videoURL
+            if (IsPreview === true) {
+                videoURL = URL.createObjectURL(data);
+            } else {
+                videoURL = URL.createObjectURL(fileBlob);
+            }
+
+            console.log(fileName)
+
+
+
+
+            // Crear un div para el archivo y su contenido
+            const videoDiv = document.createElement('div');
+            videoDiv.id = 'output-video';
+
+            // Determinar el contenido del div basado en el tipo de archivo
+            if (mimeType.startsWith('video/')) {
+                // Si es un video
+                videoDiv.innerHTML = `
+        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
+        <video id="outputVideo" style="display: block" controls src="${videoURL}"></video>
+        <div id="infoDivOutput">
+            <p id="sizeOutput"></p>
+            <p id="durationOutput"></p>
+        </div>
+    `;
+            } else if (mimeType.startsWith('audio/')) {
+                // Si es un audio
+                videoDiv.innerHTML = `
+        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
+        <audio id="outputAudio" controls src="${videoURL}"></audio>
+        <div id="infoDivOutput">
+            <p id="sizeOutput"></p>
+            <p id="durationOutput"></p>
+        </div>
+    `;
+            } else if (mimeType.startsWith('image/')) {
+                // Si es una imagen
+                videoDiv.innerHTML = `
+        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
+        <img id="outputImage" src="${videoURL}" alt="${fileName}" style="max-width: 100%; height: auto;">
+        <div id="infoDivOutput">
+            <p id="sizeOutput"></p>
+        </div>
+    `;
+            } else {
+                // Si es un tipo desconocido
+                videoDiv.innerHTML = `
+        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
+        <p>Unsupported file type: ${fileExtension}</p>
+    `;
+            }
+            const localCurrentPart = videoPart
+
+            if (videoParts !== 1) {
+                if (videoParts !== (videoPart)) {
+                    videoDiv.insertAdjacentHTML("beforeend", '<hr class="videoSeparator">');
+                }
+            }
+            videoDiv.insertAdjacentHTML("afterbegin", `<h2>${(fileName).toString()}</h2>`);
+
+            // Agregar el div al contenedor de salida
+            const ThisOutputContainer = parentElement
+            ThisOutputContainer.appendChild(videoDiv);
+            ThisOutputContainer.style.display = 'block'
+
+            const downloadButton = videoDiv.querySelector('#downloadButton');
+            downloadButton.href = videoURL;
+
+            downloadButton.download = fileName;
+
+            //downloadButton.style.display = 'block';
+
+            // Actualizar el contenedor de salida
+            const sizeOutput = Math.floor(videoBlob.size / 1000000 * 100) / 100; // Tamaño en MB
+            videoDiv.querySelector('#sizeOutput').textContent = 'Size: ' + sizeOutput + ' MB';
+            videoDiv.querySelector('#sizeOutput').setAttribute("es-translation", 'Tamaño: ' + sizeOutput + ' MB');
+            try {
+                const durationOutput = await getVideoDuration(videoBlob); // Obtener duración
+                if (videoDiv.querySelector('#durationOutput')) {
+                    videoDiv.querySelector('#durationOutput').textContent = 'Duration: ' + Math.floor(durationOutput) + ' s';
+                    videoDiv.querySelector('#durationOutput').setAttribute("es-translation", 'Duración: ' + Math.floor(durationOutput) + ' s');
+                }
+            } catch (error1) {
+                console.warn("Error al obtener la duración del video:", error1);
+                // Puedes manejar el error aquí, por ejemplo, mostrar un mensaje al usuario o establecer un valor predeterminado.
+                if (videoDiv.querySelector('#durationOutput')) {
+                    videoDiv.querySelector('#durationOutput').textContent = 'Duration: Unknown';
+                    videoDiv.querySelector('#durationOutput').setAttribute("es-translation", 'Duración: Desconocida');
+                }
+            }
+
+        }
+
+
         async function convertVideo() {
-            const videoInput = document.getElementById('videoInput').files[0];
+            const ThisoutputContainer = document.getElementById("output-container")
+            ThisoutputContainer.innerHTML = ""
+            ThisoutputContainer.style.display = 'none'
+
+
+            const videoInput = document.getElementById('videoInput').files;
             const outputFormat = document.getElementById('outputFormat').value;
             const preset = document.getElementById('speedSelect').value;
 
@@ -187,230 +363,108 @@
 
             if (!worker.isLoaded()) await worker.load();
 
-            const arrayBuffer = await videoInput.arrayBuffer();
-            await worker.FS('writeFile', 'input.mp4', new Uint8Array(arrayBuffer));
+            videoParts = videoInput.length
 
-            // Ejecutar FFmpeg con argumentos para analizar el archivo
-            const args1 = [
-                '-i', 'input.mp4', // Archivo de entrada
-                '-f', 'null', // Formato de salida nulo (no se guarda archivo)
-                '-c:v', 'copy', // Copiar directamente sin recodificar
-                '-'
-            ];
+            for (let i = 0; i < videoInput.length; i++) {
+                const file = videoInput[i];
+                currentPart = i + 1
+                const videoPart = i + 1
 
-            let stderr = '';
+                const arrayBuffer = await file.arrayBuffer();
+                await worker.FS('writeFile', 'input', new Uint8Array(arrayBuffer));
 
-            // Capturar salida estándar y errores de FFmpeg
-            worker.setLogger(({ type, message }) => {
-                stderr += message + '\n';
-            });
-
-            await worker.run(...args1);
-
-            // Buscar la línea que contiene "frame=" en la salida de error
-            const frameMatch = stderr.match(/frame=\s*(\d+)/);
-
-            if (frameMatch) {
-                totalFrames = parseInt(frameMatch[1], 10);
-                console.log(`El video tiene ${totalFrames} fotogramas.`);
-            } else {
-                console.error('No se pudo extraer el número de fotogramas.');
-            }
-
-            const loader = document.getElementById('loader');
-            loader.style.display = 'block';
-            const intervalId = setInterval(updateProgress, 500);
-            startTime = Date.now();
-
-            const fileNameWithoutExt = videoInput.name.split('.').slice(0, -1).join('.');
-            outputFileName = `${fileNameWithoutExt}.${outputFormat}`;
-            let data, videoBlob, videoURL
-            try {
-                const args = [
-                    '-i', 'input.mp4',
-                    '-preset', preset,
-                    `output.${outputFormat}`
+                // Ejecutar FFmpeg con argumentos para analizar el archivo
+                const args1 = [
+                    '-i', 'input', // Archivo de entrada
+                    '-f', 'null', // Formato de salida nulo (no se guarda archivo)
+                    '-c:v', 'copy', // Copiar directamente sin recodificar
+                    '-'
                 ];
 
-                await worker.run(...args);
+                let stderr = '';
 
-                data = worker.FS('readFile', `output.${outputFormat}`);
-                videoBlob = new Blob([data.buffer], { type: `video/${outputFormat}` });
-                videoURL = URL.createObjectURL(videoBlob);
-
-            } catch (error2) {
-                document.getElementById('progress').textContent = `Can't convert file.`;
-                document.getElementById('progress').setAttribute("es-translation", `No se puede convertir el archivo.`);
-            }
-
-            const outputContainer = document.getElementById("output-container")
-            outputContainer.innerHTML = ''
-
-            // Función para obtener la duración del video comprimido
-            async function getVideoDuration(videoBlob) {
-                return new Promise((resolve) => {
-                    const videoElement = document.createElement('video');
-                    videoElement.src = URL.createObjectURL(videoBlob);
-
-                    videoElement.addEventListener('loadedmetadata', () => {
-                        resolve(videoElement.duration);
-                    });
-
-                    videoElement.load();
+                // Capturar salida estándar y errores de FFmpeg
+                worker.setLogger(({ type, message }) => {
+                    stderr += message + '\n';
                 });
-            }
 
-            async function addVideo(data, videoPart) {
-                // Leer el video comprimido
-                const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
-                const videoURL = URL.createObjectURL(videoBlob);
+                await worker.run(...args1);
 
-                // Crear un div para el video y su contenido
-                // Supongamos que `data.name` contiene el nombre del archivo, por ejemplo: "video.mp4", "audio.mp3", "image.png"
-                const fileName = outputFileName; // Nombre del archivo
-                const fileExtension = fileName.split('.').pop().toLowerCase(); // Extraer la extensión y convertirla a minúsculas
+                // Buscar la línea que contiene "frame=" en la salida de error
+                const frameMatch = stderr.match(/frame=\s*(\d+)/);
 
-                // Mapeo de extensiones a tipos MIME
-                const mimeTypes = {
-                    mp4: 'video/mp4',
-                    avi: 'video/x-msvideo',
-                    mkv: 'video/x-matroska',
-                    mov: 'video/quicktime',
-                    webm: 'video/webm',
-                    flv: 'video/x-flv',
-                    wmv: 'video/x-ms-wmv',
-                    mpeg: 'video/mpeg',
-                    '3gp': 'video/3gpp',
-                    ogv: 'video/ogg',
-                    mp3: 'audio/mpeg',
-                    wav: 'audio/wav',
-                    aac: 'audio/aac',
-                    ogg: 'audio/ogg',
-                    flac: 'audio/flac',
-                    m4a: 'audio/mp4',
-                    wma: 'audio/x-ms-wma',
-                    opus: 'audio/opus',
-                    jpg: 'image/jpeg',
-                    jpeg: 'image/jpeg',
-                    png: 'image/png',
-                    gif: 'image/gif',
-                    bmp: 'image/bmp',
-                    webp: 'image/webp',
-                    tiff: 'image/tiff',
-                    svg: 'image/svg+xml',
-                };
-
-                // Obtener el tipo MIME basado en la extensión del archivo
-                const mimeType = mimeTypes[fileExtension] || 'application/octet-stream'; // Usar un tipo genérico si la extensión no está en la lista
-
-                // Crear el Blob con el tipo MIME correcto
-                const fileBlob = new Blob([data.buffer], { type: mimeType });
-                const fileURL = URL.createObjectURL(fileBlob);
-
-                // Crear un div para el archivo y su contenido
-                const videoDiv = document.createElement('div');
-                videoDiv.id = 'output-video';
-
-                // Determinar el contenido del div basado en el tipo de archivo
-                if (mimeType.startsWith('video/')) {
-                    // Si es un video
-                    videoDiv.innerHTML = `
-        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
-        <video id="outputVideo" style="display: block" controls src="${videoURL}"></video>
-        <div id="infoDivOutput">
-            <p id="sizeOutput"></p>
-            <p id="durationOutput"></p>
-        </div>
-    `;
-                } else if (mimeType.startsWith('audio/')) {
-                    // Si es un audio
-                    videoDiv.innerHTML = `
-        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
-        <audio id="outputAudio" controls src="${videoURL}"></audio>
-        <div id="infoDivOutput">
-            <p id="sizeOutput"></p>
-            <p id="durationOutput"></p>
-        </div>
-    `;
-                } else if (mimeType.startsWith('image/')) {
-                    // Si es una imagen
-                    videoDiv.innerHTML = `
-        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
-        <img id="outputImage" src="${videoURL}" alt="${fileName}" style="max-width: 100%; height: auto;">
-        <div id="infoDivOutput">
-            <p id="sizeOutput"></p>
-        </div>
-    `;
+                if (frameMatch) {
+                    totalFrames = parseInt(frameMatch[1], 10);
+                    console.log(`El video tiene ${totalFrames} fotogramas.`);
                 } else {
-                    // Si es un tipo desconocido
-                    videoDiv.innerHTML = `
-        <a id="downloadButton" download="${fileName}" es-translation="Descargar">Download</a>
-        <p>Unsupported file type: ${fileExtension}</p>
-    `;
-                }
-                const localCurrentPart = videoPart + 1
-
-                if (videoParts !== 1) {
-                    if (previewing == false) {
-                        if (videoParts !== (localCurrentPart)) {
-                            videoDiv.insertAdjacentHTML("beforeend", '<hr class="videoSeparator">');
-                        }
-                        videoDiv.insertAdjacentHTML("afterbegin", `<h2>Parte ${(localCurrentPart).toString()}</h2>`);
-                    }
+                    console.error('No se pudo extraer el número de fotogramas.');
                 }
 
-
-                // Agregar el div al contenedor de salida
-                document.getElementById('output-container').appendChild(videoDiv);
-
-                const downloadButton = videoDiv.querySelector('#downloadButton');
-                downloadButton.href = videoURL;
-                if (videoParts !== 1) {
-                    downloadButton.download = outputFileName.split('.').slice(0, -1).join('.') + "-" + (videoPart + 1).toString() + ".mp4"
-                } else {
-                    downloadButton.download = outputFileName;
-                }
-                downloadButton.style.display = 'block';
-
-                // Actualizar el contenedor de salida
-                const sizeOutput = Math.floor(videoBlob.size / 1000000 * 100) / 100; // Tamaño en MB
-                videoDiv.querySelector('#sizeOutput').textContent = 'Size: ' + sizeOutput + ' MB';
-                videoDiv.querySelector('#sizeOutput').setAttribute("es-translation", 'Tamaño: ' + sizeOutput + ' MB');
+                const loader = document.getElementById('loader');
+                loader.style.display = 'block';
+                const intervalId = setInterval(updateProgress, 500);
+                startTime = Date.now();
+                const fileNameWithoutExt = file.name.split('.').slice(0, -1).join('.');
+                outputFileName = `${fileNameWithoutExt}.${outputFormat}`;
+                let data, videoBlob, videoURL;
 
                 try {
-                    const durationOutput = await getVideoDuration(videoBlob); // Obtener duración
-                    if (videoDiv.querySelector('#durationOutput')) {
-                        videoDiv.querySelector('#durationOutput').textContent = 'Duration: ' + Math.floor(durationOutput) + ' s';
-                        videoDiv.querySelector('#durationOutput').setAttribute("es-translation", 'Duración: ' + Math.floor(durationOutput) + ' s');
+                    let args;
+
+                    // Si no es MP4, usa el preset por defecto
+                    if (preset === "default") {
+                        args = [
+                            '-i', 'input',
+                            `output.${outputFormat}`
+                        ];
+                    } else {
+                        args = [
+                            '-i', 'input',
+                            '-preset', preset,
+                            `output.${outputFormat}`
+                        ];
                     }
-                } catch (error1) {
-                    console.warn("Error al obtener la duración del video:", error1);
-                    // Puedes manejar el error aquí, por ejemplo, mostrar un mensaje al usuario o establecer un valor predeterminado.
-                    if (videoDiv.querySelector('#durationOutput')) {
-                        videoDiv.querySelector('#durationOutput').textContent = 'Duration: Unknown';
-                        videoDiv.querySelector('#durationOutput').setAttribute("es-translation", 'Duración: Desconocida');
-                    }
+
+                    await worker.run(...args);
+
+                    data = worker.FS('readFile', `output.${outputFormat}`);
+                    videoBlob = new Blob([data.buffer], { type: `video/${outputFormat}` });
+                    videoURL = URL.createObjectURL(videoBlob);
+
+                    addVideo(data, ThisoutputContainer, videoPart);
+
+                } catch (error2) {
+                    document.getElementById('progress').textContent = `Can't convert file.`;
+                    document.getElementById('progress').setAttribute("es-translation", `No se puede convertir el archivo.`);
                 }
+                clearInterval(intervalId);
+
+                //const outputContainer = document.getElementById("output-container")
+                //outputContainer.innerHTML = ''
+
+
             }
+            let outputContainer = document.getElementById("output-container")
             outputContainer.style.display = 'block'
-            clearInterval(intervalId);
+            const loader = document.getElementById('loader');
             loader.style.display = 'none';
-            addVideo(data);
             console.log("Finished")
             loader.style.display = 'none';
             document.getElementById('estimatedTime').style.display = 'none';
             document.getElementById('progress').textContent = `Progress: 100.00%`;
             document.getElementById('progress').setAttribute("es-translation", `Progreso: 100.00%`);
 
-            await worker.remove(videoInput.name);
+
+            //await worker.remove('input');
+            //worker.FS('unlink', file.name);
             //await worker.remove(outputFileName);
 
 
             // Mostrar contenedor de salida
             document.getElementById('output-container').style.display = 'block';
 
-        }
 
+        }
 
         document.getElementById('convertButton').addEventListener('click', () => convertVideo(false));
     </script>

@@ -87,7 +87,7 @@ button:hover {
 }
 
 #downloadButton {
-    display: none;
+    display: block;
     padding: 10px 15px;
     background-color: #0071eb;
     color: white;
@@ -102,6 +102,10 @@ button:hover {
 
 #downloadButton:hover {
     background-color: #0056b3;
+}
+
+#infoDiv > div > #downloadButton {
+    display: none !important;
 }
 
 video {

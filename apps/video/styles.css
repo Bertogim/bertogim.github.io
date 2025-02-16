@@ -236,3 +236,26 @@ hr {
     margin-top: 20px;
     display: grid;
 }
+
+
+.SetSeconds {
+    width: 40% !important;
+}
+
+#timeSelectors > div {
+    background-color: #444;
+    padding-left: 5px;
+
+}
+
+#timeSelectors {
+    margin-top: 10px;
+    background-color: #353535;
+padding: 10px;
+}
+
+#timeSelectors > div > label {
+    /*width: max-content !important;*/
+    text-align: left;
+    width: auto;
+}

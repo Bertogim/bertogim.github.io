@@ -5,30 +5,26 @@
     <meta charset="UTF-8">
     <title es-translation="Convertir MP4 a MP3">Convert MP4 to MP3</title>
     <script src="/apps/coi-serviceworker.js"></script>
-
     <script defer src="/header.js"></script>
     <script src="/translations.js"></script>
-
     <link rel="stylesheet" type="text/css" href="/apps/video/styles.css">
     <link rel="icon" type="image/png" href="/Image/Icon.png">
-
     <script src="/apps/video/ffmpeg/ffmpeg.min.js"></script>
 </head>
 
 <body>
     <h1 es-translation="Convertir MP4 a MP3">Convert MP4 to MP3</h1>
-    <p es-translation="Sube múltiples archivos MP4, se convertirán a MP3 y se usará la primera imagen del video como portada.">
-        Upload multiple MP4 files, they will be converted to MP3 and the first video frame will be used as the cover art.
+    <p es-translation="Sube múltiples archivos MP4, elige un segundo para la portada y conviértelos a MP3.">
+        Upload multiple MP4 files, select a second for the cover image, and convert them to MP3.
     </p>
     <input type="file" id="inputFiles" multiple accept="video/mp4" es-translation="Sube archivos MP4">
+    <div id="timeSelectors"></div>
     <button id="convertButton" onclick="convertFiles()" es-translation="Convertir a MP3">Convert to MP3</button>
-    
     <div class="loader" id="loader" style="display: none;"></div>
-    <div id="progress" style="display: none;"  es-translation="Progreso: 0%">Progress: 0%</div>
+    <div id="progress" style="display: none;" es-translation="Progreso: 0%">Progress: 0%</div>
     <div id="output"></div>
 
     <script>
-        // Inicializar FFmpeg
         const { createFFmpeg, fetchFile } = FFmpeg;
         const ffmpeg = createFFmpeg({ log: true });
 
@@ -38,70 +34,60 @@
             }
         }
 
-        let startTime;
-        let songCount = 0;  // Para contar el número de canciones procesadas
-
-        function updateProgress(songIndex, totalSongs) {
-    document.getElementById('loader').style.display = 'block';
-
-    if (totalSongs > 1) {
-        document.getElementById('progress').style.display = 'block';
-
-        if (songIndex === 0) {
-            document.getElementById('progress').textContent = `Progress: Calculating...`;
-            document.getElementById('progress').setAttribute("es-translation", `Progreso: Calculando...`);
-        } else {
-            const percent = (songIndex / totalSongs) * 100;
-            document.getElementById('progress').textContent = `Progress: ${percent.toFixed(0)}%`;
-            document.getElementById('progress').setAttribute("es-translation", `Progreso: ${percent.toFixed(0)}%`);
-        }
-    }
-}
-
+        document.getElementById('inputFiles').addEventListener('change', function () {
+            const files = this.files;
+            const timeSelectors = document.getElementById('timeSelectors');
+            timeSelectors.innerHTML = '';
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const div = document.createElement('div');
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.innerHTML = `<label es-translation="${file.name}:">Select second:</label>
+                                 <input class="SetSeconds" es-translation="De que segundo cojer la imagen del mp3" placeholder="What second to pick the mp3 image from" type="number" min="0" step="1" value="" id="time_${i}">`;
+                timeSelectors.appendChild(div);
+            }
+        });
 
         async function convertFiles() {
             const files = document.getElementById('inputFiles').files;
-            songCount = files.length;
-
-            if (songCount === 0) {
+            if (files.length === 0) {
                 alert("Por favor, sube archivos MP4.");
                 return;
             }
-
-            const output = document.getElementById('output');
-            output.innerHTML = '';
-            startTime = Date.now();
-
             await loadFFmpeg();
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('progress').style.display = 'block';
+            document.getElementById('output').innerHTML = '';
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 const fileName = file.name.split('.').slice(0, -1).join('.');
+                let time = document.getElementById(`time_${i}`).value;
 
-                ffmpeg.FS('writeFile', file.name, await fetchFile(file));
+                if (time == "") {
+                    time = "0";
+                }
                 
-                // Mostrar progreso si hay más de un archivo
-                updateProgress(i, songCount);
-
-                // Extraer primer frame como imagen JPEG para usar como portada
-                await ffmpeg.run('-i', file.name, '-frames:v', '1', `${fileName}.jpg`);
-
-                // Convertir MP4 a MP3 e incrustar la portada
+                ffmpeg.FS('writeFile', file.name, await fetchFile(file));
+                document.getElementById('progress').textContent = `Procesando ${fileName}...`;
+                
+                await ffmpeg.run('-i', file.name, '-ss', time, '-frames:v', '1', `${fileName}.jpg`);
                 await ffmpeg.run('-i', file.name, '-i', `${fileName}.jpg`, '-map', '0:a', '-map', '1',
                     '-c:v', 'copy', '-id3v2_version', '3', '-metadata:s:v', 'title="Album cover"',
                     '-metadata:s:v', 'comment="Cover (front)"', `${fileName}.mp3`);
-
+                
                 const mp3Data = ffmpeg.FS('readFile', `${fileName}.mp3`);
                 const mp3Blob = new Blob([mp3Data.buffer], { type: 'audio/mpeg' });
                 const mp3Url = URL.createObjectURL(mp3Blob);
                 const link = document.createElement('a');
                 link.href = mp3Url;
                 link.download = `${fileName}.mp3`;
-                link.textContent = `Download ${fileName}.mp3`;
                 link.id = "downloadSimple";
-                link.setAttribute("es-translation", `Descargar ${fileName}.mp3`);
-                output.appendChild(link);
-                output.appendChild(document.createElement('br'));
+                link.textContent = `Descargar ${fileName}.mp3`;
+                document.getElementById('output').appendChild(link);
+                document.getElementById('output').appendChild(document.createElement('br'));
 
                 ffmpeg.FS('unlink', file.name);
                 ffmpeg.FS('unlink', `${fileName}.jpg`);
@@ -110,11 +96,8 @@
 
             document.getElementById('loader').style.display = 'none';
             document.getElementById('progress').style.display = 'none';
-
             ffmpeg.exit();
         }
-
     </script>
 </body>
-
 </html>

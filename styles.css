@@ -147,10 +147,10 @@ iframe {
 }
 
 .image-container img:hover {
-    transform: scale(1.5); /* Aplica el zoom centrado */
+    transform: scale(1.3); /* Aplica el zoom centrado */
 }
 .image-container#streams2 img:hover {
-    transform: scale(1.3); /* Aplica el zoom centrado */
+    transform: scale(1.2); /* Aplica el zoom centrado */
 }
 
 .image-container2 {

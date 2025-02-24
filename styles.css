@@ -135,11 +135,22 @@ iframe {
     gap: 1.4ren;
 }
 
+.image-container {
+    display: inline-block; /* Asegura que el contenedor se ajuste a la imagen */
+}
+
 .image-container img {
     width: 100%;
     margin-bottom: 1rem;
     border-radius: 0.7rem;
+    transition: transform 0.3s ease-in-out; /* Suaviza la transición */
+}
 
+.image-container img:hover {
+    transform: scale(1.5); /* Aplica el zoom centrado */
+}
+.image-container#streams2 img:hover {
+    transform: scale(1.3); /* Aplica el zoom centrado */
 }
 
 .image-container2 {

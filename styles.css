@@ -135,10 +135,6 @@ iframe {
     gap: 1.4ren;
 }
 
-.image-container {
-    display: inline-block; /* Asegura que el contenedor se ajuste a la imagen */
-}
-
 .image-container img {
     width: 100%;
     margin-bottom: 1rem;

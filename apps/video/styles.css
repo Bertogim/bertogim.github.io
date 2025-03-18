@@ -57,6 +57,16 @@ button:hover {
     background-color: #218838;
 }
 
+
+.SimpleButton {
+    background-color: #28a745 !important;
+}
+
+.SimpleButton:hover {
+    margin: 5px;
+    background-color: #218838 !important;
+}
+
 #compressButton {
     background-color: #28a745;
 }
@@ -223,13 +233,20 @@ hr {
 
 
 
-#downloadSimple {
-    
+#downloadSimple, .downloadSimple {
     border: 1px solid #585858;
     border-radius: 4px;
     padding: 10px;
     background-color: #444;
     color: #cacaca;
+}
+
+.downloadAll {
+    background-color: #555555;
+    border: 1px solid #727272;
+    color: #ffffff;
+    padding: 15px;
+
 }
 
 #output {

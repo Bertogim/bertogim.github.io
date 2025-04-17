@@ -1,0 +1,147 @@
+/* Server gradient on dissapear up */
+.bar_c38106 {
+    z-index: 28371983721897;
+}
+
+.title_c38106 {
+    background-color: transparent;
+    background: linear-gradient(to bottom, var(--background-base-lowest), #00000000);
+}
+
+.title_a7d72e {
+    -webkit-app-region: drag;
+}
+
+.sidebar_c48ade {
+    overflow: visible !important;
+    position: relative;
+}
+
+.sidebarList_c48ade {
+    margin-left: 72px;
+}
+
+.wrapper_ef3116 {
+    position: absolute;
+    top: -35px;
+    height: calc(100vh - 65px);
+    /* padding-top: 10px; */
+}
+
+[class^="stack_dbd263 scroller_ef3116"] {
+    padding-top: 40px !important;
+}
+
+/* Server sizees */
+.svg_cc5dd2 {
+    width: 60px;
+    height: 60px;
+}
+
+.visual-refresh .sidebarResizeHandle_c48ade {
+    display: none !important;
+}
+
+.visual-refresh .sidebarList_c48ade {
+    width: 250px;
+}
+
+.listItem__650eb {
+    justify-content: unset;
+    padding-left: 12px;
+    height: 50.5px;
+}
+
+.guildSeparator__252b6 {
+    width: 50px;
+}
+
+.wrapper__6e9f8 {
+    border-radius: 20px;
+    transition: border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.wrapper__6e9f8:hover,
+.selected__6e9f8 {
+    border-radius: 12px;
+}
+
+
+/* Text input */
+
+:where(.visual-refresh) .themedBackground__74017>div * {
+    max-height: min-content;
+}
+
+:where(.visual-refresh) .themedBackground__74017 svg {
+    width: 25px !important;
+    height: 25px !important;
+    color: #96979e;
+    margin-top: 8px;
+}
+
+.buttons__74017 button {
+    margin: 5px 0px;
+}
+
+.buttons__74017 svg {
+    margin: 0px 0px;
+}
+
+.visual-refresh .slateTextArea_ec4baf {
+    padding: 10px 0px 7.5px 0px;
+    margin: 0px;
+}
+
+.spriteContainer__04eed {
+    --custom-emoji-sprite-size: 25px !important;
+    /*margin-right: 34px;*/
+}
+
+:where(.visual-refresh) .themedBackground__74017>* div {
+    min-height: 25px !important;
+    min-width: 25px !important;
+    mask-size: 500px !important;
+    /*mask-position: calc(var(--custom-emoji-sprite-col)* -1* var(--custom-emoji-sprite-size)) calc(var(--custom-emoji-sprite-row)* -1* var(--custom-emoji-sprite-size)) !important;*/
+}
+
+
+.uploadInput__0923f {
+    max-height: 500px;
+}
+
+.channelAttachmentArea_b77158 * {
+    max-height: 500px;
+}
+
+.uploadInput__0923f,
+[aria-label="Enviar un regalo"] {
+    display: none;
+}
+
+
+.visual-refresh .channelAttachmentArea_b77158 {
+    max-height: 500px;
+}
+
+.channelAppLauncher_e6e74f {
+    display: none !important;
+}
+
+/*
+div.buttons__74017 button {
+    margin-right: 6px;
+}
+*/
+
+.visual-refresh .attachButton__0923f {
+    padding: 0px 10px;
+}
+
+
+.buttonContainer__74017,
+div.buttons__74017,
+:where(.visual-refresh) .inner__74017 {
+    overflow: visible !important;
+}

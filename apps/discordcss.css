@@ -1,4 +1,5 @@
 /* Server gradient on dissapear up */
+/* Credits for server gradient to someone in v--cord server */
 .bar_c38106 {
     z-index: 28371983721897;
 }
@@ -31,6 +32,8 @@
 [class^="stack_dbd263 scroller_ef3116"] {
     padding-top: 40px !important;
 }
+
+
 
 /* Server sizees */
 .svg_cc5dd2 {
@@ -66,6 +69,7 @@
 .selected__6e9f8 {
     border-radius: 12px;
 }
+
 
 
 /* Text input */
@@ -105,6 +109,7 @@
     mask-size: 500px !important;
     /*mask-position: calc(var(--custom-emoji-sprite-col)* -1* var(--custom-emoji-sprite-size)) calc(var(--custom-emoji-sprite-row)* -1* var(--custom-emoji-sprite-size)) !important;*/
 }
+
 
 
 .uploadInput__0923f {

@@ -145,3 +145,7 @@ div.buttons__74017,
 :where(.visual-refresh) .inner__74017 {
     overflow: visible !important;
 }
+
+.visual-refresh .buttons__74017 {
+    min-width: 99px !important;
+}

@@ -89,16 +89,17 @@
 
 /*folder fix*/
 :root {
-    --guildbar-folder-size: 40px;
+    --guildbar-folder-size: 40px !important;
 }
 
 .folderGroupBackground__48112 {
-    left: 10px;
-    width: 56px;
+    left: 10px !important;
+    width: 56px !important;
 }
 
 .folderGroup__48112 > ul {
-    gap: 15px;
+    gap: 5px !important;
+    height: max-content !important;
 }
 
 

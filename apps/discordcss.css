@@ -75,6 +75,42 @@
     height: 50px;
 }
 
+/*vc fix*/
+.upperBadge_cc5dd2 {
+    right: -9px;
+    top: 3px;
+}
+
+/*mention fix*/
+.lowerBadge_cc5dd2 {
+    bottom: -8px;
+    right: -9px;
+}
+
+/*folder fix*/
+:root {
+    --guildbar-folder-size: 40px;
+}
+
+.folderGroupBackground__48112 {
+    left: 10px;
+    width: 56px;
+}
+
+.folderGroup__48112 > ul {
+    gap: 15px;
+}
+
+
+/* Avatar */
+.avatar_c19a55 {
+    transition: border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.avatar_c19a55:hover {
+    border-radius: 4px;
+}
+
 
 
 /* Text input */

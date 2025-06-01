@@ -8,7 +8,6 @@ const baseURLCoreMT = `https://unpkg.com/@ffmpeg/core-mt@${CORE_VERSION}/dist/um
 let ffmpeg = null;
 let ffmpegLogs = [];
 let ffmpegLoaded = false;
-let tryMultiThread = true;
 
 
 
@@ -56,14 +55,14 @@ async function toBlobURLPatched(url, mimeType, patcher) {
 
 
 // Carga FFmpeg (versión WASM)
-export async function initializeFFmpeg() {
+export async function initializeFFmpeg(multiThread) {
     if (ffmpegLoaded == false) {
         try {
             console.log("Initializing FFmpeg...");
             let logCounter = 0;
             let lastProgress = null;
 
-            await load(tryMultiThread, (progress) => {
+            await load(multiThread, (progress) => {
                 lastProgress = progress;
                 if (++logCounter % 100 === 0) {
                     console.log(`Loading FFmpeg: ${(progress.received / 1048576).toFixed(2)} MB`);
@@ -84,8 +83,7 @@ export async function initializeFFmpeg() {
 }
 
 // Función interna `load` (configuración core)
-export const load = async (threadMode, cb) => {
-    tryMultiThread = threadMode;
+export const load = async (multiThread, cb) => {
     const ffmpegBlobURL = await toBlobURLPatched(
         `${baseURLFFMPEG}/ffmpeg.js`,
         'text/javascript',
@@ -109,7 +107,7 @@ export const load = async (threadMode, cb) => {
 
 
     // Configuración multi-thread o single-thread
-    if (tryMultiThread && window.crossOriginIsolated) {
+    if (multiThread && window.crossOriginIsolated) {
         console.log("multi-threaded");
 
         await ffmpeg.load({
@@ -127,16 +125,35 @@ export const load = async (threadMode, cb) => {
             wasmURL: await toBlobURL(`${baseURLCore}/ffmpeg-core.wasm`, 'application/wasm', cb),
         });
     }
-
-    await ffmpeg.createDir('/output');
 };
 
+export async function createDirs(paths) {
+    if (!Array.isArray(paths)) {
+        paths = [paths]; // Asegura que siempre sea un array
+    }
+    for (const path of paths) {
+        await ffmpeg.createDir(path); // Crear directorio
+    }
+}
+
+
 // Montar un archivo real en el sistema de archivos virtual
-export async function mountFile(videoFile) {
-    const inputDir = '/input';
-    await ffmpeg.createDir(inputDir); // Crear directorio
-    await ffmpeg.mount('WORKERFS', { files: [videoFile] }, inputDir); // Montar archivo
-    return `${inputDir}/${videoFile.name}`; // Ruta virtual
+export async function mountFile(videoFile, path) {
+
+    await ffmpeg.mount('WORKERFS', { files: [videoFile] }, path); // Montar archivo
+    return `${path}/${videoFile.name}`; // Ruta virtual
+}
+
+// Eliminar archivos/directorios virtuales
+export async function unmountPaths(paths) {
+    if (!Array.isArray(paths)) {
+        paths = [paths]; // Asegura que siempre sea un array
+    }
+
+    for (const path of paths) {
+        await ffmpeg.unmount(path).catch(() => { });
+        await ffmpeg.deleteDir(path).catch(() => { });
+    }
 }
 
 // Leer un archivo del sistema virtual
@@ -145,27 +162,44 @@ export async function readVirtualFile(virtualPath) {
     return new Blob([fileData.buffer], { type: 'video/mp4' });
 }
 
-// Eliminar archivos/directorios virtuales
-export async function cleanupVirtualPaths(paths) {
-    for (const path of paths) {
-        await ffmpeg.unmount(path).catch(() => { });
-        await ffmpeg.deleteDir(path).catch(() => { });
-    }
+
+
+let parsedData = {};
+
+export function getRunData() {
+    return parsedData; // Returns the last parsed progress data
 }
 
-
-
-// Ejecutar un comando FFmpeg y capturar logs
 export async function runFFmpegCommand(args) {
-    ffmpegLogs = []; // Resetear logs
+    parsedData = {}; // Reset parsed progress
+
     ffmpeg.on('log', ({ message }) => {
-        console.log(message); // Logs en tiempo real
         ffmpegLogs.push(message);
+
+        // Example log line: frame= 260 fps=85 q=31.0 size=256kB time=00:00:10.90 bitrate=192.4kbits/s speed=3.56x
+        const regex = /frame=\s*(\d+).*?fps=\s*([\d.]+).*?q=\s*([\d.\-]+).*?size=\s*([\d.kMG]+B).*?time=\s*([\d:.]+).*?bitrate=\s*([\d.\-k]+bits\/s).*?speed=\s*([\d.]+)x/;
+        const match = message.match(regex);
+
+        if (match) {
+            parsedData = {
+                frame: parseInt(match[1]),
+                fps: parseFloat(match[2]),
+                q: parseFloat(match[3]),
+                size: match[4],
+                time: match[5],
+                bitrate: match[6],
+                speed: parseFloat(match[7])
+            };
+        } else {
+            //console.warn("Can't regex ffmpeg message, message: "+message)
+            console.log(message)
+        }
     });
 
     const exitCode = await ffmpeg.exec(args);
     if (exitCode !== 0) {
         throw new Error(`FFmpeg failed with code ${exitCode}`);
     }
+
     return ffmpegLogs;
 }

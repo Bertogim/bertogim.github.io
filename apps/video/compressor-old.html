@@ -12,6 +12,8 @@
 
 
 
+    <script src="/apps/video/ffmpeg/ffmpeg.min.js"></script>
+    <!--<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.0/dist/ffmpeg.min.js"></script>-->
     <link rel="stylesheet" type="text/css" href="./styles.css">
     <link rel="icon" type="png" target="_blank" href="/Image/Icon.png">
 
@@ -77,22 +79,11 @@
 
         </div>
     </center>
-    <script type="module">
-        import {
-            initializeFFmpeg,
-            mountFile,
-            runFFmpegCommand,
-            readVirtualFile,
-            cleanupVirtualPaths
-        } from './ffmpeg-utils.js';
-
-
-
-
-        /*const { createFFmpeg, fetchFile } = FFmpeg;
+    <script>
+        const { createFFmpeg, fetchFile } = FFmpeg;
         const worker = createFFmpeg({
             log: false
-        });*/
+        });
 
         let fps
         let videoDuration = 0;
@@ -170,13 +161,13 @@
 
             const MidWaitTimeBetweenParts = 8
 
-            /*worker.setLogger(({ type, message }) => {
+            worker.setLogger(({ type, message }) => {
                 if (type == 'fferr') {
                     const regex = /frame=\s*(\d+)/;
                     const match = message.match(regex);
                     processedFrames = Number(match[1]); // El número del frame capturado
                 }
-            });*/
+            });
 
             let localProcessedFrames = processedFrames
             if (videoParts !== 1) {
@@ -294,8 +285,10 @@
             console.log(`Threads: ` + navigator.hardwareConcurrency.toString())
 
             loader.style.display = 'block';
-            await initializeFFmpeg();
-            const inputPath = await mountFile(videoInput);
+            if (!worker.isLoaded()) { await worker.load() }
+            //const arrayBuffer = await videoInput.arrayBuffer();
+            await worker.FS('writeFile', 'input.mp4', await fetchFile(videoInput));
+
 
             const fileNameWithoutExt = videoInput.name.split('.').slice(0, -1).join('.').replace(/ /g, '_');
             outputFileName = `${fileNameWithoutExt}-compressed.mp4`;
@@ -383,24 +376,23 @@
                 //console.log('Start Arg:', startArg);
                 //console.log('End Arg:', endArg);
 
-                const cpuThreads = Math.max(1, navigator.hardwareConcurrency || 1);
                 const args = [
-                    '-threads', cpuThreads.toString(),
                     '-hwaccel', 'auto',
-                    '-i', inputPath,
+                    '-i', 'input.mp4',
                     ...startArg, // Agrega el argumento de inicio si existe
                     ...endArg,   // Agrega el argumento de final si existe
                     '-r', fps,
                     '-b:v', `${bitrateKbps}k`,
                     '-preset', preset,
-                    '/output/output.mp4'
+                    'output.mp4'
                 ].filter(Boolean); // Filtra valores falsy para evitar argumentos vacíos
 
                 console.log('Started FFmpeg with args:', args); // Imprime los argumentos finales
 
-                await runFFmpegCommand(args)
+                await worker.run(...args); // Llama a FFmpeg con los argumentos
+
                 // Leer el archivo de salida
-                const data = await readVirtualFile("output/output.mp4")
+                const data = worker.FS('readFile', 'output.mp4');
                 return data;
             }
 

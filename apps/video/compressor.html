@@ -12,8 +12,6 @@
 
 
 
-    <script src="/apps/video/ffmpeg/ffmpeg.min.js"></script>
-    <!--<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.0/dist/ffmpeg.min.js"></script>-->
     <link rel="stylesheet" type="text/css" href="./styles.css">
     <link rel="icon" type="png" target="_blank" href="/Image/Icon.png">
 
@@ -53,6 +51,14 @@
                 more quality (CAN NOT WORK)</option>
         </select>
         <br><br>
+        <select id="multiThreadSelect">
+            <option value="true" es-translation="MultiThread Activado (Mejor rendimiento)">MultiThread ON (Better
+                peformance)</option>
+            <option value="false"
+                es-translation="MultiThread Desactivado (Peor rendimiento) (Solo elige esto si da error)">
+                MultiThread OFF (Worse peformance) (Activate if only if compressing does not work) </option>
+        </select>
+        <br><br>
         <input type="number" id="sizeInput" placeholder="Target size in MB" step="0.1"
             es-translation="Tamaño objetivo en MB">
         <br><br>
@@ -72,6 +78,7 @@
         </div>
         <div class="loader" id="loader"></div>
         <div id="progress"></div>
+        <div id="speed"></div>
         <div id="estimatedTime"></div>
         <br><br>
         <div id="output-container"></div>
@@ -79,11 +86,25 @@
 
         </div>
     </center>
-    <script>
-        const { createFFmpeg, fetchFile } = FFmpeg;
+    <script type="module">
+        import {
+            initializeFFmpeg,
+            createDirs,
+            mountFile,
+            unmountPaths,
+            readVirtualFile,
+            getRunData,
+            runFFmpegCommand
+
+        } from './ffmpeg-utils.js';
+
+
+
+
+        /*const { createFFmpeg, fetchFile } = FFmpeg;
         const worker = createFFmpeg({
             log: false
-        });
+        });*/
 
         let fps
         let videoDuration = 0;
@@ -94,10 +115,11 @@
         let last_media_time = 0;
         let last_frame_num = 0;
         let durationObtained = false;  // Variable para verificar si se pudo obtener la duración
-        let processedFrames = 0
-        let videoParts = 1
-        let currentPart = 1
-        let previewing = false
+        let processedFrames = 0;
+        let videoParts = 1;
+        let currentPart = 1;
+        let previewing = false;
+        let fileMounted = false;
 
         document.getElementById('videoInput').addEventListener('change', (event) => {
             const videoFile = event.target.files[0];
@@ -159,15 +181,19 @@
         function updateProgress() {
             document.getElementById('estimatedTime').style.display = 'block';
 
+            const data = getRunData();
+
             const MidWaitTimeBetweenParts = 8
 
-            worker.setLogger(({ type, message }) => {
+            /*worker.setLogger(({ type, message }) => {
                 if (type == 'fferr') {
                     const regex = /frame=\s*(\d+)/;
                     const match = message.match(regex);
                     processedFrames = Number(match[1]); // El número del frame capturado
                 }
-            });
+            });*/
+
+            processedFrames = data.frame
 
             let localProcessedFrames = processedFrames
             if (videoParts !== 1) {
@@ -178,6 +204,9 @@
             const percent = (localProcessedFrames / totalFrames) * 100;
             document.getElementById('progress').textContent = `Progress: ${percent.toFixed(2)}%`;
             document.getElementById('progress').setAttribute("es-translation", `Progreso: ${percent.toFixed(2)}%`);
+
+            document.getElementById('speed').textContent = `Speed: x${data.speed}`;
+            document.getElementById('speed').setAttribute("es-translation", `Velocidad: x${data.speed}`);
 
             if (percent <= 5) {
                 document.getElementById('estimatedTime').textContent = `Estimated time remaining: Calculating...`;
@@ -285,10 +314,25 @@
             console.log(`Threads: ` + navigator.hardwareConcurrency.toString())
 
             loader.style.display = 'block';
-            if (!worker.isLoaded()) { await worker.load() }
-            //const arrayBuffer = await videoInput.arrayBuffer();
-            await worker.FS('writeFile', 'input.mp4', await fetchFile(videoInput));
 
+            let MultiThread = true;
+            if (document.getElementById('multiThreadSelect').value == "false") {
+                MultiThread = false;
+            };
+
+
+            await initializeFFmpeg(MultiThread);
+            document.getElementById('multiThreadSelect').classList.add("disabled");
+            document.getElementById('multiThreadSelect').disabled = true;
+
+            if (fileMounted) {
+                unmountPaths(["/input", "/output"])
+            }
+
+            createDirs(["/input", "/output"])
+
+            const inputPath = await mountFile(videoInput, "/input");
+            fileMounted = true;
 
             const fileNameWithoutExt = videoInput.name.split('.').slice(0, -1).join('.').replace(/ /g, '_');
             outputFileName = `${fileNameWithoutExt}-compressed.mp4`;
@@ -305,7 +349,7 @@
 
             async function addVideo(data, videoPart) {
                 // Leer el video comprimido
-                const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
+                const videoBlob = data//new Blob([data.buffer], { type: 'video/mp4' });
                 const videoURL = URL.createObjectURL(videoBlob);
 
                 // Crear un div para el video y su contenido
@@ -376,23 +420,24 @@
                 //console.log('Start Arg:', startArg);
                 //console.log('End Arg:', endArg);
 
+                const cpuThreads = Math.max(1, navigator.hardwareConcurrency || 1);
                 const args = [
+                    '-threads', cpuThreads.toString(),
                     '-hwaccel', 'auto',
-                    '-i', 'input.mp4',
+                    '-i', inputPath,
                     ...startArg, // Agrega el argumento de inicio si existe
                     ...endArg,   // Agrega el argumento de final si existe
                     '-r', fps,
                     '-b:v', `${bitrateKbps}k`,
                     '-preset', preset,
-                    'output.mp4'
+                    '/output/output.mp4'
                 ].filter(Boolean); // Filtra valores falsy para evitar argumentos vacíos
 
                 console.log('Started FFmpeg with args:', args); // Imprime los argumentos finales
 
-                await worker.run(...args); // Llama a FFmpeg con los argumentos
-
+                await runFFmpegCommand(args)
                 // Leer el archivo de salida
-                const data = worker.FS('readFile', 'output.mp4');
+                const data = await readVirtualFile("output/output.mp4")
                 return data;
             }
 
@@ -448,6 +493,7 @@
             //await worker.remove(outputFileName);
             loader.style.display = 'none';
             document.getElementById('estimatedTime').style.display = 'none';
+            document.getElementById('speed').style.display = 'none';
             document.getElementById('progress').textContent = `Progress: 100.00%`;
             document.getElementById('progress').setAttribute("es-translation", `Progreso: 100.00%`);
 

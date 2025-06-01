@@ -39,6 +39,13 @@ header select.LanguageSelect {
     width: 100px;
 }
 
+select.disabled {
+    background-color: #292929;
+    color: #a8a8a8;
+    border-color: #3a3a3a;
+    
+}
+
 
 button {
     padding: 10px 15px;
@@ -114,7 +121,7 @@ button:hover {
     background-color: #0056b3;
 }
 
-#infoDiv > div > #downloadButton {
+#infoDiv>div>#downloadButton {
     display: none !important;
 }
 
@@ -124,6 +131,7 @@ video {
     border-radius: 4px;
     display: none;
     /* Se ocultará hasta que se suba un video */
+    max-height: 500px;
 }
 
 .loader {
@@ -233,7 +241,8 @@ hr {
 
 
 
-#downloadSimple, .downloadSimple {
+#downloadSimple,
+.downloadSimple {
     border: 1px solid #585858;
     border-radius: 4px;
     padding: 10px;
@@ -259,7 +268,7 @@ hr {
     width: 40% !important;
 }
 
-#timeSelectors > div {
+#timeSelectors>div {
     background-color: #444;
     padding-left: 5px;
 
@@ -268,10 +277,10 @@ hr {
 #timeSelectors {
     margin-top: 10px;
     background-color: #353535;
-padding: 10px;
+    padding: 10px;
 }
 
-#timeSelectors > div > label {
+#timeSelectors>div>label {
     /*width: max-content !important;*/
     text-align: left;
     width: auto;

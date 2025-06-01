@@ -101,3 +101,12 @@ function translate(language) {
     document.documentElement.lang = language; // Cambia el idioma del documento
     isTranslating = false; // Marca el fin de la traducción
 }
+
+//Repeat set language for 2 seconds (page loading)
+const interval = setInterval(function() {
+    translate(localStorage.getItem('selectedLanguage'));
+}, 50);
+
+setTimeout(function() {
+    clearInterval(interval);
+}, 2000);

@@ -49,6 +49,9 @@
             <option value="superfast" es-translation="Procesado menos rápido pero más calidad (PUEDE QUE ESTE BUG)">
                 Slower processing but
                 more quality (CAN NOT WORK)</option>
+            <option value="default" es-translation="Procesado muy lento pero más calidad">
+                SLOW SLOW processing but
+                more quality</option>
         </select>
         <br><br>
         <select id="multiThreadSelect">
@@ -94,7 +97,8 @@
             unmountPaths,
             readVirtualFile,
             getRunData,
-            runFFmpegCommand
+            runFFmpegCommand,
+            getLastFrameFromVideo
 
         } from './ffmpeg-utils.js';
 
@@ -180,6 +184,7 @@
 
         function updateProgress() {
             document.getElementById('estimatedTime').style.display = 'block';
+            document.getElementById('speed').style.display = 'block';
 
             const data = getRunData();
 
@@ -416,20 +421,23 @@
                 const startArg = startTime !== null ? ['-ss', formatTime(startTime)] : [];
                 const endArg = endTime !== null ? ['-to', formatTime(endTime)] : [];
 
+                const presetArg = preset !== "default" ? ['-preset', preset] : [];
+
+
                 // Verifica los valores de startArg y endArg
                 //console.log('Start Arg:', startArg);
                 //console.log('End Arg:', endArg);
 
                 const cpuThreads = Math.max(1, navigator.hardwareConcurrency || 1);
                 const args = [
-                    '-threads', cpuThreads.toString(),
+                    //'-threads', cpuThreads.toString(),
                     '-hwaccel', 'auto',
                     '-i', inputPath,
                     ...startArg, // Agrega el argumento de inicio si existe
                     ...endArg,   // Agrega el argumento de final si existe
                     '-r', fps,
                     '-b:v', `${bitrateKbps}k`,
-                    '-preset', preset,
+                    ...presetArg,
                     '/output/output.mp4'
                 ].filter(Boolean); // Filtra valores falsy para evitar argumentos vacíos
 

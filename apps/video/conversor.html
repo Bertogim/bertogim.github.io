@@ -69,12 +69,20 @@
         </select>
         <br><br>
         <select id="speedSelect">
-            <option value="ultrafast" es-translation="++ Velocidad de procesado / - Calidad">++ Processing speed / -
-                Quality</option>
+            <option value="ultrafast" es-translation="++ Velocidad de procesado / Posible perdida de calidad">++
+                Processing speed / Posible quality loss</option>
             <option value="veryfast" es-translation="+ Velocidad de procesado / Posible perdida de calidad">+ Processing
                 speed / Posible quality loss</option>
             <option selected value="fast" es-translation="Velocidad de procesado normal / Calidad original">Normal
                 processing speed / Original quality</option>
+        </select>
+        <br><br>
+        <select id="multiThreadSelect">
+            <option value="true" es-translation="MultiThread Activado (Mejor rendimiento)">MultiThread ON (Better
+                peformance)</option>
+            <option value="false"
+                es-translation="MultiThread Desactivado (Peor rendimiento) (Solo elige esto si da error)">
+                MultiThread OFF (Worse peformance) (Activate if only if compressing does not work) </option>
         </select>
         <br><br>
         <div id="convertButtons">
@@ -87,9 +95,23 @@
         <div id="output-container"></div>
     </center>
 
-    <script>
+    <script type="module">
+        /*
         const { createFFmpeg, fetchFile } = FFmpeg;
         const worker = createFFmpeg({ log: false });
+        */
+        import {
+            initializeFFmpeg,
+            createDirs,
+            mountFile,
+            unmountPaths,
+            readVirtualFile,
+            getRunData,
+            runFFmpegCommand,
+            getLastFrameFromVideo
+
+        } from './ffmpeg-utils.js';
+
         let videoDuration = 0;
         let outputFileName;
         let startTime;
@@ -98,6 +120,8 @@
         let processedFrames = 0
         let videoParts = 1
         let currentPart = 1
+        let fileMounted = false;
+
 
         document.getElementById('videoInput').addEventListener('change', (event) => {
             const videoFiles = event.target.files;
@@ -116,15 +140,19 @@
         function updateProgress() {
             document.getElementById('estimatedTime').style.display = 'block';
 
+            const data = getRunData();
+
             const MidWaitTimeBetweenParts = 8
 
-            worker.setLogger(({ type, message }) => {
+            /*worker.setLogger(({ type, message }) => {
                 if (type == 'fferr') {
                     const regex = /frame=\s*(\d+)/;
                     const match = message.match(regex);
                     processedFrames = Number(match[1]); // El número del frame capturado
                 }
-            });
+            });*/
+
+            processedFrames = data.frame
 
             let localProcessedFrames = processedFrames
             //if (videoParts !== 1) {
@@ -236,16 +264,16 @@
             // Leer el video comprimido
             let videoBlob
             if (IsPreview === true) {
-                videoBlob = new Blob([data], { type: 'video/mp4' });
+                videoBlob = data//new Blob([data], { type: 'video/mp4' });
             } else {
-                videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
+                videoBlob = data//new Blob([data.buffer], { type: 'video/mp4' });
             }
 
             // Obtener el tipo MIME basado en la extensión del archivo
             const mimeType = mimeTypes[fileExtension] || 'application/octet-stream'; // Usar un tipo genérico si la extensión no está en la lista
 
             // Crear el Blob con el tipo MIME correcto
-            const fileBlob = new Blob([data.buffer], { type: mimeType });
+            const fileBlob = data//new Blob([data.buffer], { type: mimeType });
 
             // Crear un div para el video y su contenido
 
@@ -361,7 +389,25 @@
                 return;
             }
 
-            if (!worker.isLoaded()) await worker.load();
+
+            let MultiThread = true;
+            if (document.getElementById('multiThreadSelect').value == "false") {
+                MultiThread = false;
+            };
+
+
+            await initializeFFmpeg(MultiThread);
+            document.getElementById('multiThreadSelect').classList.add("disabled");
+            document.getElementById('multiThreadSelect').disabled = true;
+
+            if (fileMounted) {
+                unmountPaths(["/input", "/output"])
+            }
+
+            createDirs(["/input", "/output"])
+
+
+            fileMounted = true;
 
             videoParts = videoInput.length
 
@@ -370,35 +416,13 @@
                 currentPart = i + 1
                 const videoPart = i + 1
 
-                const arrayBuffer = await file.arrayBuffer();
-                await worker.FS('writeFile', 'input', new Uint8Array(arrayBuffer));
+                //const arrayBuffer = await file.arrayBuffer();
+                //await worker.FS('writeFile', 'input', new Uint8Array(arrayBuffer));
+                const filePath = await mountFile(file, "/input");
 
-                // Ejecutar FFmpeg con argumentos para analizar el archivo
-                const args1 = [
-                    '-i', 'input', // Archivo de entrada
-                    '-f', 'null', // Formato de salida nulo (no se guarda archivo)
-                    '-c:v', 'copy', // Copiar directamente sin recodificar
-                    '-'
-                ];
 
-                let stderr = '';
-
-                // Capturar salida estándar y errores de FFmpeg
-                worker.setLogger(({ type, message }) => {
-                    stderr += message + '\n';
-                });
-
-                await worker.run(...args1);
-
-                // Buscar la línea que contiene "frame=" en la salida de error
-                const frameMatch = stderr.match(/frame=\s*(\d+)/);
-
-                if (frameMatch) {
-                    totalFrames = parseInt(frameMatch[1], 10);
-                    console.log(`El video tiene ${totalFrames} fotogramas.`);
-                } else {
-                    console.error('No se pudo extraer el número de fotogramas.');
-                }
+                totalFrames = await getLastFrameFromVideo(filePath);
+                console.log("Video total frames: " + totalFrames)
 
                 const loader = document.getElementById('loader');
                 loader.style.display = 'block';
@@ -411,31 +435,62 @@
                 try {
                     let args;
 
-                    // Si no es MP4, usa el preset por defecto
-                    if (preset === "default") {
+                    // Determine the type of the input file based on its extension (or MIME type)
+                    const fileExtension = filePath.split('.').pop().toLowerCase();
+
+                    // Case 1: If it's a video
+                    if (['mp4', 'avi', 'mkv', 'mov', 'webm', 'flv', 'wmv', 'mpeg', '3gp', 'ogv', 'gif'].includes(outputFormat)) {
+                        // Video conversion
+                        if (preset === "default") {
+                            args = [
+                                '-i', filePath,   // Input video file
+                                `/output/${outputFileName}`  // Output video file
+                            ];
+                        } else {
+                            args = [
+                                '-i', filePath,      // Input video file
+                                '-preset', preset,   // Preset (e.g., 'fast', 'ultrafast', etc.)
+                                `/output/${outputFileName}`  // Output video file
+                            ];
+                        }
+
+                        // Case 2: If it's an audio file
+                    } else if (['mp3', 'wav', 'aac', 'ogg', 'flac', 'm4a', 'wma', 'opus'].includes(outputFormat)) {
+                        // Audio conversion
                         args = [
-                            '-i', 'input',
-                            `output.${outputFormat}`
+                            '-i', filePath,        // Input audio file
+                            `/output/${outputFileName}`  // Output audio file
                         ];
+
+                        // Case 3: If it's an image
+                    } else if (['jpg', 'png', 'bmp', 'webp', 'tiff', 'svg'].includes(outputFormat)) {
+                        // Image conversion (extract first frame from video or convert image)
+                        args = [
+                            '-i', filePath,            // Input video or image file
+                            '-vf', 'select=eq(n\\,1)',  // Select the first frame (change the frame number as needed)
+                            '-vsync', 'vfr',           // Use variable frame rate for extraction
+                            '-frames:v', '1',          // Extract only one frame (for video -> image)
+                            `/output/${outputFileName}`  // Output image file
+                        ];
+
                     } else {
-                        args = [
-                            '-i', 'input',
-                            '-preset', preset,
-                            `output.${outputFormat}`
-                        ];
+                        throw new Error('Unsupported file type');
                     }
 
-                    await worker.run(...args);
 
-                    data = worker.FS('readFile', `output.${outputFormat}`);
-                    videoBlob = new Blob([data.buffer], { type: `video/${outputFormat}` });
+                    await runFFmpegCommand(args);
+
+                    //data = worker.FS('readFile', `output.${outputFormat}`);
+                    data = await readVirtualFile(`/output/${outputFileName}`)
+
+                    videoBlob = data//new Blob([data.buffer], { type: `video/${outputFormat}` });
                     videoURL = URL.createObjectURL(videoBlob);
 
                     addVideo(data, ThisoutputContainer, videoPart);
 
                 } catch (error2) {
-                    document.getElementById('progress').textContent = `Can't convert file.`;
-                    document.getElementById('progress').setAttribute("es-translation", `No se puede convertir el archivo.`);
+                    document.getElementById('progress').textContent = `Can't convert file: ` + error2;
+                    document.getElementById('progress').setAttribute("es-translation", `No se puede convertir el archivo: ` + error2);
                 }
                 clearInterval(intervalId);
 

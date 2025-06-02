@@ -6,7 +6,7 @@ const baseURLCore = `https://unpkg.com/@ffmpeg/core@${CORE_VERSION}/dist/umd`;
 const baseURLCoreMT = `https://unpkg.com/@ffmpeg/core-mt@${CORE_VERSION}/dist/umd`;
 
 let ffmpeg = null;
-let ffmpegLogs = [];
+let ffmpegLogs = "";
 let ffmpegLoaded = false;
 
 
@@ -139,7 +139,6 @@ export async function createDirs(paths) {
 
 // Montar un archivo real en el sistema de archivos virtual
 export async function mountFile(videoFile, path) {
-
     await ffmpeg.mount('WORKERFS', { files: [videoFile] }, path); // Montar archivo
     return `${path}/${videoFile.name}`; // Ruta virtual
 }
@@ -172,9 +171,11 @@ export function getRunData() {
 
 export async function runFFmpegCommand(args) {
     parsedData = {}; // Reset parsed progress
+    let localFFmpegLogs = "";
 
     ffmpeg.on('log', ({ message }) => {
-        ffmpegLogs.push(message);
+        ffmpegLogs += message + '\n';
+        localFFmpegLogs += message + '\n';
 
         // Example log line: frame= 260 fps=85 q=31.0 size=256kB time=00:00:10.90 bitrate=192.4kbits/s speed=3.56x
         const regex = /frame=\s*(\d+).*?fps=\s*([\d.]+).*?q=\s*([\d.\-]+).*?size=\s*([\d.kMG]+B).*?time=\s*([\d:.]+).*?bitrate=\s*([\d.\-k]+bits\/s).*?speed=\s*([\d.]+)x/;
@@ -196,10 +197,52 @@ export async function runFFmpegCommand(args) {
         }
     });
 
+    console.log("Running FFmpeg with args:", args.join(' '));
+
     const exitCode = await ffmpeg.exec(args);
     if (exitCode !== 0) {
         throw new Error(`FFmpeg failed with code ${exitCode}`);
     }
 
-    return ffmpegLogs;
+    return localFFmpegLogs;
+}
+
+export async function getLastFrameFromVideo(videoPath) {
+    return new Promise(async (resolve, reject) => {
+        let lastFrame = null;
+
+
+        // Run FFmpeg command with the provided video file
+        const args = [
+            '-i', videoPath,           // Input file
+            '-map', '0:v:0',           // Map the first video stream
+            '-c', 'copy',              // Copy without re-encoding
+            '-f', 'null',              // Output to null (no actual output)
+            '-y',                      // Overwrite output file
+            ''                         // Output to /
+        ];
+
+        try {
+            // Running FFmpeg command and capturing logs
+            let ffmpegLogs = await runFFmpegCommand(args);
+
+            // Regular expression to match frame numbers in the logs
+            const frameRegex = /frame=\s*(\d+)/g;
+            let match;
+
+            // Loop through all log lines and find the last frame number
+            while ((match = frameRegex.exec(ffmpegLogs)) !== null) {
+                lastFrame = match[1]; // Capture the last matched frame
+            }
+
+            // Resolve with the last frame
+            if (lastFrame !== null) {
+                resolve(lastFrame);
+            } else {
+                reject('No frame data found in logs.');
+            }
+        } catch (error) {
+            reject(`Error running FFmpeg: ${error.message}`);
+        }
+    });
 }

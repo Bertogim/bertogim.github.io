@@ -170,57 +170,130 @@ export function getRunData() {
 }
 
 export async function runFFmpegCommand(args) {
-    parsedData = {}; // Reset parsed progress
+    let ffmpegError = null;
+
+    parsedData = {
+        frame: null,
+        fps: null,
+        q: null,
+        size: null,
+        time: null,
+        bitrate: null,
+        speed: "?",
+    }; // Reset parsed progress
+
+    
     let localFFmpegLogs = "";
+
 
     ffmpeg.on('log', ({ message }) => {
         ffmpegLogs += message + '\n';
         localFFmpegLogs += message + '\n';
 
-        // Example log line: frame= 260 fps=85 q=31.0 size=256kB time=00:00:10.90 bitrate=192.4kbits/s speed=3.56x
-        const regex = /frame=\s*(\d+).*?fps=\s*([\d.]+).*?q=\s*([\d.\-]+).*?size=\s*([\d.kMG]+B).*?time=\s*([\d:.]+).*?bitrate=\s*([\d.\-k]+bits\/s).*?speed=\s*([\d.]+)x/;
-        const match = message.match(regex);
+        // Language selection: 'EN' or 'ES'
+        const lang = localStorage.getItem('selectedLanguage') || 'en';
 
-        if (match) {
+        // ERROR MESSAGES
+
+        if (message.includes('does not contain any stream')) {
+            ffmpegError = lang === 'es'
+                ? 'Este archivo no contiene audio que se pueda convertir.'
+                : 'This file does not contain any audio stream to convert.';
+        }
+
+        if (message.includes('Invalid data found') || message.includes('could not find codec')) {
+            ffmpegError = lang === 'es'
+                ? 'El archivo de entrada no es válido o está dañado.'
+                : 'The input file is invalid or corrupted.';
+        }
+
+        if (message.includes('No such file or directory')) {
+            ffmpegError = lang === 'es'
+                ? 'El archivo especificado no se encontró.'
+                : 'The specified file was not found.';
+        }
+
+        if (message.toLowerCase().includes('deprecated pixel format used')) {
+            // This warning is usually harmless, so we may ignore it or log it as a minor issue.
+        }
+
+
+
+
+
+
+
+
+        // Example log line: frame= 260 fps=85 q=31.0 size=256kB time=00:00:10.90 bitrate=192.4kbits/s speed=3.56x
+        const frameMatch = message.match(/frame=\s*(\d+)/);
+        const fpsMatch = message.match(/fps=\s*([\d.]+)/);
+        const qMatch = message.match(/q=\s*([\d.\-]+)/);
+        const sizeMatch = message.match(/size=\s*([\d.kMG]+B)/);
+        const timeMatch = message.match(/time=\s*([\d:.]+)/);
+        const bitrateMatch = message.match(/bitrate=\s*([\d.\-k]+bits\/s)/);
+        const speedMatch = message.match(/speed=\s*([\d.]+)x/);
+
+        if (
+            frameMatch || fpsMatch || qMatch ||
+            sizeMatch || timeMatch || bitrateMatch || speedMatch
+        ) {
             parsedData = {
-                frame: parseInt(match[1]),
-                fps: parseFloat(match[2]),
-                q: parseFloat(match[3]),
-                size: match[4],
-                time: match[5],
-                bitrate: match[6],
-                speed: parseFloat(match[7])
+                frame: frameMatch ? parseInt(frameMatch[1], 10) : null,
+                fps: fpsMatch ? parseFloat(fpsMatch[1]) : null,
+                q: qMatch ? parseFloat(qMatch[1]) : null,
+                size: sizeMatch ? sizeMatch[1] : null,
+                time: timeMatch ? timeMatch[1] : null,
+                bitrate: bitrateMatch ? bitrateMatch[1] : null,
+                speed: speedMatch ? parseFloat(speedMatch[1]) : "?",
             };
+
         } else {
             //console.warn("Can't regex ffmpeg message, message: "+message)
             console.log(message)
         }
     });
 
-    console.log("Running FFmpeg with args:", args.join(' '));
+    try {
+        console.log("Running FFmpeg with args:", args.join(' '));
+        console.trace();
 
-    const exitCode = await ffmpeg.exec(args);
-    if (exitCode !== 0) {
-        throw new Error(`FFmpeg failed with code ${exitCode}`);
+        const exitCode = await ffmpeg.exec(args);
+        if (exitCode !== 0 && !ffmpegError) {
+            alert("General error, exit code " + exitCode);
+            throw new Error(`FFmpeg failed with code ${exitCode}`);
+        }
+
+        if (ffmpegError) {
+            alert(ffmpegError);  // Show user-friendly message
+            throw new Error(ffmpegError);  // Stop further processing
+        }
+    } catch (err) {
+        console.error('FFmpeg execution failed:', err);
+        alert(lang === 'ES'
+            ? 'Ocurrió un error al procesar el video.'
+            : 'An error occurred while processing the video.');
     }
 
     return localFFmpegLogs;
 }
 
 export async function getLastFrameFromVideo(videoPath) {
+    //Averages to only 75x speed, bad for long videos
+    //Pretty accurate
+
     return new Promise(async (resolve, reject) => {
         let lastFrame = null;
 
 
         // Run FFmpeg command with the provided video file
         const args = [
-            '-i', videoPath,           // Input file
-            '-map', '0:v:0',           // Map the first video stream
-            '-c', 'copy',              // Copy without re-encoding
-            '-f', 'null',              // Output to null (no actual output)
-            '-y',                      // Overwrite output file
-            ''                         // Output to /
+            '-i', videoPath,
+            '-map', '0:v:0',
+            '-c', 'copy',
+            '-f', 'null',
+            '-y', '-' // Output to null device
         ];
+
 
         try {
             // Running FFmpeg command and capturing logs
@@ -244,5 +317,74 @@ export async function getLastFrameFromVideo(videoPath) {
         } catch (error) {
             reject(`Error running FFmpeg: ${error.message}`);
         }
+    });
+}
+export async function estimateTotalFrames(videoPath) {
+    return new Promise(async (resolve, reject) => {
+        let ffmpegLogs = "";
+
+        const SAMPLE_DURATION = 30; // 2 minutes
+
+
+        const args = [
+            '-i', videoPath,
+            '-t', SAMPLE_DURATION.toString(),
+            '-map', '0:v:0',
+            '-c', 'copy',
+            '-f', 'null',
+            '-preset', 'ultrafast',
+            '-y', '-'
+        ];
+
+        try {
+            // Run FFmpeg and capture logs
+            ffmpegLogs = await runFFmpegCommand(args);
+
+            // Variables to store the latest frame and time values
+            let lastFrame = 0;
+            let lastTimeInSeconds = 0;
+
+            // Regex to match both frame and time values from log lines
+            const logRegex = /frame=\s*(\d+).*?time=(\d+):(\d+):(\d+\.\d+)/g;
+            let match;
+
+            // Iterate over all matches to find the last logged frame and time
+            while ((match = logRegex.exec(ffmpegLogs)) !== null) {
+                const frame = parseInt(match[1]);
+                const h = parseInt(match[2]);
+                const m = parseInt(match[3]);
+                const s = parseFloat(match[4]);
+                const seconds = h * 3600 + m * 60 + s;
+
+                lastFrame = frame;
+                lastTimeInSeconds = seconds;
+            }
+
+            if (lastTimeInSeconds === 0) {
+                return reject("Could not calculate time from logs.");
+            }
+
+            // Extract the total duration from the logs
+            const durationMatch = ffmpegLogs.match(/Duration: (\d+):(\d+):(\d+\.\d+)/);
+            if (!durationMatch) return reject("No duration found in logs.");
+
+            const [_, hours, minutes, seconds] = durationMatch;
+            const totalDurationInSeconds =
+                parseInt(hours) * 3600 +
+                parseInt(minutes) * 60 +
+                parseFloat(seconds);
+
+            // Estimate the real FPS based on the last known frame and timestamp
+            const estimatedFps = lastFrame / lastTimeInSeconds;
+
+            // Estimate the total number of frames for the full video
+            const estimatedTotalFrames = Math.round(estimatedFps * totalDurationInSeconds);
+
+            resolve(estimatedTotalFrames);
+
+        } catch (err) {
+            reject(err);
+        }
+
     });
 }

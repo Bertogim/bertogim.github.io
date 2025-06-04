@@ -58,7 +58,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Función para traducir el contenido de la página
 function translate(language) {
-    console.log("Selected language: " + language);
     isTranslating = true; // Marca el inicio de la traducción
 
     var elementsToTranslate = document.querySelectorAll('*[es-translation], *[en-translation]:not(script):not(style)');
@@ -102,11 +101,14 @@ function translate(language) {
     isTranslating = false; // Marca el fin de la traducción
 }
 
+console.log("Selected language: " + localStorage.getItem('selectedLanguage'));
+
+
 //Repeat set language for 2 seconds (page loading)
-const interval = setInterval(function() {
+const interval = setInterval(function () {
     translate(localStorage.getItem('selectedLanguage'));
 }, 50);
 
-setTimeout(function() {
+setTimeout(function () {
     clearInterval(interval);
 }, 2000);

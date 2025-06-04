@@ -46,9 +46,9 @@
         <select id="speedSelect">
             <option value="ultrafast" es-translation="Procesado más rápido pero menos calidad">Faster processing but
                 less quality</option>
-            <option value="superfast" es-translation="Procesado menos rápido pero más calidad (PUEDE QUE ESTE BUG)">
+            <option value="veryfast" es-translation="Procesado menos rápido pero más calidad">
                 Slower processing but
-                more quality (CAN NOT WORK)</option>
+                more quality</option>
             <option value="default" es-translation="Procesado muy lento pero más calidad">
                 SLOW SLOW processing but
                 more quality</option>
@@ -98,7 +98,8 @@
             readVirtualFile,
             getRunData,
             runFFmpegCommand,
-            getLastFrameFromVideo
+            getLastFrameFromVideo,
+            estimateTotalFrames
 
         } from './ffmpeg-utils.js';
 

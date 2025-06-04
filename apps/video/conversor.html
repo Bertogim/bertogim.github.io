@@ -22,7 +22,7 @@
     <center>
         <h1 es-translation="Conversor de Archivos">File Converter</h1>
         <div class="input-container">
-            <input type="file" id="videoInput" accept="*"> <!--multiple-->
+            <input type="file" id="videoInput" accept="*" multiple> <!---->
             <video id="uploadedVideo" controls style="display: none;"></video>
             <div id="infoDiv">
                 <p id="size" es-translation="Tamaño">Size</p>
@@ -73,7 +73,7 @@
                 Processing speed / Posible quality loss</option>
             <option value="veryfast" es-translation="+ Velocidad de procesado / Posible perdida de calidad">+ Processing
                 speed / Posible quality loss</option>
-            <option selected value="fast" es-translation="Velocidad de procesado normal / Calidad original">Normal
+            <option selected value="default" es-translation="Velocidad de procesado normal / Calidad original">Normal
                 processing speed / Original quality</option>
         </select>
         <br><br>
@@ -90,6 +90,7 @@
         </div>
         <div class="loader" id="loader"></div>
         <div id="progress"></div>
+        <div id="speed"></div>
         <div id="estimatedTime"></div>
         <br><br>
         <div id="output-container"></div>
@@ -108,7 +109,8 @@
             readVirtualFile,
             getRunData,
             runFFmpegCommand,
-            getLastFrameFromVideo
+            getLastFrameFromVideo,
+            estimateTotalFrames
 
         } from './ffmpeg-utils.js';
 
@@ -121,6 +123,7 @@
         let videoParts = 1
         let currentPart = 1
         let fileMounted = false;
+        let actualStartTime = 0;
 
 
         document.getElementById('videoInput').addEventListener('change', (event) => {
@@ -137,71 +140,110 @@
             }
         });
 
-        function updateProgress() {
-            document.getElementById('estimatedTime').style.display = 'block';
-
-            const data = getRunData();
-
-            const MidWaitTimeBetweenParts = 8
-
-            /*worker.setLogger(({ type, message }) => {
-                if (type == 'fferr') {
-                    const regex = /frame=\s*(\d+)/;
-                    const match = message.match(regex);
-                    processedFrames = Number(match[1]); // El número del frame capturado
-                }
-            });*/
-
-            processedFrames = data.frame
-
-            let localProcessedFrames = processedFrames
-            //if (videoParts !== 1) {
-            //localProcessedFrames = processedFrames + (totalFrames / videoParts) * (currentPart - 1)
-            //}
-
-            let textToAdd = ""
-            if (videoParts !== 1) {
-                textToAdd = " (" + currentPart + "/" + videoParts + ")"
-            }
-
-            const percent = (localProcessedFrames / totalFrames) * 100;
-            document.getElementById('progress').textContent = `Progress: ${percent.toFixed(2)}%` + textToAdd;
-            document.getElementById('progress').setAttribute("es-translation", `Progreso: ${percent.toFixed(2)}%` + textToAdd);
-
-            if (percent <= 5) {
-                document.getElementById('estimatedTime').textContent = `Estimated time remaining: Calculating...`;
-                document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: Calculando...`);
+        function updateProgress(text, textES) {
+            if (text) {
+                document.getElementById('progress').textContent = text;
+                document.getElementById('progress').setAttribute("es-translation", textES);
             } else {
-                if (localProcessedFrames > 0 && startTime) {
-                    const elapsedTime = (Date.now() - startTime) / 1000;
-                    const estimatedTotalTime = (elapsedTime / localProcessedFrames) * totalFrames;
-                    let remainingTime = 0
+                document.getElementById('speed').style.display = 'block';
+                document.getElementById('estimatedTime').style.display = 'block';
 
 
+                const data = getRunData();
 
-                    remainingTime = estimatedTotalTime - elapsedTime;
+                const MidWaitTimeBetweenParts = 8;
 
-                    const remainingMinutes = Math.floor(remainingTime / 60);
-                    const remainingSeconds = Math.floor(remainingTime % 60);
-                    document.getElementById('estimatedTime').textContent = `Estimated time remaining: ${remainingMinutes}m ${remainingSeconds}s`;
-                    document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: ${remainingMinutes}m ${remainingSeconds}s`);
+                processedFrames = data.frame;
+
+                let localProcessedFrames = processedFrames;
+
+                //console.log(data);
+
+                let timeSeconds;
+
+                // Use time only if frame is invalid
+                const hasValidFrame = typeof processedFrames === 'number' && !isNaN(processedFrames);
+
+                if (!hasValidFrame && data.time) {
+                    const timeString = data.time; // e.g., "00:00:00.03"
+                    const timeParts = timeString.split(':'); // ["hh", "mm", "ss.ms"]
+
+                    if (timeParts.length === 3) {
+                        timeSeconds =
+                            parseFloat(timeParts[0]) * 3600 +
+                            parseFloat(timeParts[1]) * 60 +
+                            parseFloat(timeParts[2]);
+
+                        // Estimate frames using duration and totalFrames
+                        localProcessedFrames = (timeSeconds / videoDuration) * totalFrames;
+                    }
                 }
+
+
+                let textToAdd = "";
+                if (videoParts !== 1) {
+                    textToAdd = ` (${currentPart}/${videoParts})`;
+                }
+
+                const percent = (localProcessedFrames / totalFrames) * 100;
+                document.getElementById('progress').textContent = `Progress: ${percent.toFixed(2)}%` + textToAdd;
+                document.getElementById('progress').setAttribute("es-translation", `Progreso: ${percent.toFixed(2)}%` + textToAdd);
+
+                document.getElementById('speed').textContent = `Speed: x${data.speed}`;
+                document.getElementById('speed').setAttribute("es-translation", `Velocidad: x${data.speed}`);
+
+                let elapsedTime = (Date.now() - startTime) / 1000;
+
+
+                const elapsedSinceActualStart = (Date.now() - actualStartTime) / 1000;
+                
+                //console.log(elapsedSinceActualStart);
+
+                if (percent <= 5 && elapsedSinceActualStart < 10) {
+
+                    document.getElementById('estimatedTime').textContent = `Estimated time remaining: Calculating...`;
+                    document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: Calculando...`);
+                } else {
+                    if (localProcessedFrames > 0 && startTime) {
+                        const estimatedTotalTime = (elapsedTime / localProcessedFrames) * totalFrames;
+                        let remainingTime = 0
+
+
+
+                        remainingTime = estimatedTotalTime - elapsedTime;
+
+                        const remainingMinutes = Math.floor(remainingTime / 60);
+                        const remainingSeconds = Math.floor(remainingTime % 60);
+                        document.getElementById('estimatedTime').textContent = `Estimated time remaining: ${remainingMinutes}m ${remainingSeconds}s`;
+                        document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: ${remainingMinutes}m ${remainingSeconds}s`);
+                    }
+                }
+
+                if (percent > 100) {
+                    document.getElementById('progress').textContent = `Progress: ${localProcessedFrames} / ?` + textToAdd;
+                    document.getElementById('progress').setAttribute("es-translation", `Progreso: ${localProcessedFrames} / ?` + textToAdd);
+
+                    document.getElementById('estimatedTime').textContent = `Estimated time remaining: ?`;
+                    document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: ?`);
+
+                }
+
+                if (percent == 0) {
+                    document.getElementById('progress').textContent = "Long videos can take a while to start processing";
+                    document.getElementById('progress').setAttribute("es-translation", "Los vídeos largos pueden tardar un poco en comenzar a procesarse");
+
+                    document.getElementById('estimatedTime').textContent = ``;
+                    document.getElementById('estimatedTime').setAttribute("es-translation","");
+
+                    actualStartTime = Date.now()
+                }
+
+                //if (percent > 100) {
+                //    const loader = document.getElementById('loader');
+                //    loader.style.display = 'none';
+                //}
+                console.log(localProcessedFrames + ' / ' + totalFrames + ' | ' + percent.toFixed(3) + '%')
             }
-
-            if (percent > 100) {
-                document.getElementById('progress').textContent = `Progress: ${localProcessedFrames} / ?` + textToAdd;
-                document.getElementById('progress').setAttribute("es-translation", `Progreso: ${localProcessedFrames} / ?` + textToAdd);
-
-                document.getElementById('estimatedTime').textContent = `Estimated time remaining: ?`;
-                document.getElementById('estimatedTime').setAttribute("es-translation", `Tiempo estimado restante: ?`);
-
-            }
-
-            //if (percent > 100) {
-            //    const loader = document.getElementById('loader');
-            //    loader.style.display = 'none';
-            //}
-            console.log(localProcessedFrames + ' / ' + totalFrames + ' | ' + percent.toFixed(3) + '%')
         }
 
 
@@ -404,7 +446,7 @@
                 unmountPaths(["/input", "/output"])
             }
 
-            createDirs(["/input", "/output"])
+            await createDirs(["/input", "/output"])
 
 
             fileMounted = true;
@@ -416,18 +458,32 @@
                 currentPart = i + 1
                 const videoPart = i + 1
 
-                console.log("Processing "+file.name)
+                updateProgress("Analyzing file...", "Analizando archivo...")
+                console.log("Processing " + file.name)
 
-                //const arrayBuffer = await file.arrayBuffer();
-                //await worker.FS('writeFile', 'input', new Uint8Array(arrayBuffer));
-                const filePath = await mountFile(file, "/input");
+                videoDuration = await getVideoDuration(file);
 
-
-                totalFrames = await getLastFrameFromVideo(filePath);
-                console.log("Video total frames: " + totalFrames)
 
                 const loader = document.getElementById('loader');
                 loader.style.display = 'block';
+
+                //const arrayBuffer = await file.arrayBuffer();
+                //await worker.FS('writeFile', 'input', new Uint8Array(arrayBuffer));
+                createDirs([`/input/input_${i}`])
+                const filePath = await mountFile(file, `/input/input_${i}`);
+                console.log(filePath)
+
+
+                //totalFrames = await getLastFrameFromVideo(filePath);
+                if (['jpg', 'png', 'bmp', 'webp', 'tiff', 'svg', 'mp3'].includes(outputFormat)) {
+                    totalFrames = 1
+                } else {
+                    totalFrames = await estimateTotalFrames(filePath);
+                }
+
+                console.log("Total frames: " + totalFrames)
+
+
                 const intervalId = setInterval(updateProgress, 500);
                 startTime = Date.now();
                 const fileNameWithoutExt = file.name.split('.').slice(0, -1).join('.');
@@ -451,7 +507,7 @@
                         } else {
                             args = [
                                 '-i', filePath,      // Input video file
-                                '-preset', preset,   // Preset (e.g., 'fast', 'ultrafast', etc.)
+                                '-preset', preset,
                                 `/output/${outputFileName}`  // Output video file
                             ];
                         }
@@ -459,18 +515,24 @@
                         // Case 2: If it's an audio file
                     } else if (['mp3', 'wav', 'aac', 'ogg', 'flac', 'm4a', 'wma', 'opus'].includes(outputFormat)) {
                         // Audio conversion
-                        args = [
-                            '-i', filePath,        // Input audio file
-                            `/output/${outputFileName}`  // Output audio file
-                        ];
+                        if (preset === "default") {
+                            args = [
+                                '-i', filePath,   // Input video file
+                                `/output/${outputFileName}`  // Output video file
+                            ];
+                        } else {
+                            args = [
+                                '-i', filePath,      // Input video file
+                                '-preset', preset,
+                                `/output/${outputFileName}`  // Output video file
+                            ];
+                        }
 
                         // Case 3: If it's an image
                     } else if (['jpg', 'png', 'bmp', 'webp', 'tiff', 'svg'].includes(outputFormat)) {
                         // Image conversion (extract first frame from video or convert image)
                         args = [
                             '-i', filePath,            // Input video or image file
-                            '-vf', 'select=eq(n\\,1)',  // Select the first frame (change the frame number as needed)
-                            '-vsync', 'vfr',           // Use variable frame rate for extraction
                             '-frames:v', '1',          // Extract only one frame (for video -> image)
                             `/output/${outputFileName}`  // Output image file
                         ];
@@ -508,6 +570,7 @@
             console.log("Finished")
             loader.style.display = 'none';
             document.getElementById('estimatedTime').style.display = 'none';
+            document.getElementById('speed').style.display = 'none';
             document.getElementById('progress').textContent = `Progress: 100.00%`;
             document.getElementById('progress').setAttribute("es-translation", `Progreso: 100.00%`);
 

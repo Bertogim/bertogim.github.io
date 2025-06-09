@@ -19,7 +19,7 @@ link.addEventListener('load', () => {
 
             <!-- Dropdown for Creations -->
         <div class="dropdown">
-            <a href="#" class="dropdown-toggle" es-translation="Creaciones">Creations</a>
+            <a href="/creations" class="dropdown-toggle" es-translation="Creaciones">Creations</a>
             <div class="dropdown-menu">
                 <a href="/apps/discord-timestamps" es-translation="Discord Timestamps">Discord Timestamps</a>
                 <a target="_blank" href="/apps/notepad" es-translation="Notepad">Notepad</a>

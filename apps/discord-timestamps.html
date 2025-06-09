@@ -74,22 +74,28 @@
             cursor: pointer;
             padding: 5px;
         }
+
+        #imageContainer {
+            background-color: white;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5rem;
+            user-select: none;
+        }
     </style>
     <script defer src="/translations.js"></script>
     <script defer src="/header.js"></script>
 </head>
+
 <body>
 
 
 
 
-    <div style="width: 100%;
-        max-height: 90vh;
-        overflow: hidden;
-        margin-top: -10%;
-        position: relative;background-color: white;">
-        <img style="width: 50%; height: auto; padding-left: 25%;"
-            src="https://cdn-icons-png.flaticon.com/512/8403/8403154.png" alt="Background Image">
+    <div id="imageContainer">
+        📅
     </div>
 
     <h1>Discord Timestamp Generator</h1>
@@ -160,7 +166,7 @@
         <button class="preset" data-offset="1800">In 30 minutes</button>
         <button class="preset" data-offset="2400">In 40 minutes</button>
         <button class="preset" data-offset="3000">In 50 minutes</button>
-    
+
     </section>
 
     <section id="custom">
@@ -208,13 +214,13 @@
         const generateButton = document.getElementById('generate-button');
         generateButton.addEventListener('click', GenButtonClicked);
 
-        
+
         function GenButtonClicked() {
             generateButton.textContent = 'Generated!'
-                setTimeout(() => {
-                    generateButton.textContent = 'Generate Timestamp';
-                }, 1000);
-                generateCustomTimestamp()
+            setTimeout(() => {
+                generateButton.textContent = 'Generate Timestamp';
+            }, 1000);
+            generateCustomTimestamp()
         }
 
         // Función para generar un timestamp personalizado
@@ -456,7 +462,6 @@
 
     </script>
 
-    <script src="translations.js"></script>
 
 </body>
 

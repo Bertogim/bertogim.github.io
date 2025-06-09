@@ -5,9 +5,9 @@ body {
 /* Estilos generales del header */
 header {
     text-align: center;
-    background-color: #131615;
+    background-color: #090b0b;
     color: white;
-    border-bottom: 0.1vh solid #f59400;
+    border-bottom: 0.1vh solid rgb(202, 123, 4);
     z-index: 999;
     top: 0;
     left: 0;

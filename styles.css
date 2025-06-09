@@ -75,6 +75,28 @@ iframe {
     object-fit: cover;
 }
 
+.card img.Anchor-Top {
+    object-position: top;
+}
+
+.card .emoji {
+    height: 200px;
+    width: 100%;
+    padding-right: 5%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 8rem;
+    /* Tamaño grande para el emoji */
+    background-color: #ffffff;
+    object-fit: scale-down;
+    /* No aplica a div, pero lo dejamos para imagen si quieres alternar */
+    user-select: none;
+
+}
+
+
+
 .card .text {
     padding: 10px;
     padding-top: 0px;
@@ -139,38 +161,53 @@ iframe {
     width: 100%;
     margin-bottom: 1rem;
     border-radius: 0.7rem;
-    transition: transform 0.3s ease-in-out; /* Suaviza la transición */
+    transition: transform 0.3s ease-in-out;
+    /* Suaviza la transición */
 }
 
 .image-container img:hover {
-    transform: scale(1.3); /* Aplica el zoom centrado */
+    transform: scale(1.3);
+    /* Aplica el zoom centrado */
 }
+
 .image-container#streams2 img:hover {
-    transform: scale(1.2); /* Aplica el zoom centrado */
+    transform: scale(1.2);
+    /* Aplica el zoom centrado */
 }
 
 .image-container2 {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 columnas con tamaño igual */
-    gap: 10px; /* Espacio entre las imágenes */
-    margin-top: 20px; /* Ajuste del margen superior */
+    grid-template-columns: repeat(3, 1fr);
+    /* 3 columnas con tamaño igual */
+    gap: 10px;
+    /* Espacio entre las imágenes */
+    margin-top: 20px;
+    /* Ajuste del margen superior */
 }
 
 .image-container2 a {
-    display: block; /* Asegura que cada enlace ocupe todo el espacio disponible */
-    text-align: center; /* Centra el texto (en caso de haber) dentro del enlace */
+    display: block;
+    /* Asegura que cada enlace ocupe todo el espacio disponible */
+    text-align: center;
+    /* Centra el texto (en caso de haber) dentro del enlace */
 }
 
 .SocialImage {
-    width: 100%; /* Ocupa todo el ancho disponible en su contenedor */
-    height: auto; /* Mantiene la proporción original de la imagen */
-    max-width: 150px; /* Establece un ancho máximo para las imágenes */
-    border-radius: 10px; /* Añade bordes redondeados para un aspecto más suave */
-    transition: transform 0.15s ease-in-out; /* Efecto de transición al hacer hover */
+    width: 100%;
+    /* Ocupa todo el ancho disponible en su contenedor */
+    height: auto;
+    /* Mantiene la proporción original de la imagen */
+    max-width: 150px;
+    /* Establece un ancho máximo para las imágenes */
+    border-radius: 10px;
+    /* Añade bordes redondeados para un aspecto más suave */
+    transition: transform 0.15s ease-in-out;
+    /* Efecto de transición al hacer hover */
 }
 
 .SocialImage:hover {
-    transform: scale(1.1); /* Escala ligeramente la imagen al hacer hover */
+    transform: scale(1.1);
+    /* Escala ligeramente la imagen al hacer hover */
 }
 
 
@@ -283,14 +320,14 @@ iframe {
     background: none;
     width: 50px;
     height: 50px;
-    position: relative; 
-    text-indent:-9999px;
+    position: relative;
+    text-indent: -9999px;
     width: 90%;
     background-color: #12cc0f;
     margin-left: 5%;
     align-items: center;
     border-radius: 10px;
-  }
+}
 
 .play span {
     width: 0;
@@ -298,32 +335,41 @@ iframe {
     border-top: 15px solid transparent;
     border-left: 20px solid #fff;
     border-bottom: 15px solid transparent;
-    position:absolute;
-    top:20%;
-    left:49%;    
-  }
+    position: absolute;
+    top: 20%;
+    left: 49%;
+}
 
-  
-.open {
-    background: none;
-    width: 50px;
-    height: 50px;
-    position: relative; 
-    text-indent:-9999px;
-    width: 90%;
-    background-color: #0fbfcc;
-    margin-left: 5%;
+.try {
+    display: flex;
+    /* Establish flex container */
+    justify-content: center;
+    /* Center horizontally */
     align-items: center;
-    border-radius: 10px;
-  }
+    /* Center vertically */
 
-.open span {
-    width: 0;
-    height: 0;
-    border-top: 15px solid transparent;
-    border-left: 20px solid #fff;
-    border-bottom: 15px solid transparent;
-    position:absolute;
-    top:20%;
-    left:49%;    
-  }
+    /* Updated width and height as needed */
+    width: 90%;
+    height: 50px;
+    /* keep or adjust height as desired */
+
+    background-color: #0f90cc;
+    margin-left: 5%;
+    border-radius: 10px;
+
+    transition: 0.3s;
+}
+
+.try:hover {
+    background-color: #1676a3;
+}
+
+.try p {
+    font-size: 1.17em;
+    color: #ffffff;
+}
+
+.card>div>a {
+    text-decoration: none;
+
+}

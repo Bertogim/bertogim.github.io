@@ -285,3 +285,8 @@ hr {
     text-align: left;
     width: auto;
 }
+
+.small {
+    font-size: 0.5em;
+    color: #686a6e;
+}

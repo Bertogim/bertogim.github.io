@@ -196,7 +196,7 @@
 
 
                 const elapsedSinceActualStart = (Date.now() - actualStartTime) / 1000;
-                
+
                 //console.log(elapsedSinceActualStart);
 
                 if (percent <= 5 && elapsedSinceActualStart < 10) {
@@ -229,11 +229,11 @@
                 }
 
                 if (percent == 0) {
-                    document.getElementById('progress').textContent = "Long videos can take a while to start processing";
-                    document.getElementById('progress').setAttribute("es-translation", "Los vídeos largos pueden tardar un poco en comenzar a procesarse");
+                    document.getElementById('progress').textContent = "Long videos can take a while to start processing<br><span class='small'>(If it seems to not do anything, try without multithreading)</span>";
+                    document.getElementById('progress').setAttribute("es-translation", "Los vídeos largos pueden tardar un poco en comenzar a procesarse<br><span class='small'>(Si parece que no pasa nada, prueba la version sin multi-thread)</span>");
 
                     document.getElementById('estimatedTime').textContent = ``;
-                    document.getElementById('estimatedTime').setAttribute("es-translation","");
+                    document.getElementById('estimatedTime').setAttribute("es-translation", "");
 
                     actualStartTime = Date.now()
                 }
@@ -460,9 +460,11 @@
 
                 updateProgress("Analyzing file...", "Analizando archivo...")
                 console.log("Processing " + file.name)
-
-                videoDuration = await getVideoDuration(file);
-
+                if (['jpg', 'png', 'bmp', 'webp', 'tiff', 'svg'].includes(outputFormat)) {
+                    videoDuration = 0;
+                } else {
+                    videoDuration = await estimateTotalFrames(filePath);
+                }
 
                 const loader = document.getElementById('loader');
                 loader.style.display = 'block';
@@ -530,13 +532,15 @@
 
                         // Case 3: If it's an image
                     } else if (['jpg', 'png', 'bmp', 'webp', 'tiff', 'svg'].includes(outputFormat)) {
-                        // Image conversion (extract first frame from video or convert image)
-                        args = [
-                            '-i', filePath,            // Input video or image file
-                            '-frames:v', '1',          // Extract only one frame (for video -> image)
-                            `/output/${outputFileName}`  // Output image file
-                        ];
+                        // Image conversion
+                        const isJpg = outputFormat === 'jpg';
 
+                        args = [
+                            '-i', filePath,
+                            '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+                            ...(isJpg ? ['-f', 'image2'] : ['-f', outputFormat]),
+                            `/output/${outputFileName}`
+                        ];
                     } else {
                         throw new Error('Unsupported file type');
                     }

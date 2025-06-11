@@ -246,6 +246,7 @@ export async function runFFmpegCommand(args) {
                 bitrate: bitrateMatch ? bitrateMatch[1] : null,
                 speed: speedMatch ? parseFloat(speedMatch[1]) : "?",
             };
+            console.log(message)
 
         } else {
             //console.warn("Can't regex ffmpeg message, message: "+message)

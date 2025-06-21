@@ -459,15 +459,6 @@
                 const videoPart = i + 1
 
                 updateProgress("Analyzing file...", "Analizando archivo...")
-                console.log("Processing " + file.name)
-                if (['jpg', 'png', 'bmp', 'webp', 'tiff', 'svg'].includes(outputFormat)) {
-                    videoDuration = 0;
-                } else {
-                    videoDuration = await estimateTotalFrames(filePath);
-                }
-
-                const loader = document.getElementById('loader');
-                loader.style.display = 'block';
 
                 //const arrayBuffer = await file.arrayBuffer();
                 //await worker.FS('writeFile', 'input', new Uint8Array(arrayBuffer));
@@ -475,12 +466,31 @@
                 const filePath = await mountFile(file, `/input/input_${i}`);
                 console.log(filePath)
 
+                console.log("Processing " + file.name)
+                if (['jpg', 'png', 'bmp', 'webp', 'tiff', 'svg'].includes(outputFormat)) {
+                    videoDuration = 0;
+                } else {
+                    try {
+                        videoDuration = 0//await estimateTotalFrames(filePath);
+                    } catch {
+                        videoDuration = 0;
+                    }
+                }
+
+                const loader = document.getElementById('loader');
+                loader.style.display = 'block';
+
+
 
                 //totalFrames = await getLastFrameFromVideo(filePath);
                 if (['jpg', 'png', 'bmp', 'webp', 'tiff', 'svg', 'mp3'].includes(outputFormat)) {
                     totalFrames = 1
                 } else {
-                    totalFrames = await estimateTotalFrames(filePath);
+                    try {
+                        totalFrames = await estimateTotalFrames(filePath);
+                    } catch {
+                        videoDuration = 0;
+                    }
                 }
 
                 console.log("Total frames: " + totalFrames)

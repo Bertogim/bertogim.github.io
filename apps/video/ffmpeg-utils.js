@@ -182,7 +182,7 @@ export async function runFFmpegCommand(args) {
         speed: "?",
     }; // Reset parsed progress
 
-    
+
     let localFFmpegLogs = "";
 
 
@@ -270,6 +270,9 @@ export async function runFFmpegCommand(args) {
         }
     } catch (err) {
         console.error('FFmpeg execution failed:', err);
+
+        // Language selection: 'EN' or 'ES'
+        const lang = localStorage.getItem('selectedLanguage') || 'en';
         alert(lang === 'ES'
             ? 'Ocurrió un error al procesar el video.'
             : 'An error occurred while processing the video.');

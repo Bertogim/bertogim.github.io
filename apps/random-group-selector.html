@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Organizador de Grupos</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Fondo con patrón Chevron sutil */
+        body {
+            margin: 0;
+            font-family: "Titillium Web", sans-serif;
+            font-weight: 700;
+            font-style: normal;
+            background-color: #b1a690;
+                        background-image:
+                repeating-linear-gradient(45deg, #a39985 0, #a39985 10px, transparent 10px, transparent 20px);
+            background-size: 30px 30px;
+
+
+            color: #1e1e1e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #2b271f;
+            color: #eae0c2;
+            padding: 15px 25px;
+            font-size: 26px;
+            font-weight: bold;
+            text-align: left;
+            letter-spacing: 1px;
+            border-bottom: 4px solid #000;
+        }
+
+        header::after {
+            content: "ORGANIZADOR RANDOM DE GRUPOS";
+        }
+
+        .container {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .note-area {
+            background: linear-gradient(to bottom, #2b271f 50%, #71695b 50%);
+            box-shadow: 0 0 0 7px rgba(43, 39, 31, 0.322);
+            border-radius: 3px;
+            margin-bottom: -5px;
+            width: 420px;
+            color: #eae0c2;
+        }
+
+        .note-area p {
+            width: 100%;
+            padding: 0px 12px;
+            margin: 5px;
+        }
+
+
+        .note-area textarea {
+            width: calc(100% - 20px);
+            height: 100px;
+            padding: 10px;
+            font-size: 15px;
+            background: #71695b;
+            color: #eae0c2;
+            border: none;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .group-controls {
+            margin: 20px 0 10px 0px;
+        }
+
+        .group-controls button {
+            background-color: #3a3a3a;
+            color: #eae0c2;
+            border: 1px solid #000;
+            padding: 10px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+            font-family: inherit;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 0 #000;
+        }
+
+        .group-controls button:hover {
+            background-color: #5a5a5a;
+        }
+
+        .groups {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .group {
+            background-color: #0d0d0d;
+            border: 3px solid #1b1b1b;
+            width: 250px;
+            min-height: 240px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            position: relative;
+            border: #2b2820 solid 0.8vh;
+        }
+
+        .group-header {
+            text-align: center;
+            font-weight: bold;
+            color: #fcf5da;
+            padding: 3px 0px;
+            font-size: 17px;
+        }
+
+        .group ul {
+            list-style: none;
+            padding: 0px;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .group li {
+            color: #fcf5da;
+            padding: 0px 5px;
+            border-radius: 4px;
+            font-size: 25px;
+            text-align: center;
+        }
+
+        .group input {
+            width: calc(100% - 0.8vh);
+            background: transparent;
+            border: none;
+            text-align: center;
+            color: #fcf5da;
+            font-weight: bold;
+            font-size: 30px;
+            padding: 4px;
+            font-family: inherit;
+        }
+
+        .remove-btn {
+            display: none;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #822;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+
+<body>
+    <header></header>
+
+    <div class="container">
+        <div class="note-area">
+            <p><strong>Lista de nombres:</strong></p>
+            <textarea id="nameList" placeholder="Escribe nombres, uno por línea..."></textarea>
+        </div>
+
+        <div class="group-controls">
+            <button onclick="addGroup()">Añadir Grupo</button>
+            <button onclick="removeGroup()">Quitar Grupo</button>
+            <button onclick="randomizeGroups()">Organizar Aleatoriamente</button>
+        </div>
+
+        <div class="groups" id="groupContainer"></div>
+    </div>
+
+    <script>
+        let groupCount = 0;
+        let groupTitles = {};
+        const nameList = document.getElementById("nameList");
+        const groupContainer = document.getElementById("groupContainer");
+
+        const headerColors = ['#7f7f7f', '#755d40', '#415135', '#3a4a64', '#1d1d1d'];
+
+        // Guardar entrada localmente
+        nameList.value = localStorage.getItem("nameList") || "";
+        nameList.addEventListener("input", () => {
+            localStorage.setItem("nameList", nameList.value);
+        });
+
+        function getNames() {
+            return nameList.value.split("\n").map(n => n.trim()).filter(n => n);
+        }
+
+        function addGroup() {
+            const id = `group-${++groupCount}`;
+            groupTitles[id] = `Grupo ${groupCount}`;
+            const color = headerColors[(groupCount - 1) % headerColors.length];
+
+            // Función para oscurecer un color hexadecimal un porcentaje dado (0 a 1)
+            function darkenHexColor(hex, percent) {
+                // Elimina #
+                hex = hex.replace('#', '');
+                // Divide en R, G, B
+                const num = parseInt(hex, 16);
+                let r = (num >> 16) & 0xFF;
+                let g = (num >> 8) & 0xFF;
+                let b = num & 0xFF;
+
+                // Reduce cada canal
+                r = Math.floor(r * (1 - percent));
+                g = Math.floor(g * (1 - percent));
+                b = Math.floor(b * (1 - percent));
+
+                // Convierte de vuelta a hex con padding
+                const toHex = n => n.toString(16).padStart(2, '0');
+                return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+            }
+
+            const darkColor = darkenHexColor(color, 0.5); // 50% más oscuro
+
+            const group = document.createElement("div");
+            group.className = "group";
+            group.id = id;
+            group.style.position = "relative";
+            group.innerHTML = `
+<div class="group-header" style="
+  background:
+  linear-gradient(to bottom, ${color} 0%, ${color} calc(100% - 0.8vh), ${darkColor} calc(100% - 0.8vh), ${darkColor} 100%);
+">
+          <input value="Grupo ${groupCount}" onchange="renameGroup('${id}', this.value)">
+        </div>
+        <button class="remove-btn" onclick="removeThisGroup('${id}')">×</button>
+        <ul></ul>
+      `;
+            groupContainer.appendChild(group);
+        }
+
+
+        function removeGroup() {
+            if (groupContainer.lastChild) {
+                delete groupTitles[groupContainer.lastChild.id];
+                groupContainer.removeChild(groupContainer.lastChild);
+                groupCount--;
+            }
+        }
+
+        function removeThisGroup(id) {
+            const group = document.getElementById(id);
+            if (group) {
+                delete groupTitles[id];
+                group.remove();
+                groupCount--;
+            }
+        }
+
+        function renameGroup(id, newName) {
+            groupTitles[id] = newName;
+        }
+
+        function randomizeGroups() {
+            const groupElems = document.querySelectorAll(".group ul");
+            if (groupElems.length === 0) return;
+
+            groupElems.forEach(ul => ul.innerHTML = "");
+
+            const names = getNames();
+            const shuffled = [...names];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+
+            shuffled.forEach((name, i) => {
+                const li = document.createElement("li");
+                li.textContent = name;
+                groupElems[i % groupElems.length].appendChild(li);
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -18,11 +18,10 @@
             font-family: "Titillium Web", sans-serif;
             font-weight: 700;
             font-style: normal;
-            background-color: #b1a690;
-                        background-image:
-                repeating-linear-gradient(45deg, #a39985 0, #a39985 10px, transparent 10px, transparent 20px);
-            background-size: 30px 30px;
-
+            background-color: #b1a68f;
+            background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0IDQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiNiMWE2OGYiLz48cG9seWdvbiBwb2ludHM9IjIsNCA0LDQgNCwyIDIsMiIgZmlsbD0iI2EzOTk4NCIvPjxwb2x5Z29uIHBvaW50cz0iMSw0IDIsNCAwLDIgMCwzIiBmaWxsPSIjYTM5OTg0Ii8+PHBvbHlnb24gcG9pbnRzPSIyLDIgMiwzIDEsMiIgZmlsbD0iI2EzOTk4NCIvPjxwb2x5Z29uIHBvaW50cz0iMiwyIDMsMiAyLDEiIGZpbGw9IiNhMzk5ODQiLz48cG9seWdvbiBwb2ludHM9IjQsMiA0LDEgMywwIDIsMCIgZmlsbD0iI2EzOTk4NCIvPjwvc3ZnPg==");
+            background-repeat: repeat;
+            background-size: 60px 60px;
 
             color: #1e1e1e;
             min-height: 100vh;
@@ -32,7 +31,7 @@
 
         header {
             background-color: #2b271f;
-            color: #eae0c2;
+            color: #fcf5da;
             padding: 15px 25px;
             font-size: 26px;
             font-weight: bold;
@@ -118,7 +117,7 @@
             flex-direction: column;
             align-items: stretch;
             position: relative;
-            border: #2b2820 solid 0.8vh;
+            border: #2b2820 solid 5px;
         }
 
         .group-header {
@@ -126,6 +125,7 @@
             font-weight: bold;
             color: #fcf5da;
             padding: 3px 0px;
+            padding-top: 0px;
             font-size: 17px;
         }
 
@@ -145,7 +145,7 @@
         }
 
         .group input {
-            width: calc(100% - 0.8vh);
+            width: calc(100% - 5px);
             background: transparent;
             border: none;
             text-align: center;
@@ -153,6 +153,8 @@
             font-weight: bold;
             font-size: 30px;
             padding: 4px;
+            padding-top: 0px;
+            padding-bottom: 6px;
             font-family: inherit;
         }
 
@@ -242,15 +244,15 @@
             group.id = id;
             group.style.position = "relative";
             group.innerHTML = `
-<div class="group-header" style="
-  background:
-  linear-gradient(to bottom, ${color} 0%, ${color} calc(100% - 0.8vh), ${darkColor} calc(100% - 0.8vh), ${darkColor} 100%);
-">
-          <input value="Grupo ${groupCount}" onchange="renameGroup('${id}', this.value)">
-        </div>
-        <button class="remove-btn" onclick="removeThisGroup('${id}')">×</button>
-        <ul></ul>
-      `;
+            <div class="group-header" style="
+              background:
+                  linear-gradient(to bottom, ${color} 0%, ${color} calc(100% - 5px), ${darkColor} calc(100% - 5px), ${darkColor} 100%);
+            ">
+            <input value="Grupo ${groupCount}" onchange="renameGroup('${id}', this.value)">
+            </div>
+            <button class="remove-btn" onclick="removeThisGroup('${id}')">×</button>
+            <ul></ul>
+            `;
             groupContainer.appendChild(group);
         }
 
@@ -295,6 +297,11 @@
                 groupElems[i % groupElems.length].appendChild(li);
             });
         }
+
+        addGroup()
+        addGroup()
+        addGroup()
+        //randomizeGroups()
     </script>
 </body>
 

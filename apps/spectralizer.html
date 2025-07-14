@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Espectrograma Estéreo</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    input {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <input type="file" id="audioFile" accept="audio/*">
+  <canvas id="spectrogram"></canvas>
+
+  <script>
+    const canvas = document.getElementById("spectrogram");
+    const ctx = canvas.getContext("2d");
+    const fileInput = document.getElementById("audioFile");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let audioCtx, analyserL, analyserR, dataArrayL, dataArrayR;
+
+    fileInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (audioCtx) audioCtx.close();
+
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const arrayBuffer = await file.arrayBuffer();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+      const source = audioCtx.createBufferSource();
+      source.buffer = audioBuffer;
+
+      // Estéreo splitter
+      const splitter = audioCtx.createChannelSplitter(2);
+
+      analyserL = audioCtx.createAnalyser();
+      analyserR = audioCtx.createAnalyser();
+
+      analyserL.fftSize = 8192;
+      analyserR.fftSize = 8192;
+
+      dataArrayL = new Float32Array(analyserL.frequencyBinCount);
+      dataArrayR = new Float32Array(analyserR.frequencyBinCount);
+
+      source.connect(splitter);
+      splitter.connect(analyserL, 0);
+      splitter.connect(analyserR, 1);
+      source.connect(audioCtx.destination);
+
+      source.start();
+
+      draw();
+    });
+
+    // Logarithmic mapping helper
+    function getLogIndex(y, height, fftSize, sampleRate) {
+      const minFreq = 20;
+      const maxFreq = sampleRate / 2;
+      const logMin = Math.log10(minFreq);
+      const logMax = Math.log10(maxFreq);
+      const logFreq = logMin + (1 - y / height) * (logMax - logMin);
+      const freq = Math.pow(10, logFreq);
+      const index = Math.round(freq / (sampleRate / fftSize));
+      return Math.min(index, fftSize / 2 - 1);
+    }
+
+    function getColor(value) {
+      // Map decibel value [-100, 0] to color
+      const norm = Math.max((value + 100) / 100, 0);
+      const hue = (1 - norm) * 260; // from blue to red
+      return `hsl(${hue}, 100%, ${norm * 60 + 20}%)`;
+    }
+
+    function draw() {
+      requestAnimationFrame(draw);
+
+      analyserL.getFloatFrequencyData(dataArrayL);
+      analyserR.getFloatFrequencyData(dataArrayR);
+
+      // Scroll image up
+      const imgData = ctx.getImageData(0, 1, canvas.width, canvas.height - 1);
+      ctx.putImageData(imgData, 0, 0);
+
+      // Draw new row at bottom
+      const center = canvas.width / 2;
+      for (let x = 0; x < center; x++) {
+        const indexL = getLogIndex(x, center, analyserL.fftSize, audioCtx.sampleRate);
+        const indexR = getLogIndex(x, center, analyserR.fftSize, audioCtx.sampleRate);
+
+        const dB_L = dataArrayL[indexL];
+        const dB_R = dataArrayR[indexR];
+
+        const colorL = getColor(dB_L);
+        const colorR = getColor(dB_R);
+
+        ctx.fillStyle = colorL;
+        ctx.fillRect(center - x, canvas.height - 1, 1, 1);
+
+        ctx.fillStyle = colorR;
+        ctx.fillRect(center + x, canvas.height - 1, 1, 1);
+      }
+    }
+
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>

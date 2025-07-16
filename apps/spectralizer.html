@@ -257,8 +257,8 @@
 <body>
 
   <div class="instructions" id="instructions">
-    <h2>Espectrograma Mejorado</h2>
-    <p>¡Calidad visual normalizada para todas las frecuencias!</p>
+    <h2>Espectrograma</h2>
+    <p>¡Selecciona un archivo de audio!</p>
     <label class="file-input">
       Seleccionar Audio
       <input type="file" id="audioFile" accept="audio/*" style="display: none;">
@@ -745,7 +745,7 @@
 
       const cx = width / 2;
       const cy = height / 2;
-      const radius = Math.min(cx, cy) / 2.5;
+      const radius = Math.min(cx, cy) / 3.75;
       const barsCount = 60;
 
       // Actualizar ángulo de rotación
@@ -754,7 +754,7 @@
       // Configuración de las barras
       const barWidth = 6;
       const barLengthMultiplier = 180;
-      const barLengthBase = 40;
+      const barLengthBase = 5;
 
       for (let i = 0; i < barsCount; i++) {
         const angle = (i / barsCount) * Math.PI * 2 + spectralizerAngle;

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Espectrograma con Paleta Optimizada</title>
+  <title>Espectrograma con Calidad Visual Normalizada</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
   <style>
     * {
@@ -145,7 +145,6 @@
       background: rgba(0, 0, 0, 0.5);
       padding: 15px;
       border-radius: 15px;
-      /*display: flex;*/
       gap: 10px;
       z-index: 100;
       backdrop-filter: blur(5px);
@@ -239,29 +238,44 @@
       text-transform: uppercase;
       letter-spacing: 10px;
     }
+
+    .band-info {
+      position: absolute;
+      bottom: 80px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      z-index: 100;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
   </style>
 </head>
 
 <body>
-  
-    <div class="instructions" id="instructions">
-      <h2>Espectrograma</h2>
-      <p>¡Selecciona un archivo de audio!</p>
-        <label class="file-input">
-    Seleccionar Audio
-    <input type="file" id="audioFile" accept="audio/*" style="display: none;">
-  </label>
-    </div>
+
+  <div class="instructions" id="instructions">
+    <h2>Espectrograma Mejorado</h2>
+    <p>¡Calidad visual normalizada para todas las frecuencias!</p>
+    <label class="file-input">
+      Seleccionar Audio
+      <input type="file" id="audioFile" accept="audio/*" style="display: none;">
+    </label>
+  </div>
 
   <div class="visualization-container">
     <div class="loading" id="loading"></div>
     <div class="color-preview" id="colorPreview"></div>
     <div class="palette-preview" id="palettePreview"></div>
+    <div class="band-info" id="bandInfo">Graves: Detalle completo | Medios: Promedio 3 bins | Agudos: Promedio 8 bins
+    </div>
 
     <canvas id="spectrogramCanvas"></canvas>
     <canvas id="spectralizerCanvas"></canvas>
 
-    <div class="info" id="info">Paleta optimizada | Colores ordenados por luminosidad</div>
+    <div class="info" id="info">Paleta optimizada | Calidad visual normalizada</div>
   </div>
 
   <script>
@@ -276,6 +290,7 @@
     const loading = document.getElementById("loading");
     const info = document.getElementById("info");
     const instructions = document.getElementById("instructions");
+    const bandInfo = document.getElementById("bandInfo");
 
     // Variables de audio
     let audioCtx, analyserL, analyserR, dataArrayL, dataArrayR;
@@ -301,14 +316,14 @@
     const spectralizerSpeed = 0.0015;
 
     // Configuracion del spectrograma
-    const spectrogramQuality = 16384/4;
+    const spectrogramQuality = 4096 * 2;
 
     // Tamaño inicial de los canvas
     function resizeCanvases() {
       specCanvas.width = window.innerWidth;
-      specCanvas.height = window.innerHeight - 80;
+      specCanvas.height = window.innerHeight;
       spectralizerCanvas.width = window.innerWidth;
-      spectralizerCanvas.height = window.innerHeight - 80;
+      spectralizerCanvas.height = window.innerHeight;
     }
 
     resizeCanvases();
@@ -321,6 +336,7 @@
 
       instructions.style.display = "none";
       loading.textContent = "Cargando y procesando audio...";
+      bandInfo.style.display = "block";
 
       // Cerrar contexto de audio previo si existe
       if (audioCtx) {
@@ -584,6 +600,21 @@
       );
     }
 
+    // Función para calcular el promedio de un rango de bins
+    function getMaxValue(dataArray, startIndex, endIndex) {
+      let max = -Infinity;
+
+      for (let i = startIndex; i <= endIndex; i++) {
+        if (i >= 0 && i < dataArray.length) {
+          if (dataArray[i] > max) {
+            max = dataArray[i];
+          }
+        }
+      }
+
+      return max > -Infinity ? max : -100;
+    }
+
     // Función principal de renderizado
     function draw() {
       if (!audioPlaying) {
@@ -606,7 +637,7 @@
       renderSpectralizer();
     }
 
-    // Renderizar espectrograma
+    // Renderizar espectrograma con calidad visual normalizada
     function renderSpectrogram() {
       const width = specCanvas.width;
       const height = specCanvas.height;
@@ -619,13 +650,52 @@
       // Limpiar la última línea
       specCtx.clearRect(0, height - 1, width, 1);
 
+      // Definir bandas de frecuencia
+      const bassRange = [20, 500];    // Graves
+      const midRange = [500, 4000];   // Medios
+      const trebleRange = [4000, audioCtx.sampleRate / 2]; // Agudos
+
       // Dibujar nuevas barras de frecuencia
       for (let x = 0; x < center; x++) {
+        // Obtener índice central
         const indexL = getLogIndex(x, center, analyserL.fftSize, audioCtx.sampleRate);
         const indexR = getLogIndex(x, center, analyserR.fftSize, audioCtx.sampleRate);
 
-        const dB_L = dataArrayL[indexL];
-        const dB_R = dataArrayR[indexR];
+        // Calcular frecuencia correspondiente
+        const freqL = indexL * (audioCtx.sampleRate / analyserL.fftSize);
+        const freqR = indexR * (audioCtx.sampleRate / analyserR.fftSize);
+
+        let dB_L, dB_R;
+
+        // Determinar estrategia de muestreo según banda de frecuencia
+        if (freqL < bassRange[1]) {
+          // Graves: usar valor puntual (máximo detalle)
+          dB_L = dataArrayL[indexL];
+        } else if (freqL < midRange[1]) {
+          // Medios: promedio de 3 bins (balance detalle/calidad)
+          const start = Math.max(0, indexL - 1);
+          const end = Math.min(analyserL.frequencyBinCount - 1, indexL + 1);
+          dB_L = getMaxValue(dataArrayL, start, end);
+        } else {
+          // Agudos: promedio de 8 bins (mejor calidad visual)
+          const start = Math.max(0, indexL - 4);
+          const end = Math.min(analyserL.frequencyBinCount - 1, indexL + 3);
+          dB_L = getMaxValue(dataArrayL, start, end);
+        }
+
+        // Mismo procesamiento para canal derecho
+        if (freqR < bassRange[1]) {
+          dB_R = dataArrayR[indexR];
+        } else if (freqR < midRange[1]) {
+          const start = Math.max(0, indexR - 1);
+          const end = Math.min(analyserR.frequencyBinCount - 1, indexR + 1);
+          dB_R = getMaxValue(dataArrayR, start, end);
+        } else {
+          const start = Math.max(0, indexR - 4);
+          const end = Math.min(analyserR.frequencyBinCount - 1, indexR + 3);
+          dB_R = getMaxValue(dataArrayR, start, end);
+          dB_R = (dataArrayR[indexR] * 0.5) + (dB_R * 0.5);
+        }
 
         const colorL = getSpectrogramColor(dB_L);
         const colorR = getSpectrogramColor(dB_R);
@@ -640,7 +710,7 @@
       }
     }
 
-    // Renderizar aro spectralizer
+    // Renderizar aro spectralizer (sin cambios)
     function renderSpectralizer() {
       const ctx = spectralizerCtx;
       const width = spectralizerCanvas.width;
@@ -735,6 +805,7 @@
     // Inicialización
     setOptimizedPalette();
     colorPreview.style.backgroundColor = spectralizerColor;
+    bandInfo.style.display = "none";
   </script>
 </body>
 

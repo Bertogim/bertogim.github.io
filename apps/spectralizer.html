@@ -515,8 +515,9 @@
         // Actualizar vista previa de la paleta
         updatePalettePreview();
 
-        // Color para el spectralizer (el más brillante)
-        spectralizerColor = `rgb(${brightest[0]}, ${brightest[1]}, ${brightest[2]})`;
+        // Color para el spectralizer
+        const secondColor = spectrogramPalette[2];
+        spectralizerColor = `rgb(${secondColor[0]}, ${secondColor[1]}, ${secondColor[2]})`;
         colorPreview.style.backgroundColor = spectralizerColor;
       } catch (error) {
         console.log("Error al extraer paleta optimizada:", error);
@@ -666,8 +667,8 @@
         let dB_L, dB_R;
         // Configuración de bins por rango
         const binsBass = 1;
-        const binsMid = 2*spectrogramQualityMultiplier;
-        const binsHigh = 10*spectrogramQualityMultiplier;
+        const binsMid = 2 * spectrogramQualityMultiplier;
+        const binsHigh = 10 * spectrogramQualityMultiplier;
 
         /**
          * Devuelve el valor representativo (aquí máximo) en el rango [start, end]

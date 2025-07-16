@@ -269,12 +269,12 @@
     <div class="loading" id="loading"></div>
     <div class="color-preview" id="colorPreview"></div>
     <div class="palette-preview" id="palettePreview"></div>
-    </div>
+  </div>
 
-    <canvas id="spectrogramCanvas"></canvas>
-    <canvas id="spectralizerCanvas"></canvas>
+  <canvas id="spectrogramCanvas"></canvas>
+  <canvas id="spectralizerCanvas"></canvas>
 
-    <div class="info" id="info">Paleta optimizada | Calidad visual normalizada</div>
+  <div class="info" id="info">Paleta optimizada | Calidad visual normalizada</div>
   </div>
 
   <script>
@@ -314,7 +314,8 @@
     const spectralizerSpeed = 0.0015;
 
     // Configuracion del spectrograma
-    const spectrogramQuality = 4096 * 2;
+    const spectrogramQualityMultiplier = 2;
+    const spectrogramQuality = 4096 * spectrogramQualityMultiplier;
 
     // Tamaño inicial de los canvas
     function resizeCanvases() {
@@ -663,36 +664,51 @@
         const freqR = indexR * (audioCtx.sampleRate / analyserR.fftSize);
 
         let dB_L, dB_R;
+        // Configuración de bins por rango
+        const binsBass = 1;
+        const binsMid = 2*spectrogramQualityMultiplier;
+        const binsHigh = 10*spectrogramQualityMultiplier;
 
-        // Determinar estrategia de muestreo según banda de frecuencia
-        if (freqL < bassRange[1]) {
-          // Graves: usar valor puntual (máximo detalle)
-          dB_L = dataArrayL[indexL];
-        } else if (freqL < midRange[1]) {
-          // Medios: promedio de 3 bins (balance detalle/calidad)
-          const start = Math.max(0, indexL - 1);
-          const end = Math.min(analyserL.frequencyBinCount - 1, indexL + 1);
-          dB_L = getMaxValue(dataArrayL, start, end);
-        } else {
-          // Agudos: promedio de 8 bins (mejor calidad visual)
-          const start = Math.max(0, indexL - 4);
-          const end = Math.min(analyserL.frequencyBinCount - 1, indexL + 3);
-          dB_L = getMaxValue(dataArrayL, start, end);
+        /**
+         * Devuelve el valor representativo (aquí máximo) en el rango [start, end]
+         */
+        function sampleBins(array, centerIndex, bins) {
+          const half = Math.floor(bins / 2);
+          const start = Math.max(0, centerIndex - half);
+          // Si bins es par, end = center + half - 1; si es impar, end = center + half
+          const end = Math.min(array.length - 1,
+            centerIndex + half - (bins % 2 === 0 ? 1 : 0)
+          );
+          return getMaxValue(array, start, end);
         }
 
-        // Mismo procesamiento para canal derecho
+        // Canal izquierdo
+        if (freqL < bassRange[1]) {
+          // Graves
+          dB_L = dataArrayL[indexL];
+
+        } else if (freqL < midRange[1]) {
+          // Medios
+          dB_L = sampleBins(dataArrayL, indexL, binsMid);
+
+        } else {
+          // Agudos
+          dB_L = sampleBins(dataArrayL, indexL, binsHigh);
+        }
+
+        // Canal derecho
         if (freqR < bassRange[1]) {
           dB_R = dataArrayR[indexR];
+
         } else if (freqR < midRange[1]) {
-          const start = Math.max(0, indexR - 1);
-          const end = Math.min(analyserR.frequencyBinCount - 1, indexR + 1);
-          dB_R = getMaxValue(dataArrayR, start, end);
+          dB_R = sampleBins(dataArrayR, indexR, binsMid);
+
         } else {
-          const start = Math.max(0, indexR - 4);
-          const end = Math.min(analyserR.frequencyBinCount - 1, indexR + 3);
-          dB_R = getMaxValue(dataArrayR, start, end);
-          dB_R = (dataArrayR[indexR] * 0.5) + (dB_R * 0.5);
+          // Para agudos, además mezclamos puntual y rango al 50%
+          const maxHigh = sampleBins(dataArrayR, indexR, binsHigh);
+          dB_R = (dataArrayR[indexR] * 0.5) + (maxHigh * 0.5);
         }
+
 
         const colorL = getSpectrogramColor(dB_L);
         const colorR = getSpectrogramColor(dB_R);

@@ -289,7 +289,6 @@
     const loading = document.getElementById("loading");
     const info = document.getElementById("info");
     const instructions = document.getElementById("instructions");
-    const bandInfo = document.getElementById("bandInfo");
 
     // Variables de audio
     let audioCtx, analyserL, analyserR, dataArrayL, dataArrayR;
@@ -335,7 +334,6 @@
 
       instructions.style.display = "none";
       loading.textContent = "Cargando y procesando audio...";
-      bandInfo.style.display = "block";
 
       // Cerrar contexto de audio previo si existe
       if (audioCtx) {
@@ -804,7 +802,6 @@
     // Inicialización
     setOptimizedPalette();
     colorPreview.style.backgroundColor = spectralizerColor;
-    bandInfo.style.display = "none";
   </script>
 </body>
 

@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espectrograma con Calidad Visual Normalizada</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 100;
+      position: relative;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .title {
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: 3px;
+      background: linear-gradient(90deg, #ff9966, #ff5e62);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+
+    .controls {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .file-input {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 12px 25px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .file-input:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .visualization-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #spectrogramCanvas {
+      z-index: 1;
+    }
+
+    #spectralizerCanvas {
+      z-index: 2;
+    }
+
+    .info {
+      display: none;
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.5);
+      padding: 12px 25px;
+      border-radius: 30px;
+      font-size: 1rem;
+      z-index: 100;
+      text-align: center;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.8rem;
+      color: rgba(255, 255, 255, 0.7);
+      z-index: 10;
+      text-align: center;
+      max-width: 80%;
+    }
+
+    .color-preview {
+      display: none;
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      z-index: 100;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+      border: 2px solid white;
+      animation: pulse 2s infinite;
+    }
+
+    .palette-preview {
+      display: none;
+      position: absolute;
+      bottom: 100px;
+      left: 30px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 15px;
+      border-radius: 15px;
+      gap: 10px;
+      z-index: 100;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .palette-color {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .instructions {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      max-width: 600px;
+      z-index: 5;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 40px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .instructions h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #ff9966, #ff5e62);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .instructions p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .feature-list {
+      text-align: left;
+      max-width: 500px;
+      margin: 0 auto 30px;
+    }
+
+    .feature-list li {
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 1.5s ease-out;
+    }
+
+    .visualizer-title {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 3rem;
+      z-index: 5;
+      opacity: 0.1;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 10px;
+    }
+
+    .band-info {
+      position: absolute;
+      bottom: 80px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      z-index: 100;
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="instructions" id="instructions">
+    <h2>Espectrograma</h2>
+    <p>¡Selecciona un archivo de audio!</p>
+    <label class="file-input">
+      Seleccionar Audio
+      <input type="file" id="audioFile" accept="audio/*" style="display: none;">
+    </label>
+  </div>
+
+  <div class="visualization-container">
+    <div class="loading" id="loading"></div>
+    <div class="color-preview" id="colorPreview"></div>
+    <div class="palette-preview" id="palettePreview"></div>
+  </div>
+
+  <canvas id="spectrogramCanvas"></canvas>
+  <canvas id="spectralizerCanvas"></canvas>
+
+  <div class="info" id="info">Paleta optimizada | Calidad visual normalizada</div>
+  </div>
+
+  <script>
+    // Elementos del DOM
+    const specCanvas = document.getElementById("spectrogramCanvas");
+    const specCtx = specCanvas.getContext("2d", { willReadFrequently: true });
+    const spectralizerCanvas = document.getElementById("spectralizerCanvas");
+    const spectralizerCtx = spectralizerCanvas.getContext("2d");
+    const fileInput = document.getElementById("audioFile");
+    const colorPreview = document.getElementById("colorPreview");
+    const palettePreview = document.getElementById("palettePreview");
+    const loading = document.getElementById("loading");
+    const info = document.getElementById("info");
+    const instructions = document.getElementById("instructions");
+
+    // Variables de audio
+    let audioCtx, analyserL, analyserR, dataArrayL, dataArrayR;
+    let sourceNode, audioPlaying = false;
+
+    // Imagen de portada
+    let coverImage = new Image();
+    let coverLoaded = false;
+
+    // Paleta de colores optimizada
+    let spectrogramPalette = [
+      [20, 30, 70],     // Azul muy oscuro
+      [40, 60, 100],    // Azul oscuro
+      [80, 120, 180],   // Azul medio
+      [150, 200, 255],  // Azul brillante
+      [150, 200, 255]   // Azul brillante (mismo que el anterior)
+    ];
+
+    let spectralizerColor = "rgb(150, 200, 255)";
+
+    // Configuración del aro
+    let spectralizerAngle = 0;
+    const spectralizerSpeed = 0.0015;
+
+    // Configuracion del spectrograma
+    const spectrogramQualityMultiplier = 2;
+    const spectrogramQuality = 4096 * spectrogramQualityMultiplier;
+
+    // Tamaño inicial de los canvas
+    function resizeCanvases() {
+      specCanvas.width = window.innerWidth;
+      specCanvas.height = window.innerHeight;
+      spectralizerCanvas.width = window.innerWidth;
+      spectralizerCanvas.height = window.innerHeight;
+    }
+
+    resizeCanvases();
+    window.addEventListener("resize", resizeCanvases);
+
+    // Evento para cargar archivo de audio
+    fileInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      instructions.style.display = "none";
+      loading.textContent = "Cargando y procesando audio...";
+
+      // Cerrar contexto de audio previo si existe
+      if (audioCtx) {
+        if (sourceNode) sourceNode.stop();
+        audioCtx.close();
+      }
+
+      // Crear nuevo contexto de audio
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+        // Crear nodo de origen
+        sourceNode = audioCtx.createBufferSource();
+        sourceNode.buffer = audioBuffer;
+
+        // Configurar analizadores
+        const splitter = audioCtx.createChannelSplitter(2);
+        analyserL = audioCtx.createAnalyser();
+        analyserR = audioCtx.createAnalyser();
+
+        analyserL.fftSize = spectrogramQuality;
+        analyserR.fftSize = spectrogramQuality;
+
+        dataArrayL = new Float32Array(analyserL.frequencyBinCount);
+        dataArrayR = new Float32Array(analyserR.frequencyBinCount);
+
+        // Conectar nodos
+        sourceNode.connect(splitter);
+        splitter.connect(analyserL, 0);
+        splitter.connect(analyserR, 1);
+        sourceNode.connect(audioCtx.destination);
+
+        // Iniciar reproducción
+        sourceNode.start();
+        audioPlaying = true;
+        loading.textContent = "";
+        info.textContent = `Reproduciendo: ${file.name}`;
+
+        // Extraer metadatos del archivo de audio con jsmediatags
+        extractAudioMetadata(file);
+
+        // Iniciar loop de renderizado
+        draw();
+      } catch (error) {
+        console.error("Error al procesar el audio:", error);
+        loading.textContent = "Error al cargar el archivo. Intente con otro archivo.";
+      }
+    });
+
+    // Extraer metadatos del audio con jsmediatags
+    function extractAudioMetadata(file) {
+      jsmediatags.read(file, {
+        onSuccess: function (tag) {
+          // Extraer imagen de portada
+          if (tag.tags.picture) {
+            const picture = tag.tags.picture;
+            const base64String = arrayBufferToBase64(picture.data);
+            const imageUrl = `data:${picture.format};base64,${base64String}`;
+
+            coverImage.onload = function () {
+              coverLoaded = true;
+              extractOptimizedPalette(coverImage);
+            };
+
+            coverImage.onerror = function () {
+              coverLoaded = false;
+              setOptimizedPalette();
+            };
+
+            coverImage.src = imageUrl;
+          } else {
+            coverLoaded = false;
+            setOptimizedPalette();
+          }
+        },
+        onError: function (error) {
+          console.log("Error al leer metadatos:", error);
+          coverLoaded = false;
+          setOptimizedPalette();
+        }
+      });
+    }
+
+    // Convertir ArrayBuffer a Base64
+    function arrayBufferToBase64(buffer) {
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return window.btoa(binary);
+    }
+
+    // Calcular luminosidad de un color
+    function calculateLuminosity(r, g, b) {
+      return (r * 299 + g * 587 + b * 114) / 1000;
+    }
+
+    // Extraer paleta optimizada de la imagen
+    function extractOptimizedPalette(img) {
+      try {
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        const w = tempCanvas.width = 100;
+        const h = tempCanvas.height = 100;
+        tempCtx.drawImage(img, 0, 0, w, h);
+
+        const imageData = tempCtx.getImageData(0, 0, w, h).data;
+        const allColors = [];
+
+        // Paso 1: Extraer todos los colores válidos
+        for (let i = 0; i < imageData.length; i += 4) {
+          const r = imageData[i];
+          const g = imageData[i + 1];
+          const b = imageData[i + 2];
+          const a = imageData[i + 3];
+
+          if (a > 128) {
+            const luminosity = calculateLuminosity(r, g, b);
+            allColors.push({
+              rgb: [r, g, b],
+              luminosity: luminosity
+            });
+          }
+        }
+
+        // Si no hay colores, usar paleta por defecto
+        if (allColors.length === 0) {
+          setOptimizedPalette();
+          return;
+        }
+
+        // Paso 2: Ordenar por luminosidad (de oscuro a claro)
+        allColors.sort((a, b) => a.luminosity - b.luminosity);
+
+        // Paso 3: Seleccionar 4 colores representativos
+        const selectedColors = [];
+        const steps = [0.1, 0.3, 0.6, 0.9]; // Puntos de selección
+
+        steps.forEach(step => {
+          const index = Math.floor(allColors.length * step);
+          if (index < allColors.length) {
+            selectedColors.push(allColors[index].rgb);
+          }
+        });
+
+        // Asegurar que tenemos 4 colores
+        while (selectedColors.length < 4) {
+          selectedColors.push(allColors[Math.floor(Math.random() * allColors.length)].rgb);
+        }
+
+        // Paso 4: Crear paleta con 5 colores
+        // - Primeros dos: oscuros
+        // - Últimos dos: iguales y brillantes
+        spectrogramPalette = [
+          selectedColors[0], // Más oscuro
+          selectedColors[1], // Oscuro
+          selectedColors[2], // Intermedio
+          selectedColors[3], // Más brillante
+          selectedColors[3]  // Mismo que el anterior (brillante)
+        ];
+
+        // Aumentar la saturación del color más brillante
+        const brightest = [...selectedColors[3]];
+        const maxComponent = Math.max(...brightest);
+        const scaleFactor = 255 / maxComponent;
+
+        brightest[0] = Math.min(255, brightest[0] * scaleFactor);
+        brightest[1] = Math.min(255, brightest[1] * scaleFactor);
+        brightest[2] = Math.min(255, brightest[2] * scaleFactor);
+
+        spectrogramPalette[3] = brightest;
+        spectrogramPalette[4] = brightest;
+
+        // Actualizar vista previa de la paleta
+        updatePalettePreview();
+
+        // Color para el spectralizer
+        const secondColor = spectrogramPalette[2];
+        spectralizerColor = `rgb(${secondColor[0]}, ${secondColor[1]}, ${secondColor[2]})`;
+        colorPreview.style.backgroundColor = spectralizerColor;
+      } catch (error) {
+        console.log("Error al extraer paleta optimizada:", error);
+        setOptimizedPalette();
+      }
+    }
+
+    // Actualizar vista previa de paleta
+    function updatePalettePreview() {
+      palettePreview.innerHTML = '';
+      spectrogramPalette.forEach(color => {
+        const colorDiv = document.createElement('div');
+        colorDiv.className = 'palette-color fade-in';
+        colorDiv.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+        colorDiv.title = `RGB: ${color[0]}, ${color[1]}, ${color[2]}`;
+        palettePreview.appendChild(colorDiv);
+      });
+    }
+
+    // Paleta optimizada por defecto
+    function setOptimizedPalette() {
+      spectrogramPalette = [
+        [20, 30, 70],     // Azul muy oscuro
+        [40, 60, 100],    // Azul oscuro
+        [80, 120, 180],   // Azul medio
+        [150, 200, 255],  // Azul brillante
+        [150, 200, 255]   // Azul brillante (mismo que el anterior)
+      ];
+
+      spectralizerColor = "rgb(150, 200, 255)";
+
+      updatePalettePreview();
+      colorPreview.style.backgroundColor = spectralizerColor;
+    }
+
+    // Convertir frecuencia a índice logarítmico
+    function getLogIndex(pos, maxPos, fftSize, sampleRate) {
+      const minFreq = 20;
+      const maxFreq = sampleRate / 2;
+      const logMin = Math.log10(minFreq);
+      const logMax = Math.log10(maxFreq);
+      const logFreq = logMin + (1 - pos / maxPos) * (logMax - logMin);
+      const freq = Math.pow(10, logFreq);
+      const index = Math.round(freq / (sampleRate / fftSize));
+      return Math.min(index, fftSize / 2 - 1);
+    }
+
+    // Interpolación de colores
+    function interpolateColor(color1, color2, factor) {
+      const r = Math.round(color1[0] + factor * (color2[0] - color1[0]));
+      const g = Math.round(color1[1] + factor * (color2[1] - color1[1]));
+      const b = Math.round(color1[2] + factor * (color2[2] - color1[2]));
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    // Obtener color para el espectrograma
+    function getSpectrogramColor(value) {
+      // Normalizar el valor dB entre 0 y 1
+      const norm = Math.max(0, Math.min(1, (value + 100) / 100));
+
+      // Posición en la paleta (5 colores)
+      const palettePosition = norm * (spectrogramPalette.length - 1);
+      const index = Math.floor(palettePosition);
+
+      // Manejar casos extremos
+      if (index >= spectrogramPalette.length - 1) {
+        const color = spectrogramPalette[spectrogramPalette.length - 1];
+        return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+      }
+
+      // Factor de interpolación
+      const factor = palettePosition - index;
+
+      // Interpolación entre colores
+      return interpolateColor(
+        spectrogramPalette[index],
+        spectrogramPalette[index + 1],
+        factor
+      );
+    }
+
+    // Función para calcular el promedio de un rango de bins
+    function getMaxValue(dataArray, startIndex, endIndex) {
+      let max = -Infinity;
+
+      for (let i = startIndex; i <= endIndex; i++) {
+        if (i >= 0 && i < dataArray.length) {
+          if (dataArray[i] > max) {
+            max = dataArray[i];
+          }
+        }
+      }
+
+      return max > -Infinity ? max : -100;
+    }
+
+    // Función principal de renderizado
+    function draw() {
+      if (!audioPlaying) {
+        requestAnimationFrame(draw);
+        return;
+      }
+
+      requestAnimationFrame(draw);
+
+      if (!analyserL || !analyserR) return;
+
+      // Obtener datos de frecuencia
+      analyserL.getFloatFrequencyData(dataArrayL);
+      analyserR.getFloatFrequencyData(dataArrayR);
+
+      // Renderizar espectrograma
+      renderSpectrogram();
+
+      // Renderizar aro spectralizer
+      renderSpectralizer();
+    }
+
+    // Renderizar espectrograma con calidad visual normalizada
+    function renderSpectrogram() {
+      const width = specCanvas.width;
+      const height = specCanvas.height;
+      const center = width / 2;
+
+      // Scroll vertical para efecto de espectrograma
+      const imgData = specCtx.getImageData(0, 1, width, height - 1);
+      specCtx.putImageData(imgData, 0, 0);
+
+      // Limpiar la última línea
+      specCtx.clearRect(0, height - 1, width, 1);
+
+      // Definir bandas de frecuencia
+      const bassRange = [20, 500];    // Graves
+      const midRange = [500, 4000];   // Medios
+      const trebleRange = [4000, audioCtx.sampleRate / 2]; // Agudos
+
+      // Dibujar nuevas barras de frecuencia
+      for (let x = 0; x < center; x++) {
+        // Obtener índice central
+        const indexL = getLogIndex(x, center, analyserL.fftSize, audioCtx.sampleRate);
+        const indexR = getLogIndex(x, center, analyserR.fftSize, audioCtx.sampleRate);
+
+        // Calcular frecuencia correspondiente
+        const freqL = indexL * (audioCtx.sampleRate / analyserL.fftSize);
+        const freqR = indexR * (audioCtx.sampleRate / analyserR.fftSize);
+
+        let dB_L, dB_R;
+        // Configuración de bins por rango
+        const binsBass = 1;
+        const binsMid = 2 * spectrogramQualityMultiplier;
+        const binsHigh = 10 * spectrogramQualityMultiplier;
+
+        /**
+         * Devuelve el valor representativo (aquí máximo) en el rango [start, end]
+         */
+        function sampleBins(array, centerIndex, bins) {
+          const half = Math.floor(bins / 2);
+          const start = Math.max(0, centerIndex - half);
+          // Si bins es par, end = center + half - 1; si es impar, end = center + half
+          const end = Math.min(array.length - 1,
+            centerIndex + half - (bins % 2 === 0 ? 1 : 0)
+          );
+          return getMaxValue(array, start, end);
+        }
+
+        // Canal izquierdo
+        if (freqL < bassRange[1]) {
+          // Graves
+          dB_L = dataArrayL[indexL];
+
+        } else if (freqL < midRange[1]) {
+          // Medios
+          dB_L = sampleBins(dataArrayL, indexL, binsMid);
+
+        } else {
+          // Agudos
+          dB_L = sampleBins(dataArrayL, indexL, binsHigh);
+        }
+
+        // Canal derecho
+        if (freqR < bassRange[1]) {
+          dB_R = dataArrayR[indexR];
+
+        } else if (freqR < midRange[1]) {
+          dB_R = sampleBins(dataArrayR, indexR, binsMid);
+
+        } else {
+          // Para agudos, además mezclamos puntual y rango al 50%
+          const maxHigh = sampleBins(dataArrayR, indexR, binsHigh);
+          dB_R = (dataArrayR[indexR] * 0.5) + (maxHigh * 0.5);
+        }
+
+
+        const colorL = getSpectrogramColor(dB_L);
+        const colorR = getSpectrogramColor(dB_R);
+
+        // Dibujar lado izquierdo
+        specCtx.fillStyle = colorL;
+        specCtx.fillRect(center - x - 1, height - 1, 1, 1);
+
+        // Dibujar lado derecho
+        specCtx.fillStyle = colorR;
+        specCtx.fillRect(center + x, height - 1, 1, 1);
+      }
+    }
+
+    // Renderizar aro spectralizer (sin cambios)
+    function renderSpectralizer() {
+      const ctx = spectralizerCtx;
+      const width = spectralizerCanvas.width;
+      const height = spectralizerCanvas.height;
+
+      // Limpiar canvas
+      ctx.clearRect(0, 0, width, height);
+
+      // Dibujar imagen de portada
+      if (coverLoaded) {
+        const size = Math.min(width, height) / 4;
+        const cx = width / 2;
+        const cy = height / 2;
+
+        // Crear máscara circular
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+
+        // Dibujar imagen
+        ctx.drawImage(coverImage, cx - size / 2, cy - size / 2, size, size);
+        ctx.restore();
+
+        // Borde circular
+        ctx.beginPath();
+        ctx.arc(cx, cy, size / 2, 0, Math.PI * 2);
+        ctx.strokeStyle = spectralizerColor;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      if (!analyserL || !analyserR) return;
+
+      const cx = width / 2;
+      const cy = height / 2;
+      const radius = Math.min(cx, cy) / 3.75;
+      const barsCount = 60;
+
+      // Actualizar ángulo de rotación
+      spectralizerAngle += spectralizerSpeed;
+
+      // Configuración de las barras
+      const barWidth = 6;
+      const barLengthMultiplier = 180;
+      const barLengthBase = 5;
+
+      for (let i = 0; i < barsCount; i++) {
+        const angle = (i / barsCount) * Math.PI * 2 + spectralizerAngle;
+
+        // Obtener índices de frecuencia
+        const indexL = Math.floor(i * dataArrayL.length / barsCount);
+        const indexR = Math.floor(i * dataArrayR.length / barsCount);
+
+        // Calcular magnitud
+        const magL = Math.max(0, (dataArrayL[indexL] + 100) / 100);
+        const magR = Math.max(0, (dataArrayR[indexR] + 100) / 100);
+
+        // Longitud de las barras
+        const lenL = magL * barLengthMultiplier + barLengthBase;
+        const lenR = magR * barLengthMultiplier + barLengthBase;
+
+        // Dibujar barra izquierda
+        const xStartL = cx + Math.cos(angle) * radius;
+        const yStartL = cy + Math.sin(angle) * radius;
+        const xEndL = cx + Math.cos(angle) * (radius + lenL);
+        const yEndL = cy + Math.sin(angle) * (radius + lenL);
+
+        ctx.beginPath();
+        ctx.moveTo(xStartL, yStartL);
+        ctx.lineTo(xEndL, yEndL);
+        ctx.strokeStyle = spectralizerColor;
+        ctx.lineWidth = barWidth;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // Dibujar barra derecha (opuesta)
+        const oppAngle = angle + Math.PI;
+        const xStartR = cx + Math.cos(oppAngle) * radius;
+        const yStartR = cy + Math.sin(oppAngle) * radius;
+        const xEndR = cx + Math.cos(oppAngle) * (radius + lenR);
+        const yEndR = cy + Math.sin(oppAngle) * (radius + lenR);
+
+        ctx.beginPath();
+        ctx.moveTo(xStartR, yStartR);
+        ctx.lineTo(xEndR, yEndR);
+        ctx.stroke();
+      }
+    }
+
+    // Inicialización
+    setOptimizedPalette();
+    colorPreview.style.backgroundColor = spectralizerColor;
+  </script>
+</body>
+
+</html>

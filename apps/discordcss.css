@@ -124,7 +124,11 @@
     width: 25px !important;
     height: 25px !important;
     color: #96979e;
-    margin-top: 8px;
+}
+
+.align-chat-input .attachButtonInner__0923f {
+    margin-top: 2px;
+
 }
 
 .buttons__74017 button {
@@ -152,7 +156,13 @@
     /*mask-position: calc(var(--custom-emoji-sprite-col)* -1* var(--custom-emoji-sprite-size)) calc(var(--custom-emoji-sprite-row)* -1* var(--custom-emoji-sprite-size)) !important;*/
 }
 
+.align-chat-input .emojiButton__74017 {
+    padding-top: 8px;
+}
 
+.align-chat-input .emojiButton__74017:hover {
+    background-color: transparent;
+}
 
 .uploadInput__0923f {
     max-height: 500px;
@@ -183,7 +193,8 @@ div.buttons__74017 button {
 */
 
 .visual-refresh .attachButton__0923f {
-    padding: 0px 10px;
+    padding: 0px 1px;
+    margin-right: 3px;
 }
 
 
@@ -192,7 +203,12 @@ div.buttons__74017,
 :where(.visual-refresh) .inner__74017 {
     overflow: visible !important;
 }
-
+/*
 .visual-refresh .buttons__74017 {
     min-width: 99px !important;
+}*/
+
+
+.align-chat-input .attachWrapper__0923f {
+    padding: 0px !important;
 }

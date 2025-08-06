@@ -262,7 +262,9 @@
     <label class="file-input">
       Seleccionar Audio
       <input type="file" id="audioFile" accept="audio/*" style="display: none;">
-    </label>
+    </label><br><br>
+    <button class="file-input" id="captureDesktop">Capturar Audio del Escritorio</button>
+
   </div>
 
   <div class="visualization-container">
@@ -819,6 +821,68 @@
     // Inicialización
     setOptimizedPalette();
     colorPreview.style.backgroundColor = spectralizerColor;
+
+    // Nuevo botón para capturar audio del escritorio
+    const captureDesktopBtn = document.getElementById("captureDesktop");
+
+    captureDesktopBtn.addEventListener("click", async () => {
+      try {
+        instructions.style.display = "none";
+        loading.textContent = "Solicitando captura de audio del escritorio...";
+
+        // Cerrar contexto anterior
+        if (audioCtx) {
+          if (sourceNode) sourceNode.stop();
+          await audioCtx.close();
+        }
+
+        // Crear nuevo contexto
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Solicitar captura de pantalla con audio
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: true
+        });
+
+        // Detener video (solo queremos audio)
+        stream.getVideoTracks().forEach(track => track.stop());
+
+        // Crear fuente de audio
+        sourceNode = audioCtx.createMediaStreamSource(stream);
+
+        // Configurar analizadores
+        const splitter = audioCtx.createChannelSplitter(2);
+        analyserL = audioCtx.createAnalyser();
+        analyserR = audioCtx.createAnalyser();
+
+        analyserL.fftSize = spectrogramQuality;
+        analyserR.fftSize = spectrogramQuality;
+
+        dataArrayL = new Float32Array(analyserL.frequencyBinCount);
+        dataArrayR = new Float32Array(analyserR.frequencyBinCount);
+
+        // Conectar nodos
+        sourceNode.connect(splitter);
+        splitter.connect(analyserL, 0);
+        splitter.connect(analyserR, 1);
+        sourceNode.connect(audioCtx.destination);
+
+        audioPlaying = true;
+        loading.textContent = "";
+        info.textContent = "Reproduciendo: Audio del escritorio";
+
+        // Usar paleta por defecto (no hay metadatos)
+        coverLoaded = false;
+        setOptimizedPalette();
+
+        // Iniciar visualización
+        draw();
+      } catch (error) {
+        console.error("Error al capturar el escritorio:", error);
+        loading.textContent = "Error al capturar. Asegúrate de compartir el audio.";
+      }
+    });
   </script>
 </body>
 

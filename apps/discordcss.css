@@ -1,3 +1,7 @@
+/* Css that reverts some thigs to the old discord like a smaller text bar or round servers */
+
+
+
 /* Server gradient on dissapear up */
 /* Credits for server gradient to someone in v--cord server */
 .bar_c38106 {
@@ -97,7 +101,7 @@
     width: 56px !important;
 }
 
-.folderGroup__48112 > ul {
+.folderGroup__48112>ul {
     gap: 5px !important;
     height: max-content !important;
 }
@@ -127,11 +131,14 @@
 }
 
 .align-chat-input .attachButtonInner__0923f {
-    margin-top: 2px;
-
+    margin-top: 2.5px;
 }
 
-.buttons__74017 button {
+.visual-refresh .attachButton__0923f:hover {
+    background-color: #00000000 !important;
+}
+
+.buttons__74017 .button {
     margin: 5px 0px;
 }
 
@@ -156,9 +163,11 @@
     /*mask-position: calc(var(--custom-emoji-sprite-col)* -1* var(--custom-emoji-sprite-size)) calc(var(--custom-emoji-sprite-row)* -1* var(--custom-emoji-sprite-size)) !important;*/
 }
 
+/*
 .align-chat-input .emojiButton__74017 {
     padding-top: 8px;
 }
+*/
 
 .align-chat-input .emojiButton__74017:hover {
     background-color: transparent;
@@ -203,12 +212,18 @@ div.buttons__74017,
 :where(.visual-refresh) .inner__74017 {
     overflow: visible !important;
 }
-/*
+
+
 .visual-refresh .buttons__74017 {
     min-width: 99px !important;
-}*/
+    padding-top: 8px;
+}
 
 
 .align-chat-input .attachWrapper__0923f {
     padding: 0px !important;
+}
+
+.themedBackground__74017 {
+    overflow: visible;
 }

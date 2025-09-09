@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Espectrograma Estéreo</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: black;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #spectrogram {
+            z-index: 1;
+        }
+
+        #overlay {
+            z-index: 2;
+            pointer-events: none;
+            /* para que no interfiera con clicks */
+        }
+
+        div {
+            position: absolute;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+        }
+
+        div:hover {
+            display: flex !important;
+        }
+
+        div>* {
+            margin-left: 5px;
+        }
+
+        .info {
+            position: absolute;
+            z-index: 10;
+            top: 10px;
+            left: 5px;
+            color: white;
+        }
+
+        .info:hover {
+            display: flex !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="Inputs">
+        <label for="qualitySelect" style="color: white">Resolución:</label>
+        <select id="qualitySelect">
+            <option value="2048">2048</option>
+            <option value="4096">4096</option>
+            <option value="8192" selected>8192</option>
+            <option value="16384">16384</option>
+        </select>
+        <br><br>
+        <input type="file" id="audioFile" accept="audio/*">
+        <br><br>
+        <button class="file-input" id="captureDesktop">Capturar Audio del Escritorio</button>
+        <button class="file-input" id="captureMic">Capturar Audio del Micrófono</button>
+    </div>
+    <p class="info">Waiting...</p>
+    <canvas id="spectrogram"></canvas>
+    <canvas id="overlay"></canvas>
+
+    <script>
+        const canvas = document.getElementById("spectrogram");
+        const ctx = canvas.getContext("2d");
+        const fileInput = document.getElementById("audioFile");
+        const loading = document.querySelector(".info")
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let spectrogramQuality = 8192
+
+        const qualitySelect = document.getElementById("qualitySelect");
+        qualitySelect.addEventListener("change", (e) => {
+            spectrogramQuality = parseInt(e.target.value);
+        });
+
+
+        let audioCtx, analyserL, analyserR, dataArrayL, dataArrayR;
+
+        fileInput.addEventListener("change", async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (audioCtx) audioCtx.close();
+
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const arrayBuffer = await file.arrayBuffer();
+            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            const source = audioCtx.createBufferSource();
+            source.buffer = audioBuffer;
+
+            hideText()
+            // Estéreo splitter
+            const splitter = audioCtx.createChannelSplitter(2);
+
+            analyserL = audioCtx.createAnalyser();
+            analyserR = audioCtx.createAnalyser();
+
+            analyserL.fftSize = spectrogramQuality;
+            analyserR.fftSize = spectrogramQuality;
+
+            dataArrayL = new Float32Array(analyserL.frequencyBinCount);
+            dataArrayR = new Float32Array(analyserR.frequencyBinCount);
+
+            source.connect(splitter);
+            splitter.connect(analyserL, 0);
+            splitter.connect(analyserR, 1);
+            source.connect(audioCtx.destination);
+
+            source.start();
+            loading.textContent = "Reproduciendo: Archivo.";
+
+            drawFrequencyLabels();
+            draw();
+        });
+
+        // Logarithmic mapping helper
+        function getLogIndex(y, height, fftSize, sampleRate) {
+            const minFreq = 20;
+            const maxFreq = sampleRate / 2;
+            const logMin = Math.log10(minFreq);
+            const logMax = Math.log10(maxFreq);
+            const logFreq = logMin + (1 - y / height) * (logMax - logMin);
+            const freq = Math.pow(10, logFreq);
+            const index = Math.round(freq / (sampleRate / fftSize));
+            return Math.min(index, fftSize / 2 - 1);
+        }
+
+        function getColor(value) {
+            // Map decibel value [-100, 0] to color
+            const norm = Math.max((value + 100) / 100, 0);
+            const hue = (1 - norm) * 260; // from blue to red
+            return `hsl(${hue}, 100%, ${norm * 60 + 20}%)`;
+        }
+        function hideText() {
+            document.getElementById("Inputs").style.display = "none";
+            document.querySelector(".info").style.display = "none";
+        }
+
+        function drawFrequencyLabels() {
+            const center = overlay.width / 2;
+            const height = overlay.height;
+            const labelY = height - 10;
+            const fontSize = 12;
+
+            overlayCtx.clearRect(0, 0, overlay.width, overlay.height);
+
+            overlayCtx.font = `${fontSize}px monospace`;
+            overlayCtx.fillStyle = "white";
+            overlayCtx.textAlign = "center";
+            const freqs = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+
+            freqs.forEach(freq => {
+                const x = freqToX(freq, center, audioCtx.sampleRate);
+
+                // Invertimos: lo que estaba cerca del centro se va a los extremos
+                // y lo que estaba en los extremos se va al centro
+                const invertedX = (overlay.width / 2) - Math.abs(x);
+
+                overlayCtx.fillText(`${freq}`, center - invertedX, labelY);
+                overlayCtx.fillText(`${freq}`, center + invertedX, labelY);
+
+                // Líneas guía también invertidas
+                overlayCtx.strokeStyle = "rgba(255,255,255,0.1)";
+                overlayCtx.beginPath();
+                overlayCtx.moveTo(center - invertedX, 0);
+                overlayCtx.lineTo(center - invertedX, overlay.height);
+                overlayCtx.moveTo(center + invertedX, 0);
+                overlayCtx.lineTo(center + invertedX, overlay.height);
+                overlayCtx.stroke();
+            });
+
+
+            // L / R etiquetas
+            overlayCtx.fillStyle = "cyan";
+            overlayCtx.fillText("L", center - 40, height - 25);
+            overlayCtx.fillStyle = "magenta";
+            overlayCtx.fillText("R", center + 40, height - 25);
+        }
+
+
+        // Convert frequency to X coordinate (log scale)
+        function freqToX(freq, center, sampleRate) {
+            const minFreq = 20;
+            const maxFreq = sampleRate / 2;
+            const logMin = Math.log10(minFreq);
+            const logMax = Math.log10(maxFreq);
+            const logFreq = Math.log10(freq);
+            const norm = (logFreq - logMin) / (logMax - logMin);
+            return norm * center;
+        }
+
+        function draw() {
+            requestAnimationFrame(draw);
+
+            analyserL.getFloatFrequencyData(dataArrayL);
+            analyserR.getFloatFrequencyData(dataArrayR);
+
+            // Scroll image up
+            const imgData = ctx.getImageData(0, 1, canvas.width, canvas.height - 1);
+            ctx.putImageData(imgData, 0, 0);
+
+            // Draw new row at bottom
+            const center = canvas.width / 2;
+            for (let x = 0; x < center; x++) {
+                const indexL = getLogIndex(x, center, analyserL.fftSize, audioCtx.sampleRate);
+                const indexR = getLogIndex(x, center, analyserR.fftSize, audioCtx.sampleRate);
+
+                const dB_L = dataArrayL[indexL];
+                const dB_R = dataArrayR[indexR];
+
+                const colorL = getColor(dB_L);
+                const colorR = getColor(dB_R);
+
+                ctx.fillStyle = colorL;
+                ctx.fillRect(center - x, canvas.height - 1, 1, 1);
+
+                ctx.fillStyle = colorR;
+                ctx.fillRect(center + x, canvas.height - 1, 1, 1);
+            }
+
+        }
+
+        const overlay = document.getElementById("overlay");
+        const overlayCtx = overlay.getContext("2d");
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            overlay.width = window.innerWidth;
+            overlay.height = window.innerHeight;
+
+            drawFrequencyLabels();
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        // Nuevo botón para capturar audio del escritorio
+        const captureDesktopBtn = document.getElementById("captureDesktop");
+
+        captureDesktopBtn.addEventListener("click", async () => {
+            try {
+                loading.textContent = "Solicitando captura de audio del escritorio...";
+
+                // Cerrar contexto anterior
+                if (audioCtx) {
+                    if (sourceNode) sourceNode.stop();
+                    await audioCtx.close();
+                }
+
+                // Crear nuevo contexto
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Solicitar captura de pantalla con audio
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true,
+                    audio: true
+                });
+
+                // Detener video (solo queremos audio)
+                stream.getVideoTracks().forEach(track => track.stop());
+
+                // Crear fuente de audio
+                sourceNode = audioCtx.createMediaStreamSource(stream);
+
+                // Configurar analizadores
+                const splitter = audioCtx.createChannelSplitter(2);
+                analyserL = audioCtx.createAnalyser();
+                analyserR = audioCtx.createAnalyser();
+
+                analyserL.fftSize = spectrogramQuality;
+                analyserR.fftSize = spectrogramQuality;
+
+                dataArrayL = new Float32Array(analyserL.frequencyBinCount);
+                dataArrayR = new Float32Array(analyserR.frequencyBinCount);
+
+                // Conectar nodos
+                sourceNode.connect(splitter);
+                splitter.connect(analyserL, 0);
+                splitter.connect(analyserR, 1);
+                sourceNode.connect(audioCtx.destination);
+                hideText()
+
+                loading.textContent = "Reproduciendo: Audio del escritorio";
+
+                // Iniciar visualización
+                drawFrequencyLabels();
+                draw();
+            } catch (error) {
+                console.error("Error al capturar el escritorio:", error);
+                loading.textContent = "Error al capturar. Asegúrate de compartir el audio.";
+            }
+        });
+        const captureMicBtn = document.getElementById("captureMic");
+
+        captureMicBtn.addEventListener("click", async () => {
+            // Crear contexto de audio
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            loading.textContent = "Solicitando permiso.";
+            // Pedir permiso y capturar el micrófono
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    // Crear fuente a partir del stream del micrófono
+                    const source = audioCtx.createMediaStreamSource(stream);
+                    hideText()
+
+                    // Aquí puedes conectar la fuente a nodos de procesamiento o análisis
+                    source.connect(audioCtx.destination); // Por ejemplo, para escuchar directamente
+                    loading.textContent = "Reproduciendo: Micrófono.";
+
+                    console.log('Micrófono capturado correctamente');
+                })
+                .catch(err => {
+                    console.error('Error capturando micrófono:', err);
+                    loading.textContent = "Error capturando micrófono.";
+                });
+        });
+
+    </script>
+</body>
+
+</html>

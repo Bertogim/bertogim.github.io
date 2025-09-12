@@ -253,7 +253,9 @@
             overlay.width = window.innerWidth;
             overlay.height = window.innerHeight;
 
-            drawFrequencyLabels();
+            if (audioCtx != undefined) {
+                drawFrequencyLabels();
+            }
         }
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
@@ -314,29 +316,58 @@
                 loading.textContent = "Error al capturar. Asegúrate de compartir el audio.";
             }
         });
+
         const captureMicBtn = document.getElementById("captureMic");
 
         captureMicBtn.addEventListener("click", async () => {
-            // Crear contexto de audio
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            loading.textContent = "Solicitando permiso.";
-            // Pedir permiso y capturar el micrófono
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    // Crear fuente a partir del stream del micrófono
-                    const source = audioCtx.createMediaStreamSource(stream);
-                    hideText()
+            try {
+                loading.textContent = "Solicitando acceso al micrófono...";
 
-                    // Aquí puedes conectar la fuente a nodos de procesamiento o análisis
-                    source.connect(audioCtx.destination); // Por ejemplo, para escuchar directamente
-                    loading.textContent = "Reproduciendo: Micrófono.";
+                // Cerrar contexto anterior si existe
+                if (audioCtx) {
+                    if (sourceNode) sourceNode.disconnect();
+                    await audioCtx.close();
+                }
 
-                    console.log('Micrófono capturado correctamente');
-                })
-                .catch(err => {
-                    console.error('Error capturando micrófono:', err);
-                    loading.textContent = "Error capturando micrófono.";
-                });
+                // Crear nuevo contexto
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+                // Solicitar acceso al micrófono
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                // Crear fuente de audio
+                sourceNode = audioCtx.createMediaStreamSource(stream);
+
+                // Configurar analizadores (igual que escritorio)
+                const splitter = audioCtx.createChannelSplitter(2);
+                analyserL = audioCtx.createAnalyser();
+                analyserR = audioCtx.createAnalyser();
+
+                analyserL.fftSize = spectrogramQuality;
+                analyserR.fftSize = spectrogramQuality;
+
+                dataArrayL = new Float32Array(analyserL.frequencyBinCount);
+                dataArrayR = new Float32Array(analyserR.frequencyBinCount);
+
+                // Conectar nodos
+                sourceNode.connect(splitter);
+                splitter.connect(analyserL, 0);
+                splitter.connect(analyserR, 1);
+                sourceNode.connect(audioCtx.destination);
+
+                hideText();
+
+                loading.textContent = "Reproduciendo: Micrófono";
+
+                // Iniciar visualización
+                drawFrequencyLabels();
+                draw();
+
+                console.log("Micrófono capturado correctamente");
+            } catch (err) {
+                console.error("Error capturando micrófono:", err);
+                loading.textContent = "Error capturando micrófono.";
+            }
         });
 
     </script>

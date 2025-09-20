@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Micrófono con Gain Ajustable</title>
+</head>
+<body>
+<h1>Micrófono con Gain Ajustable</h1>
+<button id="start">Iniciar</button>
+<label for="gainSlider">Gain (dB): </label>
+<input type="range" id="gainSlider" min="-20" max="200" value="0">
+<span id="gainValue">0</span> dB
+
+<script>
+let gainNode;
+
+document.getElementById('start').onclick = async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false
+            }
+        });
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(stream);
+
+        gainNode = audioCtx.createGain();
+        source.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        console.log('Micrófono activo');
+    } catch (err) {
+        console.error('Error al acceder al micrófono:', err);
+    }
+};
+
+// Slider para controlar gain en dB
+const slider = document.getElementById('gainSlider');
+const display = document.getElementById('gainValue');
+
+slider.addEventListener('input', () => {
+    const db = parseFloat(slider.value);
+    display.textContent = db;
+
+    if (gainNode) {
+        // Convertir dB a ganancia lineal
+        gainNode.gain.value = Math.pow(10, db / 20);
+    }
+});
+</script>
+</body>
+</html>

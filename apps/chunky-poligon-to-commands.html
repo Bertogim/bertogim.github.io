@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Rectángulos para Chunky</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background-color: #2d2d30;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1, h2 {
+            color: #4ec9b0;
+            margin-bottom: 15px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            grid-column: 1 / -1;
+        }
+        
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 150px;
+            background-color: #3e3e42;
+            border: 1px solid #5a5a5a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            padding: 10px;
+            resize: vertical;
+            font-family: Consolas, monospace;
+        }
+        
+        button {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #005a9e;
+        }
+        
+        .visualization {
+            min-height: 400px;
+            border: 1px solid #5a5a5a;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+            background-color: #1e1e1e;
+        }
+        
+        .rectangle {
+            position: absolute;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .rectangle:hover {
+            transform: scale(1.02);
+            z-index: 10;
+        }
+        
+        .commands-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .command-item {
+            background-color: #3e3e42;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            border-left: 4px solid #007acc;
+            font-family: Consolas, monospace;
+            word-break: break-all;
+        }
+        
+        .instructions {
+            background-color: #252526;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        
+        .coordinates-display {
+            font-family: Consolas, monospace;
+            background-color: #3e3e42;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .parsed-coordinates {
+            margin-top: 10px;
+            font-size: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Rectángulos para Polígonos en Chunky</h1>
+        
+        <div class="panel">
+            <h2>Entrada de Coordenadas</h2>
+            <div class="input-section">
+                <p>Pega los comandos de teleportación (formato: /execute in minecraft:overworld run tp X Y Z):</p>
+                <textarea id="coordinatesInput" placeholder="/execute in minecraft:overworld run tp -2540 320 -5988
+/execute in minecraft:overworld run tp -2559 320 -8180
+/execute in minecraft:overworld run tp -3583 320 -8164"></textarea>
+                <div class="coordinates-display">
+                    <div id="coordinatesCount">Coordenadas ingresadas: 0</div>
+                    <div class="parsed-coordinates" id="parsedCoordinates">
+                        Coordenadas parseadas aparecerán aquí...
+                    </div>
+                </div>
+                <button id="generateBtn">Generar Rectángulos</button>
+            </div>
+            
+            <div class="instructions">
+                <h3>Instrucciones:</h3>
+                <ul>
+                    <li>Pega los comandos de teleportación completos (con /execute)</li>
+                    <li>Las coordenadas se extraerán automáticamente y se redondearán a múltiplos de 100</li>
+                    <li>El algoritmo dividirá el polígono en rectángulos que cubran su área</li>
+                    <li>Cada rectángulo generará un comando de Chunky</li>
+                    <li>Haz clic en cualquier rectángulo para ver su comando en detalle</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <h2>Visualización</h2>
+            <div class="visualization" id="visualization">
+                <!-- Los rectángulos se generarán aquí -->
+            </div>
+            
+            <h2>Comandos Generados</h2>
+            <div class="commands-list" id="commandsList">
+                <!-- Los comandos se generarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const coordinatesInput = document.getElementById('coordinatesInput');
+            const coordinatesCount = document.getElementById('coordinatesCount');
+            const parsedCoordinates = document.getElementById('parsedCoordinates');
+            const generateBtn = document.getElementById('generateBtn');
+            const visualization = document.getElementById('visualization');
+            const commandsList = document.getElementById('commandsList');
+            
+            // Actualizar el contador de coordenadas
+            coordinatesInput.addEventListener('input', function() {
+                const lines = coordinatesInput.value.trim().split('\n').filter(line => line.trim() !== '');
+                coordinatesCount.textContent = `Comandos ingresados: ${lines.length}`;
+                
+                // Mostrar las coordenadas parseadas
+                const coords = parseCoordinates(coordinatesInput.value);
+                parsedCoordinates.innerHTML = '<strong>Coordenadas parseadas:</strong><br>' + 
+                    coords.map(c => `(${c.x}, ${c.z})`).join(' → ');
+            });
+            
+            // Función para redondear a múltiplos de 100
+            function roundTo100(value) {
+                return Math.round(value / 100) * 100;
+            }
+            
+            // Función para parsear coordenadas desde comandos de teleportación
+            function parseCoordinates(input) {
+                const lines = input.trim().split('\n').filter(line => line.trim() !== '');
+                const coordinates = [];
+                
+                for (const line of lines) {
+                    // Buscar números en el formato de comando de teleportación
+                    const match = line.match(/tp\s+(-?\d+)\s+\d+\s+(-?\d+)/);
+                    if (match) {
+                        const x = parseInt(match[1]);
+                        const z = parseInt(match[2]);
+                        coordinates.push({ 
+                            x: roundTo100(x), 
+                            z: roundTo100(z) 
+                        });
+                    }
+                }
+                
+                return coordinates;
+            }
+            
+            // Función para calcular el bounding box del polígono
+            function calculateBoundingBox(points) {
+                if (points.length === 0) {
+                    return { minX: 0, maxX: 0, minZ: 0, maxZ: 0 };
+                }
+                
+                const xs = points.map(p => p.x);
+                const zs = points.map(p => p.z);
+                
+                return {
+                    minX: Math.min(...xs),
+                    maxX: Math.max(...xs),
+                    minZ: Math.min(...zs),
+                    maxZ: Math.max(...zs)
+                };
+            }
+            
+            // Función para verificar si un punto está dentro de un polígono
+            function pointInPolygon(point, polygon) {
+                const x = point.x, z = point.z;
+                let inside = false;
+                
+                for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+                    const xi = polygon[i].x, zi = polygon[i].z;
+                    const xj = polygon[j].x, zj = polygon[j].z;
+                    
+                    const intersect = ((zi > z) !== (zj > z)) &&
+                        (x < (xj - xi) * (z - zi) / (zj - zi) + xi);
+                    
+                    if (intersect) inside = !inside;
+                }
+                
+                return inside;
+            }
+            
+            // Función para dividir el polígono en rectángulos
+            function polygonToRectangles(polygon) {
+                if (polygon.length < 3) return [];
+                
+                const bbox = calculateBoundingBox(polygon);
+                const rectangles = [];
+                const covered = new Set();
+                
+                // Crear una cuadrícula de puntos cada 100 unidades
+                for (let x = bbox.minX; x <= bbox.maxX; x += 100) {
+                    for (let z = bbox.minZ; z <= bbox.maxZ; z += 100) {
+                        const key = `${x},${z}`;
+                        
+                        // Si ya está cubierto, saltar
+                        if (covered.has(key)) continue;
+                        
+                        // Verificar si este punto está dentro del polígono
+                        if (pointInPolygon({ x, z }, polygon)) {
+                            // Encontrar el rectángulo más grande posible desde este punto
+                            let maxWidth = 100;
+                            let maxHeight = 100;
+                            
+                            // Expandir hacia la derecha
+                            for (let w = 100; x + w <= bbox.maxX; w += 100) {
+                                let valid = true;
+                                for (let h = 0; h < maxHeight; h += 100) {
+                                    const checkX = x + w;
+                                    const checkZ = z + h;
+                                    const checkKey = `${checkX},${checkZ}`;
+                                    
+                                    if (covered.has(checkKey) || !pointInPolygon({ x: checkX, z: checkZ }, polygon)) {
+                                        valid = false;
+                                        break;
+                                    }
+                                }
+                                if (valid) {
+                                    maxWidth = w + 100;
+                                } else {
+                                    break;
+                                }
+                            }
+                            
+                            // Expandir hacia abajo
+                            for (let h = 100; z + h <= bbox.maxZ; h += 100) {
+                                let valid = true;
+                                for (let w = 0; w < maxWidth; w += 100) {
+                                    const checkX = x + w;
+                                    const checkZ = z + h;
+                                    const checkKey = `${checkX},${checkZ}`;
+                                    
+                                    if (covered.has(checkKey) || !pointInPolygon({ x: checkX, z: checkZ }, polygon)) {
+                                        valid = false;
+                                        break;
+                                    }
+                                }
+                                if (valid) {
+                                    maxHeight = h + 100;
+                                } else {
+                                    break;
+                                }
+                            }
+                            
+                            // Crear el rectángulo
+                            const rect = {
+                                x1: x,
+                                z1: z,
+                                x2: x + maxWidth,
+                                z2: z + maxHeight,
+                                index: rectangles.length
+                            };
+                            
+                            rectangles.push(rect);
+                            
+                            // Marcar todas las celdas cubiertas por este rectángulo
+                            for (let dx = 0; dx < maxWidth; dx += 100) {
+                                for (let dz = 0; dz < maxHeight; dz += 100) {
+                                    covered.add(`${x + dx},${z + dz}`);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return rectangles;
+            }
+            
+            // Función para generar comandos de Chunky
+            function generateChunkyCommands(rectangles) {
+                return rectangles.map((rect) => {
+                    return `/chunky corners ${rect.x1} ${rect.z1} ${rect.x2} ${rect.z2}`;
+                });
+            }
+            
+            // Función para visualizar rectángulos
+            function visualizeRectangles(rectangles, polygon, container) {
+                container.innerHTML = '';
+                
+                if (polygon.length === 0) return;
+                
+                // Calcular dimensiones para escalado
+                const bbox = calculateBoundingBox(polygon);
+                const width = bbox.maxX - bbox.minX;
+                const height = bbox.maxZ - bbox.minZ;
+                
+                if (width === 0 || height === 0) return;
+                
+                // Factor de escala para visualización
+                const scaleX = (container.clientWidth - 100) / width;
+                const scaleZ = (container.clientHeight - 100) / height;
+                const scale = Math.min(scaleX, scaleZ);
+                
+                // Dibujar el polígono
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('width', '100%');
+                svg.setAttribute('height', '100%');
+                svg.style.position = 'absolute';
+                svg.style.top = '0';
+                svg.style.left = '0';
+                
+                const polygonPath = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                const points = polygon.map(p => 
+                    `${((p.x - bbox.minX) * scale) + 50},${((p.z - bbox.minZ) * scale) + 50}`
+                ).join(' ');
+                polygonPath.setAttribute('points', points);
+                polygonPath.setAttribute('fill', 'rgba(78, 201, 176, 0.1)');
+                polygonPath.setAttribute('stroke', '#4ec9b0');
+                polygonPath.setAttribute('stroke-width', '2');
+                
+                svg.appendChild(polygonPath);
+                container.appendChild(svg);
+                
+                // Dibujar cada rectángulo
+                rectangles.forEach((rect) => {
+                    const rectElement = document.createElement('div');
+                    rectElement.className = 'rectangle';
+                    rectElement.dataset.index = rect.index;
+                    
+                    // Posición y tamaño escalados
+                    const left = ((rect.x1 - bbox.minX) * scale) + 50;
+                    const top = ((rect.z1 - bbox.minZ) * scale) + 50;
+                    const rectWidth = (rect.x2 - rect.x1) * scale;
+                    const rectHeight = (rect.z2 - rect.z1) * scale;
+                    
+                    rectElement.style.left = `${left}px`;
+                    rectElement.style.top = `${top}px`;
+                    rectElement.style.width = `${rectWidth}px`;
+                    rectElement.style.height = `${rectHeight}px`;
+                    
+                    // Color aleatorio pero consistente
+                    const hue = (rect.index * 137) % 360; // Número primo para distribución
+                    rectElement.style.borderColor = `hsl(${hue}, 70%, 50%)`;
+                    rectElement.style.backgroundColor = `hsl(${hue}, 70%, 20%, 0.5)`;
+                    rectElement.style.color = `hsl(${hue}, 70%, 90%)`;
+                    
+                    rectElement.textContent = rect.index + 1;
+                    
+                    // Agregar tooltip con información del rectángulo
+                    rectElement.title = `Rectángulo ${rect.index + 1}: (${rect.x1}, ${rect.z1}) a (${rect.x2}, ${rect.z2})`;
+                    
+                    // Evento para mostrar el comando al hacer clic
+                    rectElement.addEventListener('click', function() {
+                        const command = `/chunky corners ${rect.x1} ${rect.z1} ${rect.x2} ${rect.z2}`;
+                        alert(`Comando para el rectángulo ${rect.index + 1}:\n\n${command}`);
+                    });
+                    
+                    container.appendChild(rectElement);
+                });
+            }
+            
+            // Función principal
+            generateBtn.addEventListener('click', function() {
+                try {
+                    const polygon = parseCoordinates(coordinatesInput.value);
+                    
+                    if (polygon.length < 3) {
+                        alert('Se necesitan al menos 3 puntos para formar un polígono');
+                        return;
+                    }
+                    
+                    const rectangles = polygonToRectangles(polygon);
+                    const commands = generateChunkyCommands(rectangles);
+                    
+                    // Visualizar rectángulos
+                    visualizeRectangles(rectangles, polygon, visualization);
+                    
+                    // Mostrar comandos
+                    commandsList.innerHTML = '';
+                    if (commands.length === 0) {
+                        commandsList.innerHTML = '<div class="command-item">No se pudieron generar rectángulos. Verifica que el polígono sea válido.</div>';
+                    } else {
+                        commands.forEach((command, index) => {
+                            const commandItem = document.createElement('div');
+                            commandItem.className = 'command-item';
+                            commandItem.textContent = command;
+                            commandsList.appendChild(commandItem);
+                        });
+                    }
+                    
+                } catch (error) {
+                    alert('Error al procesar las coordenadas: ' + error.message);
+                    console.error(error);
+                }
+            });
+            
+            // Ejemplo inicial con los comandos proporcionados
+            coordinatesInput.value = `/execute in minecraft:overworld run tp -2540 320 -5988
+/execute in minecraft:overworld run tp -2559 320 -8180
+/execute in minecraft:overworld run tp -3583 320 -8164
+/execute in minecraft:overworld run tp -3567 320 -13300
+/execute in minecraft:overworld run tp -6639 320 -13332
+/execute in minecraft:overworld run tp -6639 320 -16372
+/execute in minecraft:overworld run tp -7152 320 -16378
+/execute in minecraft:overworld run tp -7168 320 -16882
+/execute in minecraft:overworld run tp -7680 320 -16898
+/execute in minecraft:overworld run tp -7680 320 -17394
+/execute in minecraft:overworld run tp -7680 320 -17914
+/execute in minecraft:overworld run tp -8176 320 -17930
+/execute in minecraft:overworld run tp -8200 320 -19474
+/execute in minecraft:overworld run tp -5648 320 -19466
+/execute in minecraft:overworld run tp -5648 320 -19946
+/execute in minecraft:overworld run tp -4096 320 -19954
+/execute in minecraft:overworld run tp -4096 320 -20490
+/execute in minecraft:overworld run tp -520 320 -20482
+/execute in minecraft:overworld run tp -504 320 -19450
+/execute in minecraft:overworld run tp 0 320 -19442
+/execute in minecraft:overworld run tp 0 320 -18458
+/execute in minecraft:overworld run tp 504 320 -18434
+/execute in minecraft:overworld run tp 496 320 -14850
+/execute in minecraft:overworld run tp -1032 320 -14842
+/execute in minecraft:overworld run tp -992 320 -14354
+/execute in minecraft:overworld run tp -1544 320 -14330
+/execute in minecraft:overworld run tp -1536 320 -13810
+/execute in minecraft:overworld run tp -1528 320 -11754
+/execute in minecraft:overworld run tp -16 320 -11778
+/execute in minecraft:overworld run tp -8 320 -11282
+/execute in minecraft:overworld run tp 512 320 -11242
+/execute in minecraft:overworld run tp 512 320 -10234
+/execute in minecraft:overworld run tp 1024 320 -10234
+/execute in minecraft:overworld run tp 1032 320 -9730
+/execute in minecraft:overworld run tp 2017 320 -9732
+/execute in minecraft:overworld run tp 2049 320 -6164`;
+            
+            // Actualizar el contador inicial
+            const initialLines = coordinatesInput.value.trim().split('\n').filter(line => line.trim() !== '');
+            coordinatesCount.textContent = `Comandos ingresados: ${initialLines.length}`;
+            
+            // Mostrar las coordenadas parseadas iniciales
+            const initialCoords = parseCoordinates(coordinatesInput.value);
+            parsedCoordinates.innerHTML = '<strong>Coordenadas parseadas:</strong><br>' + 
+                initialCoords.map(c => `(${c.x}, ${c.z})`).join(' → ');
+        });
+    </script>
+</body>
+</html>

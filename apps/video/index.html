@@ -21,8 +21,9 @@
             background-color: #222;
             color: white;
             font-family: Arial, sans-serif;
-            max-width: 90%;
-
+                       justify-content: center;
+            width: max-content;
+            max-width: 97% !important;
         }
 
         .video-container {
@@ -62,7 +63,7 @@
         .input-container {
             text-align: center;
             /* Centrar el texto en el contenedor */
-            margin: 20px;
+            margin: 00px;
             /* Margen */
             padding: 3px;
             /* Relleno */
@@ -71,8 +72,13 @@
             border-radius: 10px;
             /* Bordes redondeados */
 
-            padding-left: 20px;
-            padding-right: 20px;
+            padding-left: 5px;
+            padding-right: 5px;
+            width: 100%;
+        }
+
+        center {
+
         }
 
         .input-container .video-container p {
@@ -102,7 +108,6 @@
 
 <body>
 
-    <center>
         <h1 style="font-size: 50px;" es-translation="Herramientas de Video">Video Tools</h1>
         <p
             es-translation="Estas herramientas de video son extremadamente útiles, ya que permiten realizar diversas tareas de procesamiento sin necesidad de subir archivos a la nube.<br> Todo el procesamiento se lleva a cabo directamente en tu ordenador, lo que garantiza una mayor seguridad y privacidad.<br><br>Además, son muy fáciles de usar, con interfaces simples que te permiten realizar compresiones y otros ajustes de video de manera rápida y eficiente, sin complicaciones.">
@@ -140,6 +145,15 @@
                         <p es-translation="Tamaño comprimido: <strong>8.56 MB</strong>">Compressed size: <strong>8.56
                                 MB</strong></p>
                     </div>
+                    <span class="arrow">🔜</span>
+                    <div class="video">
+                        <video controls>
+                            <source src="./examples/loot_delicioso-compressed-app.webm" type="video/mp4">
+                            Your browser does not support the video element.
+                        </video>
+                        <p es-translation="Proxima aplicacion de escritorio<br>Tamaño comprimido: <strong>2.01 MB</strong>">Next desktop application<br>Compressed size: <strong>2.01
+                                MB</strong></p>
+                    </div>
                 </div>
                 <p class="credits"
                     es-translation='Creditos del video a <a style="color: #b7b7b7;" target="_blank" href="https://www.youtube.com/channel/UCXZl3qQWKV1sUU5p_HvTFzw">daviddrm52</a>'>
@@ -164,7 +178,6 @@
             We are working on more features to improve your video processing experience. Stay tuned for future updates
             that will include tools like video editing, format conversion, and much more.
         </p>
-    </center>
 </body>
 
 

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title es-translation="Bertogim">Bertogim</title>
-    <link rel="icon" type="png" target="_blank" href="Image/Icon.png">
-    <link rel="stylesheet" type="text/css" href="/styles.css">
+    <title es-translation="Herramientas de Video">Video tools</title>
+    <link rel="stylesheet" type="text/css" href="./styles.css">
+    <link rel="icon" type="png" target="_blank" href="/Image/Icon.png">
 
     <meta content="Bertogim" property="og:title" />
     <meta content="Bertogim's Website" property="og:description" />
@@ -16,203 +16,176 @@
 
     <script defer src="/translations.js"></script>
     <script defer src="/header.js"></script>
+    <style>
+        body {
+            background-color: #222;
+            color: white;
+            font-family: Arial, sans-serif;
+            justify-content: center;
+            width: max-content;
+            max-width: 97% !important;
+        }
+
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        video {
+            margin: 0px;
+            border-radius: 10px;
+            background-color: #000;
+            display: block;
+        }
+
+        .arrow {
+            font-size: 24px;
+            margin: 0 10px;
+            color: #00ff00;
+            padding-bottom: 30px;
+        }
+
+        .size-info {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        h1,
+        h2,
+        h3 {
+            text-align: center;
+            /* Centrar títulos */
+        }
+
+        /* Estilo para el contenedor principal */
+        .input-container {
+            text-align: center;
+            /* Centrar el texto en el contenedor */
+            margin: 00px;
+            /* Margen */
+            padding: 3px;
+            /* Relleno */
+            background-color: #333;
+            /* Fondo gris oscuro */
+            border-radius: 10px;
+            /* Bordes redondeados */
+
+            padding-left: 5px;
+            padding-right: 5px;
+            width: 100%;
+        }
+
+        center {}
+
+        .input-container .video-container p {
+            margin-bottom: 0px;
+        }
+
+        .credits {
+            bottom: 10px;
+            right: 20px;
+            text-align: right;
+            margin-top: 0px;
+            margin-bottom: 5px;
+        }
+
+        .link {
+            font-size: 40px;
+            color: #ffff;
+            text-decoration: underline;
+            background-color: #31a2d6;
+            padding: 10px;
+            padding-left: 50px;
+            padding-right: 50px;
+            border-radius: 10px;
+        }
+    </style>
 </head>
+
 <body>
 
-    
-    
-    
-    
+    <h1 style="font-size: 50px;" es-translation="Herramientas de Video">Video Tools</h1>
+    <p
+        es-translation="Estas herramientas de video son extremadamente útiles, ya que permiten realizar diversas tareas de procesamiento sin necesidad de subir archivos a la nube.<br> Todo el procesamiento se lleva a cabo directamente en tu ordenador, lo que garantiza una mayor seguridad y privacidad.<br><br>Además, son muy fáciles de usar, con interfaces simples que te permiten realizar compresiones y otros ajustes de video de manera rápida y eficiente, sin complicaciones.">
+        These video tools are extremely useful, as they allow you to perform various processing tasks without the
+        need to upload files to the cloud.<br>All processing is done directly on your computer, ensuring greater
+        security and privacy.<br><br>Additionally, they are very easy to use, with simple interfaces that let
+        you perform video compressions and other adjustments quickly and efficiently, without hassle.
+    </p>
+    <br><br>
 
-    <script>
-        window.addEventListener('scroll', function () {
-            var overlay = document.querySelector('.overlay-image img');
-            if (overlay) {
-                overlay.style.transition = 'none';
-                overlay.style.transform = 'translateY(' + window.scrollY + 'px)';
-            }
-        });
-    </script>
+    <h1 style="color: #31a2d6;margin-bottom: -7px;" es-translation="Programa de escritorio proximamente!">Desktop app
+        coming soon!</h1>
+    <p
+        es-translation="25 veces mas rapido que en web y mejores codecs como AV1, VP9, HEVC y opus<br>Tambien sporte de codificacion con tarjeta grafica">
+        25 times faster than in web and more powerful codecs (AV1, VP9, HEVC, opus)<br>Also supports encoding with GPU
+    </p>
+    <br>
+    <h1 es-translation="1. Compresor de Video">1. Video Compressor</h1>
+    <p
+        es-translation="Una util herramienta de compresión de video. Esta aplicación te permite subir videos y <b>comprimirlos a los MB que quieras</b>.">
+        A useful video compression tool.<br>This application allows you to upload videos and <b>compress them to the
+            MB you want</b>.
+    </p>
 
-    <div class="overlay-image">
-        <img src="Image/Background1.jpg" alt="Bertogim Background Image">
-        <h1>Bertogim</h1>
-    </div>
-
-    <h1 es-translation="Página Web de Bertogim (En desarollo)">Bertogim's Website (In development)</h1>
-    <div class="content-container">
-        <div class="info-wrapper75">
-
-            <div id="twitch-embed" class="infobox" style="display: none;">
-
-                <h2 es-translation="Estoy en directo!">Im streaming!</h2>
-
-                <!-- Load the Twitch embed script -->
-                <script src="https://embed.twitch.tv/embed/v1.js"></script>
-
-                <!-- Create a Twitch.Embed object that will render within the "twitch-embed" element. -->
-                <script type="text/javascript">
-                    var embed = new Twitch.Embed("twitch-embed", {
-                        width: "100%",
-                        height: "400px",
-                        channel: "bertogim",
-                        autoplay: true,
-                        layout: "video",
-                        muted: true,
-                    });
-
-                    embed.addEventListener(Twitch.Embed.VIDEO_PLAY, () => {
-                        document.getElementById("twitch-embed").style.display = "grid"
-                    });
-                </script>
-            </div>
-
-
-        </div>
-    </div>
-    <div class="content-container">
-        <div class="info-wrapper">
-            <div>
-                <div class="infobox">
-                    <h2 es-translation="Sobre Mí">About Me</h2>
-                    <p
-                        es-translation="📽️ Soy <span><a target='_blank' href='https://www.youtube.com/@Bertogim'>Youtuber</a></span> y <span><a target='_blank' href='https://www.twitch.tv/bertogim'>Streamer</a></span>">
-                        📽️ I am a <a style="margin: 0; color: #b7b7b7;" target="_blank"
-                            href="https://www.youtube.com/@Bertogim">Youtuber</a> and <a
-                            style="margin: 0; color: #b7b7b7;" target="_blank"
-                            href="https://www.twitch.tv/bertogim">Streamer</a></p>
-                    <p es-translation="⌨️ Puedo programar en Roblox (Lua) y JavaScript">⌨️ I can code in Roblox (Lua)
-                        and
-                        JavaScript
-                    </p>
-                    <p
-                        es-translation="🗄️ He creado bastantes <span><a href='/creations'>cosas</a></span> (Paginas web, juegos de Roblox etc...)">
-                        🗄️ I have created several <a style="margin: 0; color: #b7b7b7;" href="/proyect">things</a> (Web
-                        pages,
-                        Roblox games etc...)</p>
-                    <p
-                        es-translation="✨ He ayudado a streamers y contribuido en wikis (<span><a href='/contribuitions'>Contribuciones</a>)">
-                        ✨ I have helped streamers and contributed on wikis (<a style="margin: 0; color: #b7b7b7;"
-                            href="/contribuitions">Contribuitions</a>)</p>
+    <div class="input-container">
+        <h3 es-translation="Ejemplo:">Example:</h3>
+        <div>
+            <div class="video-container">
+                <div class="video">
+                    <video controls>
+                        <source src="./examples/loot_delicioso.mp4" type="video/mp4">
+                        Your browser does not support the video element.
+                    </video>
+                    <p es-translation="Tamaño original: <strong>91.84 MB</strong>">Original size: <strong>91.84
+                            MB</strong></p>
                 </div>
-                <div class="infobox">
-                    <h2 es-translation="Logros">Achievements</h2>
-                    <p
-                        es-translation="He llegado a 800 suscriptores en <span><a target='_blank' href='https://www.youtube.com/@Bertogim' a>Youtube</a></span>">
-                        I have reached 800 subscribers on <a target="_blank"
-                            href="https://www.youtube.com/@Bertogim">Youtube</a>
-                    </p>
-                    <p
-                        es-translation="He llegado a 200 seguidores en <span><a target='_blank' href='https://www.twitch.tv/bertogim' a>Twitch</a></span>">
-                        I have reached 200 followers on <a target="_blank"
-                            href="https://www.twitch.tv/bertogim">Twitch</a>
-                    </p>
-                    <p
-                        es-translation="He conseguido el Afliado en mi canal de <span><a target='_blank' href='https://www.twitch.tv/bertogim' a>Twitch</a></span>">
-                        I have the Affiliate on my <span><a target='_blank' href='https://www.twitch.tv/bertogim'
-                                a>Twitch</a></span> channel</p>
-                    <p
-                        es-translation="He hecho un <span><a target='_blank' href='https://www.roblox.com/games/10073716653/Marble-races' a>Juego</a></span> en Roblox que tiene 30k Visitas">
-                        I made a <span><a target='_blank' href='https://www.roblox.com/games/10073716653/Marble-races'
-                                a>Game</a></span> on Roblox that has over 30k Visits</p>
-
+                <span class="arrow">➡️</span>
+                <div class="video">
+                    <video controls>
+                        <source src="./examples/loot_delicioso-compressed.mp4" type="video/mp4">
+                        Your browser does not support the video element.
+                    </video>
+                    <p es-translation="Tamaño comprimido: <strong>8.56 MB</strong>">Compressed size: <strong>8.56
+                            MB</strong></p>
                 </div>
-                <div class="infobox">
-                    <h2 es-translation="Redes Sociales">Social Media</h2>
-                    <div class="image-container2">
-                        <a href="https://www.twitch.tv/bertogim" target="_blank"><img src="Image/Social/Twitch.png"
-                                class="SocialImage" alt="Twitch"></a>
-                        <a href="https://discord.gg/pK3YJYh383" target="_blank"><img src="Image/Social/Discord.png"
-                                class="SocialImage" alt="Discord"></a>
-                        <a href="https://steamcommunity.com/id/bertogim" target="_blank"><img src="Image/Social/Steam.png"
-                                class="SocialImage" alt="Steam"></a>
-                        <a href="https://www.youtube.com/@bertogim" target="_blank"><img src="Image/Social/YouTube.png"
-                                class="SocialImage" alt="YouTube"></a>
-                        <a href="https://www.tiktok.com/@bertogim" target="_blank"><img src="Image/Social/TikTok.png"
-                                class="SocialImage" alt="TikTok"></a>
-                        <a href="https://twitter.com/bertogim" target="_blank"><img src="Image/Social/Twitter.png"
-                                class="SocialImage" alt="Twitter"></a>
-                    </div>
-                </div>
-                
-                
-                <div class="infobox">
-                    <h2 es-translation="Servidor de Discord">Discord server</h2>
-                    <p es-translation="<p></p>">⚠ The discord server is a spanish server</p>
-                    <a target="_blank" href="https://discord.gg/pK3YJYh383">
-                        <p es-translation="Unete al servidor de Discord!">Join the discord server!</p>
-                    </a>
-                    <iframe width="100%" height="400px" src="https://discord.com/widget?id=734104333934919741"></iframe>
+                <span class="arrow">🔜</span>
+                <div class="video">
+                    <video controls>
+                        <source src="./examples/loot_delicioso-compressed-app.webm" type="video/mp4">
+                        Your browser does not support the video element.
+                    </video>
+                    <p es-translation="Proxima aplicacion de escritorio<br>Tamaño comprimido: <strong>2.01 MB</strong>">
+                        Desktop application (Soon)<br>Compressed size: <strong>2.01
+                            MB</strong></p>
                 </div>
             </div>
-
-
-            <div class="infobox">
-                <h2 es-translation="Algunas creaciones mias">Some of my creaions</h2>
-                <div class="card">
-                    <img src="/Image/Games/MarbleRaces.webp">
-                    <h3>Marble Races</h3>
-                    <div class="text">
-                        <p
-                            es-translation="🚀 Bienvenido a Marble Races, ¡experimenta la emoción de las carreras dinámicas de canicas! 🚀">
-                            🚀 Welcome to Marble Races, experience the thrill of dynamic marble racing! 🚀</p>
-                        <p
-                            es-translation="🌟 Mapas generados aleatoriamente mantienen cada carrera única, mientras que nuestra tienda en el juego te permite personalizar tu canica con una variedad de colores. ¡Gana la carrera, supera obstáculos y demuestra que eres el campeón definitivo de las carreras de canicas! 🌟">
-                            🌟 Randomly generated maps keep every race unique, while the shop lets you personalize your
-                            marble with a variety of colors. Win the race, outsmart obstacles, and prove you're the
-                            ultimate marble racing champion! 🌟</p>
-                        <p
-                            es-translation="🏆 Compite con amigos y otros jugadores. ¿Listo para rodar? ¡Que comiencen las carreras! 🏆">
-                            🏆 Compete with friends other players. Ready to roll? Let the races begin! 🏆</p>
-                            <br>
-                            <a href="https://www.roblox.com/games/10073716653/Marble-races" target="_blank"><div class="play"><span>play</span></div></a>
-                        </div>
-                </div>
-                <center>
-                    <div class="card">
-                        <a style="text-decoration: none;" href="/apps/video" class="videoLike" es-translation='
-                            <h3 class="videoLike" style="margin-top: 20px;" >> Herramientas de Video <<h3>
-                                '>
-                            <h3 class="videoLike" style="margin-top: 20px;">
-                                > Video Tools < </h3>
-                        </a>
-                        <p
-                            es-translation="Estas herramientas de video son seguras y fáciles de usar, ya que procesan directamente en tu ordenador sin subir archivos a la nube.<br>Permiten realizar compresiones y otros ajustes de forma rápida y sencilla.">
-                            These video tools are secure and easy to use, as they process directly on your computer
-                            without uploading files to the cloud.<br>
-                            They allow quick and simple compressions and other adjustments.
-                        </p>
-
-                        <br>
-                        <a href="/apps/video/compressor.html" target="_blank" class="videoLike button"
-                            es-translation="Compresor de Video">Video Compress</a>
-                        <a href="/apps/video/conversor.html" target="_blank" class="videoLike button"
-                            es-translation="Conversor de Multimedia">Media Conversor</a>
-                        <a href="/apps/video/mp4-to-mp3.html" target="_blank" class="videoLike button blue"
-                            es-translation="MP4 a MP3">MP4 to MP3</a>
-                        <br><br>
-                    </div>
-                </center>
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <div class="content-container">
-        <div class="info-wrapper">
+            <p class="credits"
+                es-translation='Creditos del video a <a style="color: #b7b7b7;" target="_blank" href="https://www.youtube.com/channel/UCXZl3qQWKV1sUU5p_HvTFzw">daviddrm52</a>'>
+                Video credits to <a style="color: #b7b7b7;" target="_blank"
+                    href="https://www.youtube.com/channel/UCXZl3qQWKV1sUU5p_HvTFzw">daviddrm52</a>
+            </p>
         </div>
     </div>
-    <script>
-        var alturaHeader = document.querySelector('header').offsetHeight;
-        document.body.style.paddingTop = alturaHeader + 'px';
-    </script>
 
-
-
-
+    <h2 es-translation="¿Cómo Funciona?">How Does It Work?</h2>
+    <p
+        es-translation="La herramienta utiliza <strong>FFmpeg</strong>, una biblioteca de procesamiento de video, para realizar la compresión. Puedes ajustar la calidad y la velocidad de compresión según tus preferencias.">
+        The tool uses <strong>FFmpeg</strong>, a video processing library, to perform compression.<br>You can adjust
+        the quality and compression speed according to your preferences.
+    </p>
+    <br>
+    <h2><a class="link" href="./compressor" es-translation="Pruebalo">Try it</a></h2>
+    <br><br><br><br><br><br>
+    <h1 es-translation="2. Futuras herramientas">2. Future Tools</h1>
+    <p
+        es-translation="Estamos trabajando en más funcionalidades para mejorar tu experiencia con el procesamiento de videos. Mantente atento a futuras actualizaciones que incluirán herramientas como edición de video, conversión de formatos y mucho más.">
+        We are working on more features to improve your video processing experience. Stay tuned for future updates
+        that will include tools like video editing, format conversion, and much more.
+    </p>
 </body>
+
 
 </html>

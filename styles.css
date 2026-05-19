@@ -393,7 +393,6 @@ iframe {
         }
 
         a.videoLike.button:hover {
-            margin: -2px;
             background-color: #218838;
         }
 

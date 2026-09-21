@@ -268,8 +268,8 @@
             background-color: rgba(35, 35, 35, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 6px;
-            padding: 18px;
-            font-size: 34px;
+            padding: 24px;
+            font-size: 46px;
             font-weight: 400;
             line-height: 1.5;
             min-height: 120px;
@@ -291,6 +291,28 @@
         .preview-panel h2 {
             color: #ffffff;
             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .prev-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .prev-head h2 {
+            margin: 0;
+        }
+
+        .prev-head select {
+            background-color: rgba(30, 30, 30, 0.85);
+            border-color: #555;
+        }
+
+        .history-close {
+            padding: 5px 10px;
+            font-size: 13px;
         }
 
         .output-block {
@@ -467,7 +489,10 @@
     <aside id="historySidebar" class="history-sidebar">
         <div class="history-head">
             <h3>Historial</h3>
-            <button id="historyClear" class="history-clear">Vaciar</button>
+            <div style="display: flex; gap: 6px;">
+                <button id="historyClear" class="history-clear">Vaciar</button>
+                <button id="historyClose" class="history-close" title="Cerrar">✕</button>
+            </div>
         </div>
         <div id="historyList"></div>
     </aside>
@@ -476,7 +501,14 @@
         <h1>Generador de Texto con Degradado</h1>
 
         <div class="panel preview-panel">
-            <h2>Vista previa</h2>
+            <div class="prev-head">
+                <h2>Vista previa</h2>
+                <select id="previewFormat">
+                    <option value="rich">Unity Rich Text</option>
+                    <option value="html">HTML</option>
+                    <option value="bbcode">BBCode</option>
+                </select>
+            </div>
             <div id="preview"></div>
         </div>
 
@@ -601,6 +633,16 @@
                 <textarea readonly rows="4" id="bbcodeOut"></textarea>
             </div>
         </div>
+
+        <div class="panel">
+            <h2>Importar código</h2>
+            <p style="color: #aaa; font-size: 13px;">Pega aquí un código con color (Unity Rich Text, HTML o BBCode) y rellenará el texto y los colores.</p>
+            <textarea rows="4" id="importInput" placeholder="Ej: <color=#FF0000>Hola</color><color=#00FF00> Mundo</color>"></textarea>
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                <button id="importBtn">Importar</button>
+                <span id="importStatus" style="color: #ccc; font-size: 13px;"></span>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -633,6 +675,11 @@
         const historySidebar = document.getElementById('historySidebar');
         const historyList = document.getElementById('historyList');
         const historyClear = document.getElementById('historyClear');
+        const historyClose = document.getElementById('historyClose');
+        const importInput = document.getElementById('importInput');
+        const importBtn = document.getElementById('importBtn');
+        const importStatus = document.getElementById('importStatus');
+        const previewFormat = document.getElementById('previewFormat');
 
         const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
         const cutHex = h => h.startsWith('#') ? h.slice(1) : h;
@@ -710,6 +757,27 @@
                 pieces.push({ ch, hex: rgbToHex(colorAt(u, c1, c2)) });
             }
             return pieces;
+        }
+
+        function richToHtml(s) {
+            let out = s;
+            let prev;
+            do {
+                prev = out;
+                out = out
+                    .replace(/<color\s*=\s*(#[0-9A-Fa-f]{6}|[A-Za-z]+)>([\s\S]*?)<\/color>/gi,
+                        (m, c, inner) => inner ? '<span style="color:' + c + ';">' + inner + '</span>' : '')
+                    .replace(/\[color\s*=\s*(#[0-9A-Fa-f]{6}|[A-Za-z]+)\]([\s\S]*?)\[\/color\]/gi,
+                        (m, c, inner) => inner ? '<span style="color:' + c + ';">' + inner + '</span>' : '');
+            } while (out !== prev);
+            out = out
+                .replace(/\[b\]/gi, '<b>').replace(/\[\/b\]/gi, '</b>')
+                .replace(/\[i\]/gi, '<i>').replace(/\[\/i\]/gi, '</i>')
+                .replace(/\[u\]/gi, '<u>').replace(/\[\/u\]/gi, '</u>')
+                .replace(/\[s\]/gi, '<s>').replace(/\[\/s\]/gi, '</s>')
+                .replace(/<size\s*=\s*\d+>/gi, '').replace(/<\/size>/gi, '')
+                .replace(/\[\/?(?:size|font)\s*=[^\]]*\]/gi, '');
+            return out;
         }
 
         function update() {
@@ -791,7 +859,20 @@
             }
             if (styleCss) html += '</span>';
 
-            preview.innerHTML = htmlPrefixInput.value + html + htmlSuffixInput.value;
+            let prevPfx = '';
+            let prevSfx = '';
+            if (previewFormat.value === 'html') {
+                prevPfx = htmlPrefixInput.value;
+                prevSfx = htmlSuffixInput.value;
+            } else if (previewFormat.value === 'bbcode') {
+                prevPfx = richToHtml(bbcodePrefixInput.value);
+                prevSfx = richToHtml(bbcodeSuffixInput.value);
+            } else {
+                prevPfx = richToHtml(richPrefixInput.value);
+                prevSfx = richToHtml(richSuffixInput.value);
+            }
+
+            preview.innerHTML = prevPfx + html + prevSfx;
             htmlOut.value = htmlPrefixInput.value + html + htmlSuffixInput.value;
             richOut.value = richPrefixInput.value + richPrefix + rich + richSuffix + richSuffixInput.value;
             bbcodeOut.value = bbcodePrefixInput.value + bbcodePrefix + bbcode + bbcodeSuffix + bbcodeSuffixInput.value;
@@ -827,6 +908,7 @@
                 c2: endHex.value.toUpperCase(),
                 priority: parseInt(prioritySlider.value, 10),
                 conc: parseInt(concentrationSlider.value, 10),
+                vf: previewFormat.value,
                 font: fontSelect.value,
                 size: parseInt(sizeSelect.value, 10),
                 bold: boldCheck.checked,
@@ -939,6 +1021,7 @@
             endColor.value = '#' + cfg.c2;
             prioritySlider.value = cfg.priority;
             concentrationSlider.value = cfg.conc || 0;
+            previewFormat.value = cfg.vf || 'rich';
             fontSelect.value = cfg.font;
             sizeSelect.value = String(cfg.size);
             boldCheck.checked = cfg.bold;
@@ -956,10 +1039,75 @@
         historyToggle.addEventListener('click', () => {
             historySidebar.classList.toggle('open');
         });
+        historyClose.addEventListener('click', () => {
+            historySidebar.classList.remove('open');
+        });
+        document.addEventListener('click', (e) => {
+            if (historySidebar.classList.contains('open') &&
+                !historySidebar.contains(e.target) &&
+                !historyToggle.contains(e.target)) {
+                historySidebar.classList.remove('open');
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') historySidebar.classList.remove('open');
+        });
         historyClear.addEventListener('click', () => {
             history.length = 0;
             saveHistory();
             renderHistory();
+        });
+
+        function stripTags(s) {
+            return s
+                .replace(/<[^>]*>/g, '')
+                .replace(/\[[^\[\]]*\]/g, '');
+        }
+
+        function parseColoredCode(code) {
+            const tokens = [];
+            let lastIndex = 0;
+            const re = /<color\s*=\s*#?([0-9A-Fa-f]{6})>([\s\S]*?)<\/color>|\[color\s*=\s*#?([0-9A-Fa-f]{6})\]([\s\S]*?)\[\/color\]|<span[^>]*style=["'][^"']*color:\s*#?([0-9A-Fa-f]{6})[^"']*["'][^>]*>([\s\S]*?)<\/span>/gi;
+            function add(text, hex) {
+                const clean = stripTags(text);
+                for (const ch of clean) tokens.push({ ch, hex });
+            }
+            let m;
+            while ((m = re.exec(code)) !== null) {
+                add(code.slice(lastIndex, m.index), null);
+                const hex = (m[1] || m[3] || m[5]).toUpperCase();
+                add(m[2] || m[4] || m[6], hex);
+                lastIndex = m.index + m[0].length;
+            }
+            add(code.slice(lastIndex), null);
+            return tokens;
+        }
+
+        importBtn.addEventListener('click', () => {
+            const tokens = parseColoredCode(importInput.value);
+            const text = tokens.map(t => t.ch).join('');
+            let start = null;
+            let end = null;
+            for (const t of tokens) {
+                if (t.hex && !start) start = t.hex;
+                if (t.hex) end = t.hex;
+            }
+            if (!text.trim()) {
+                importStatus.textContent = 'No se ha detectado texto coloreado válido.';
+                return;
+            }
+            if (textInput.value !== text) textInput.value = text.trim();
+            if (start && startHex.value !== '#' + start) {
+                startHex.value = '#' + start;
+                startColor.value = '#' + start;
+            }
+            if (end && endHex.value !== '#' + end) {
+                endHex.value = '#' + end;
+                endColor.value = '#' + end;
+            }
+            update();
+            importStatus.textContent = 'Importado: ' + text.trim().length + ' caracteres y ' +
+                tokens.filter(t => t.hex).length + ' con color.';
         });
 
         startColor.addEventListener('input', () => {
@@ -990,6 +1138,7 @@
         });
         prioritySlider.addEventListener('input', update);
         concentrationSlider.addEventListener('input', update);
+        previewFormat.addEventListener('change', update);
         textInput.addEventListener('input', update);
         fontSelect.addEventListener('change', update);
         sizeSelect.addEventListener('change', update);

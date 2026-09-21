@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Texto con Degradado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #f0f0f0;
+            margin-bottom: 4px;
+        }
+
+        .panel {
+            background-color: #1a1a1a;
+            border: 1px solid #474b4e;
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+
+        .panel h2 {
+            color: #4ec9b0;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            background-color: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            color: #e0e0e0;
+            padding: 10px;
+            resize: vertical;
+            font-family: Consolas, monospace;
+        }
+
+        textarea[readonly] {
+            resize: none;
+            font-size: 13px;
+        }
+
+        .color-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+        }
+
+        .color-block {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .color-block label {
+            font-size: 13px;
+            color: #b7b7b7;
+        }
+
+        .color-block input[type="color"] {
+            width: 60px;
+            height: 34px;
+            padding: 0;
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            background: none;
+            cursor: pointer;
+        }
+
+        .hex-input {
+            width: 90px;
+            background-color: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            color: #e0e0e0;
+            padding: 5px 8px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+        }
+
+        button {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #005a9e;
+        }
+
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .slider-row span {
+            font-size: 12px;
+            color: #b7b7b7;
+            white-space: nowrap;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #3e3e42;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 8px;
+            border-radius: 4px;
+            background: #3e3e42;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4ec9b0;
+            border: 2px solid #1a1a1a;
+            margin-top: -6px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #6fd8c1;
+        }
+
+        input[type="range"]::-moz-range-track {
+            height: 8px;
+            border-radius: 4px;
+            background: #3e3e42;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #4ec9b0;
+            border: 2px solid #1a1a1a;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: #6fd8c1;
+        }
+
+        .slider-state {
+            text-align: center;
+            margin-top: 6px;
+            font-size: 14px;
+            color: #4ec9b0;
+            min-height: 22px;
+        }
+
+        canvas#ramp {
+            display: block;
+            width: 100%;
+            height: 14px;
+            margin-top: 10px;
+            border-radius: 6px;
+            border: 1px solid #3e3e42;
+        }
+
+        .settings-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .settings-row label {
+            font-size: 14px;
+            color: #b7b7b7;
+        }
+
+        select {
+            background-color: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            color: #e0e0e0;
+            padding: 5px 8px;
+            font-size: 14px;
+        }
+
+        input[type="checkbox"] {
+            accent-color: #007acc;
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+        }
+
+        .pfx-row {
+            display: grid;
+            grid-template-columns: 130px 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .pfx-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .pfx-label {
+            font-size: 13px;
+            color: #b7b7b7;
+        }
+
+        .pfx-input {
+            background-color: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 6px;
+            color: #e0e0e0;
+            padding: 6px 8px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+        }
+
+        @media (max-width: 620px) {
+            .pfx-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        #preview {
+            background-color: rgba(35, 35, 35, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            padding: 18px;
+            font-size: 34px;
+            font-weight: 400;
+            line-height: 1.5;
+            min-height: 120px;
+            overflow-wrap: break-word;
+            user-select: all;
+            font-family: 'Roboto', Arial, sans-serif;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .preview-panel {
+            background-image: url('/Image/gradient-preview-bg.png');
+            background-size: cover;
+            background-position: center;
+            background-color: #1a1a1a;
+        }
+
+        .preview-panel h2 {
+            color: #ffffff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .output-block {
+            margin-bottom: 14px;
+        }
+
+        .output-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .output-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .copy-btn {
+            padding: 5px 12px;
+            font-size: 13px;
+            background-color: #28a745;
+        }
+
+        .copy-btn:hover {
+            background-color: #218838;
+        }
+
+        .copy-btn.copied {
+            background-color: #555;
+        }
+
+        .history-toggle {
+            position: fixed;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            z-index: 999;
+            background-color: #1f1f1f;
+            border: 1px solid #474b4e;
+            border-right: none;
+            border-radius: 8px 0 0 8px;
+            padding: 12px 8px;
+            color: #e0e0e0;
+            cursor: pointer;
+            writing-mode: vertical-rl;
+            font-size: 13px;
+            letter-spacing: 2px;
+        }
+
+        .history-toggle:hover {
+            background-color: #2a2a2a;
+        }
+
+        .history-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 320px;
+            max-width: 95vw;
+            background-color: #181818;
+            border-left: 1px solid #474b4e;
+            transform: translateX(100%);
+            transition: transform 0.25s ease;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .history-sidebar.open {
+            transform: translateX(0);
+        }
+
+        .history-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            border-bottom: 1px solid #2d2d30;
+        }
+
+        .history-head h3 {
+            margin: 0;
+            color: #4ec9b0;
+            font-size: 15px;
+        }
+
+        .history-clear {
+            padding: 5px 12px;
+            font-size: 12px;
+            background-color: #444;
+        }
+
+        .history-clear:hover {
+            background-color: #555;
+        }
+
+        #historyList {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .hist-item {
+            background-color: #222;
+            border: 1px solid #3e3e42;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+            transition: background-color 0.15s;
+        }
+
+        .hist-item:hover {
+            background-color: #2a2a2a;
+            border-color: #555;
+        }
+
+        .hist-ramp {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            display: block;
+        }
+
+        .hist-text {
+            font-size: 12px;
+            color: #e0e0e0;
+            overflow-wrap: break-word;
+            word-break: break-all;
+            user-select: none;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+
+        .hist-del {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 11px;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        .hist-del:hover {
+            background: #3e3e42;
+            color: #fff;
+        }
+
+        .hist-empty {
+            color: #666;
+            text-align: center;
+            font-size: 13px;
+            padding: 20px;
+        }
+
+        .hist-more {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <button id="historyToggle" class="history-toggle">☰ Historial</button>
+
+    <aside id="historySidebar" class="history-sidebar">
+        <div class="history-head">
+            <h3>Historial</h3>
+            <button id="historyClear" class="history-clear">Vaciar</button>
+        </div>
+        <div id="historyList"></div>
+    </aside>
+
+    <div class="container">
+        <h1>Generador de Texto con Degradado</h1>
+
+        <div class="panel preview-panel">
+            <h2>Vista previa</h2>
+            <div id="preview"></div>
+        </div>
+
+        <div class="panel">
+            <h2>Texto</h2>
+            <textarea id="textInput" rows="3">Hola Mundo!</textarea>
+        </div>
+
+        <div class="panel">
+            <h2>Colores y Distribución</h2>
+            <div class="color-row">
+                <div class="color-block">
+                    <label for="startColor">Color inicial</label>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <input type="color" id="startColor" value="#FF0000">
+                        <input type="text" id="startHex" class="hex-input" value="#FF0000">
+                    </div>
+                </div>
+                <div class="color-block">
+                    <label for="endColor">Color final</label>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <input type="color" id="endColor" value="#0000FF">
+                        <input type="text" id="endHex" class="hex-input" value="#0000FF">
+                    </div>
+                </div>
+                <button id="swapBtn" title="Intercambiar colores">⇄ Intercambiar</button>
+            </div>
+
+            <div class="slider-row">
+                <span>A la izquierda: color inicial</span>
+                <input type="range" id="prioritySlider" min="-100" max="100" value="0">
+                <span>A la derecha: color final</span>
+            </div>
+            <div class="slider-state" id="sliderState">Equilibrado</div>
+
+            <div class="slider-row">
+                <span>Cambio repartido por los lados</span>
+                <input type="range" id="concentrationSlider" min="-100" max="100" value="0">
+                <span>Cambio concentrado en el centro</span>
+            </div>
+            <div class="slider-state" id="concState">Concentración: normal</div>
+            <canvas id="ramp"></canvas>
+        </div>
+
+        <div class="panel">
+            <h2>Opciones de texto</h2>
+            <div class="settings-row">
+                <label>Fuente
+                    <select id="fontSelect">
+                        <option value="Roboto">Roboto</option>
+                        <option value="Default">Default</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Arial Black">Arial Black</option>
+                        <option value="Century Gothic">Century Gothic</option>
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                        <option value="Courier New">Courier New</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Impact">Impact</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Trebuchet MS">Trebuchet MS</option>
+                        <option value="Verdana">Verdana</option>
+                    </select>
+                </label>
+                <label>Tamaño
+                    <select id="sizeSelect">
+                        <option value="0">Default</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                    </select>
+                </label>
+                <label><input type="checkbox" id="boldCheck" checked> Negrita</label>
+                <label><input type="checkbox" id="italicCheck"> Cursiva</label>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Prefijo y Sufijo del código</h2>
+            <div class="pfx-row">
+                <span class="pfx-label">Unity Rich Text</span>
+                <input type="text" id="richPrefixInput" class="pfx-input" placeholder="Prefijo">
+                <input type="text" id="richSuffixInput" class="pfx-input" placeholder="Sufijo">
+            </div>
+            <div class="pfx-row">
+                <span class="pfx-label">HTML</span>
+                <input type="text" id="htmlPrefixInput" class="pfx-input" placeholder="Prefijo">
+                <input type="text" id="htmlSuffixInput" class="pfx-input" placeholder="Sufijo">
+            </div>
+            <div class="pfx-row">
+                <span class="pfx-label">BBCode</span>
+                <input type="text" id="bbcodePrefixInput" class="pfx-input" placeholder="Prefijo">
+                <input type="text" id="bbcodeSuffixInput" class="pfx-input" placeholder="Sufijo">
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="output-block">
+                <div class="output-head">
+                    <h2 style="margin: 0;">Unity Rich Text</h2>
+                    <button class="copy-btn" data-target="richOut">Copiar</button>
+                </div>
+                <textarea readonly rows="4" id="richOut"></textarea>
+            </div>
+
+            <div class="output-block">
+                <div class="output-head">
+                    <h2 style="margin: 0;">HTML</h2>
+                    <button class="copy-btn" data-target="htmlOut">Copiar</button>
+                </div>
+                <textarea readonly rows="4" id="htmlOut"></textarea>
+            </div>
+
+            <div class="output-block">
+                <div class="output-head">
+                    <h2 style="margin: 0;">BBCode</h2>
+                    <button class="copy-btn" data-target="bbcodeOut">Copiar</button>
+                </div>
+                <textarea readonly rows="4" id="bbcodeOut"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('textInput');
+        const startColor = document.getElementById('startColor');
+        const endColor = document.getElementById('endColor');
+        const startHex = document.getElementById('startHex');
+        const endHex = document.getElementById('endHex');
+        const swapBtn = document.getElementById('swapBtn');
+        const prioritySlider = document.getElementById('prioritySlider');
+        const sliderState = document.getElementById('sliderState');
+        const concentrationSlider = document.getElementById('concentrationSlider');
+        const concState = document.getElementById('concState');
+        const ramp = document.getElementById('ramp');
+        const fontSelect = document.getElementById('fontSelect');
+        const sizeSelect = document.getElementById('sizeSelect');
+        const boldCheck = document.getElementById('boldCheck');
+        const italicCheck = document.getElementById('italicCheck');
+        const preview = document.getElementById('preview');
+        const richOut = document.getElementById('richOut');
+        const htmlOut = document.getElementById('htmlOut');
+        const bbcodeOut = document.getElementById('bbcodeOut');
+        const richPrefixInput = document.getElementById('richPrefixInput');
+        const richSuffixInput = document.getElementById('richSuffixInput');
+        const htmlPrefixInput = document.getElementById('htmlPrefixInput');
+        const htmlSuffixInput = document.getElementById('htmlSuffixInput');
+        const bbcodePrefixInput = document.getElementById('bbcodePrefixInput');
+        const bbcodeSuffixInput = document.getElementById('bbcodeSuffixInput');
+        const historyToggle = document.getElementById('historyToggle');
+        const historySidebar = document.getElementById('historySidebar');
+        const historyList = document.getElementById('historyList');
+        const historyClear = document.getElementById('historyClear');
+
+        const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+        const cutHex = h => h.startsWith('#') ? h.slice(1) : h;
+
+        function parseHex(h) {
+            h = cutHex(h.trim());
+            if (/^[0-9a-fA-F]{3}$/.test(h)) h = h.split('').map(c => c + c).join('');
+            if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+            return {
+                r: parseInt(h.slice(0, 2), 16),
+                g: parseInt(h.slice(2, 4), 16),
+                b: parseInt(h.slice(4, 6), 16)
+            };
+        }
+
+        function toHex(val) {
+            return clamp(Math.round(val), 0, 255).toString(16).toUpperCase().padStart(2, '0');
+        }
+
+        function rgbToHex(c) {
+            return toHex(c.r) + toHex(c.g) + toHex(c.b);
+        }
+
+        function lerp(a, b, t) {
+            return a + (b - a) * t;
+        }
+
+        function colorAt(u, c1, c2) {
+            return {
+                r: lerp(c1.r, c2.r, u),
+                g: lerp(c1.g, c2.g, u),
+                b: lerp(c1.b, c2.b, u)
+            };
+        }
+
+        function exponentFor(sliderVal) {
+            return Math.pow(6, -sliderVal / 100);
+        }
+
+        function concentrationCurve(t, conc) {
+            if (conc === 0) return t;
+            const d = 2 * t - 1;
+            let m;
+            if (conc > 0) {
+                m = Math.pow(0.15, conc / 100);
+            } else {
+                m = Math.pow(1 / 0.15, -conc / 100);
+            }
+            return 0.5 + 0.5 * Math.sign(d) * Math.pow(Math.abs(d), m);
+        }
+
+        function distribution(t, sliderVal, conc) {
+            return Math.pow(concentrationCurve(t, conc), exponentFor(sliderVal));
+        }
+
+        function escapeHtml(ch) {
+            return ch.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function isWhitespace(ch) {
+            return /\s/.test(ch);
+        }
+
+        function colorize(text, sliderVal, conc, c1, c2) {
+            const len = text.length;
+            const pieces = [];
+            for (let i = 0; i < len; i++) {
+                const ch = text[i];
+                if (isWhitespace(ch)) {
+                    pieces.push({ ch, hex: null });
+                    continue;
+                }
+                const t = len > 1 ? i / (len - 1) : 0.5;
+                const u = distribution(t, sliderVal, conc);
+                pieces.push({ ch, hex: rgbToHex(colorAt(u, c1, c2)) });
+            }
+            return pieces;
+        }
+
+        function update() {
+            const c1 = parseHex(startHex.value);
+            const c2 = parseHex(endHex.value);
+            if (!c1 || !c2) return;
+
+            const text = textInput.value;
+            const sliderVal = parseInt(prioritySlider.value, 10);
+            const conc = parseInt(concentrationSlider.value, 10);
+            const exp = exponentFor(sliderVal);
+
+            sliderState.textContent = sliderVal === 0
+                ? 'Equilibrado (0)'
+                : sliderVal < 0
+                    ? 'Prioridad al color inicial ( −' + Math.abs(sliderVal) + '% )'
+                    : 'Prioridad al color final ( +' + sliderVal + '% )';
+
+            concState.textContent = conc === 0
+                ? 'Concentración: normal (0)'
+                : conc > 0
+                    ? 'Concentrado en el centro ( +' + conc + '% )'
+                    : 'Repartido a los lados ( −' + Math.abs(conc) + '% )';
+
+            const font = fontSelect.value === 'Default' ? '' : fontSelect.value;
+            const size = parseInt(sizeSelect.value, 10);
+            const bold = boldCheck.checked;
+            const italic = italicCheck.checked;
+
+            let styleCss = '';
+            let richPrefix = '';
+            let bbcodePrefix = '';
+            let richSuffix = '';
+            let bbcodeSuffix = '';
+
+            if (bold) {
+                styleCss += 'font-weight:bold;';
+                richPrefix += '<b>';
+                bbcodePrefix += '[b]';
+                richSuffix = '</b>' + richSuffix;
+                bbcodeSuffix = '[/b]' + bbcodeSuffix;
+            }
+            if (italic) {
+                styleCss += 'font-style:italic;';
+                richPrefix += '<i>';
+                bbcodePrefix += '[i]';
+                richSuffix = '</i>' + richSuffix;
+                bbcodeSuffix = '[/i]' + bbcodeSuffix;
+            }
+            if (font) {
+                styleCss += 'font-family:"' + font + '";';
+                bbcodePrefix += '[font="' + font + '"]';
+                bbcodeSuffix = '[/font]' + bbcodeSuffix;
+            }
+            if (size) {
+                const px = [10, 12, 15, 17, 22, 27, 35][size - 1] || 12;
+                styleCss += 'font-size:' + px + 'px;';
+                richPrefix += '<size=' + (size * 6) + '>';
+                bbcodePrefix += '[size=' + size + ']';
+                richSuffix = '</size>' + richSuffix;
+                bbcodeSuffix = '[/size]' + bbcodeSuffix;
+            }
+
+            let html = styleCss ? '<span style="' + styleCss + '">' : '';
+            let rich = '';
+            let bbcode = '';
+            const pieces = colorize(text, sliderVal, conc, c1, c2);
+            for (let i = 0; i < pieces.length; i++) {
+                const p = pieces[i];
+                if (p.hex === null) {
+                    html += escapeHtml(p.ch);
+                    rich += p.ch;
+                    bbcode += p.ch;
+                    continue;
+                }
+                html += '<span style="color:#' + p.hex + ';">' + escapeHtml(p.ch) + '</span>';
+                rich += '<color=#' + p.hex + '>' + p.ch + '</color>';
+                bbcode += '[color=#' + p.hex + ']' + p.ch + '[/color]';
+            }
+            if (styleCss) html += '</span>';
+
+            preview.innerHTML = htmlPrefixInput.value + html + htmlSuffixInput.value;
+            htmlOut.value = htmlPrefixInput.value + html + htmlSuffixInput.value;
+            richOut.value = richPrefixInput.value + richPrefix + rich + richSuffix + richSuffixInput.value;
+            bbcodeOut.value = bbcodePrefixInput.value + bbcodePrefix + bbcode + bbcodeSuffix + bbcodeSuffixInput.value;
+            drawRamp(c1, c2, sliderVal, conc);
+            scheduleHistorySave();
+        }
+
+        function drawRampOn(cv, c1, c2, sliderVal, conc) {
+            cv.width = 320;
+            cv.height = 16;
+            const ctx = cv.getContext('2d');
+            const w = cv.width;
+            for (let x = 0; x < w; x++) {
+                const t = x / (w - 1);
+                const u = distribution(t, sliderVal, conc);
+                const col = colorAt(u, c1, c2);
+                ctx.fillStyle = 'rgb(' + Math.round(col.r) + ',' + Math.round(col.g) + ',' + Math.round(col.b) + ')';
+                ctx.fillRect(x, 0, 1, cv.height);
+            }
+        }
+
+        function drawRamp(c1, c2, sliderVal, conc) {
+            drawRampOn(ramp, c1, c2, sliderVal, conc);
+        }
+
+        let history = [];
+        let historySaveTimer;
+
+        function currentConfig() {
+            return {
+                text: textInput.value,
+                c1: startHex.value.toUpperCase(),
+                c2: endHex.value.toUpperCase(),
+                priority: parseInt(prioritySlider.value, 10),
+                conc: parseInt(concentrationSlider.value, 10),
+                font: fontSelect.value,
+                size: parseInt(sizeSelect.value, 10),
+                bold: boldCheck.checked,
+                italic: italicCheck.checked,
+                rpf: richPrefixInput.value,
+                rsf: richSuffixInput.value,
+                hpf: htmlPrefixInput.value,
+                hsf: htmlSuffixInput.value,
+                bpf: bbcodePrefixInput.value,
+                bsf: bbcodeSuffixInput.value
+            };
+        }
+
+        function scheduleHistorySave() {
+            clearTimeout(historySaveTimer);
+            historySaveTimer = setTimeout(addHistoryEntry, 600);
+        }
+
+        function addHistoryEntry() {
+            const cfg = currentConfig();
+            const key = JSON.stringify(cfg);
+            if (history.length && history[0].key === key) return;
+            history.unshift({ key, cfg });
+            if (history.length > 50) history.pop();
+            saveHistory();
+            renderHistory();
+        }
+
+        function saveHistory() {
+            try {
+                localStorage.setItem('gdtc_history', JSON.stringify(history));
+            } catch (e) {}
+        }
+
+        function loadHistory() {
+            try {
+                const raw = localStorage.getItem('gdtc_history');
+                if (raw) {
+                    const arr = JSON.parse(raw);
+                    if (Array.isArray(arr)) {
+                        history = arr.filter(entry => entry && entry.cfg && entry.key);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        loadHistory();
+        renderHistory();
+
+        function renderHistory() {
+            historyList.innerHTML = '';
+            if (history.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'hist-empty';
+                empty.textContent = 'Todavía no hay entradas. Tus cambios se guardarán aquí automáticamente.';
+                historyList.appendChild(empty);
+                return;
+            }
+            history.forEach((entry, idx) => {
+                const c1 = parseHex(entry.cfg.c1);
+                const c2 = parseHex(entry.cfg.c2);
+                if (!c1 || !c2) return;
+
+                const item = document.createElement('div');
+                item.className = 'hist-item';
+
+                const cv = document.createElement('canvas');
+                cv.className = 'hist-ramp';
+                cv.width = 300;
+                cv.height = 8;
+                drawRampOn(cv, c1, c2, entry.cfg.priority, entry.cfg.conc);
+
+                const textEl = document.createElement('div');
+                textEl.className = 'hist-text';
+                const pieces = colorize(entry.cfg.text, entry.cfg.priority, entry.cfg.conc, c1, c2);
+                const big = pieces.length > 44;
+                const shown = big ? pieces.slice(0, 44) : pieces;
+                let txt = '';
+                for (const p of shown) {
+                    if (p.hex === null) txt += escapeHtml(p.ch);
+                    else txt += '<span style="color:#' + p.hex + ';">' + escapeHtml(p.ch) + '</span>';
+                }
+                if (big) txt += '<span class="hist-more">…</span>';
+                textEl.innerHTML = txt;
+
+                const del = document.createElement('button');
+                del.className = 'hist-del';
+                del.textContent = '✕';
+                del.title = 'Eliminar';
+                del.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    history.splice(idx, 1);
+                    saveHistory();
+                    renderHistory();
+                });
+
+                item.appendChild(cv);
+                item.appendChild(textEl);
+                item.appendChild(del);
+                item.addEventListener('click', () => applyConfig(entry.cfg));
+                historyList.appendChild(item);
+            });
+        }
+
+        function applyConfig(cfg) {
+            textInput.value = cfg.text;
+            startHex.value = cfg.c1;
+            startColor.value = '#' + cfg.c1;
+            endHex.value = cfg.c2;
+            endColor.value = '#' + cfg.c2;
+            prioritySlider.value = cfg.priority;
+            concentrationSlider.value = cfg.conc || 0;
+            fontSelect.value = cfg.font;
+            sizeSelect.value = String(cfg.size);
+            boldCheck.checked = cfg.bold;
+            italicCheck.checked = cfg.italic;
+            richPrefixInput.value = cfg.rpf;
+            richSuffixInput.value = cfg.rsf;
+            htmlPrefixInput.value = cfg.hpf;
+            htmlSuffixInput.value = cfg.hsf;
+            bbcodePrefixInput.value = cfg.bpf;
+            bbcodeSuffixInput.value = cfg.bsf;
+            update();
+            historySidebar.classList.remove('open');
+        }
+
+        historyToggle.addEventListener('click', () => {
+            historySidebar.classList.toggle('open');
+        });
+        historyClear.addEventListener('click', () => {
+            history.length = 0;
+            saveHistory();
+            renderHistory();
+        });
+
+        startColor.addEventListener('input', () => {
+            startHex.value = startColor.value.toUpperCase();
+            update();
+        });
+        endColor.addEventListener('input', () => {
+            endHex.value = endColor.value.toUpperCase();
+            update();
+        });
+        startHex.addEventListener('input', () => {
+            const parsed = parseHex(startHex.value);
+            if (parsed) startColor.value = '#' + rgbToHex(parsed);
+            update();
+        });
+        endHex.addEventListener('input', () => {
+            const parsed = parseHex(endHex.value);
+            if (parsed) endColor.value = '#' + rgbToHex(parsed);
+            update();
+        });
+        swapBtn.addEventListener('click', () => {
+            const tmp = startColor.value;
+            startColor.value = endColor.value;
+            endColor.value = tmp;
+            startHex.value = startColor.value.toUpperCase();
+            endHex.value = endColor.value.toUpperCase();
+            update();
+        });
+        prioritySlider.addEventListener('input', update);
+        concentrationSlider.addEventListener('input', update);
+        textInput.addEventListener('input', update);
+        fontSelect.addEventListener('change', update);
+        sizeSelect.addEventListener('change', update);
+        boldCheck.addEventListener('change', update);
+        italicCheck.addEventListener('change', update);
+        richPrefixInput.addEventListener('input', update);
+        richSuffixInput.addEventListener('input', update);
+        htmlPrefixInput.addEventListener('input', update);
+        htmlSuffixInput.addEventListener('input', update);
+        bbcodePrefixInput.addEventListener('input', update);
+        bbcodeSuffixInput.addEventListener('input', update);
+
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = document.getElementById(btn.dataset.target);
+                navigator.clipboard.writeText(target.value).then(() => {
+                    btn.textContent = '¡Copiado!';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.textContent = 'Copiar';
+                        btn.classList.remove('copied');
+                    }, 1200);
+                }).catch(() => {
+                    target.select();
+                    document.execCommand('copy');
+                });
+            });
+        });
+
+        update();
+    </script>
+</body>
+</html>

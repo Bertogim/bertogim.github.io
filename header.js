@@ -23,6 +23,7 @@ link.addEventListener('load', () => {
             <div class="dropdown-menu">
                 <a href="/apps/discord-timestamps" es-translation="Discord Timestamps">Discord Timestamps</a>
                 <a target="_blank" href="/apps/notepad" es-translation="Notepad">Notepad</a>
+                <a target="_blank" href="/apps/gradient-text-colorizer" es-translation="Generador de Degradado de Texto">Gradient Text Colorizer</a>
                 <div class="dropdown">
                     <a href="/apps/video/" class="dropdown-toggle" es-translation="Herramientas de Video">Video Tools</a>
                     <div class="dropdown-menu">

@@ -684,6 +684,19 @@
         const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
         const cutHex = h => h.startsWith('#') ? h.slice(1) : h;
 
+        function normHex(v) {
+            if (typeof v !== 'string') return null;
+            let h = v.trim().replace(/^#/, '').toUpperCase();
+            if (/^[0-9A-F]{3}$/.test(h)) h = h.split('').map(c => c + c).join('');
+            if (!/^[0-9A-F]{6}$/.test(h)) return null;
+            return h;
+        }
+
+        function setSelectValue(sel, val, fallback) {
+            const valid = Array.prototype.some.call(sel.options, o => o.value === String(val));
+            sel.value = valid ? String(val) : String(fallback);
+        }
+
         function parseHex(h) {
             h = cutHex(h.trim());
             if (/^[0-9a-fA-F]{3}$/.test(h)) h = h.split('').map(c => c + c).join('');
@@ -902,10 +915,13 @@
         let historySaveTimer;
 
         function currentConfig() {
+            const c1 = normHex(startHex.value);
+            const c2 = normHex(endHex.value);
+            if (!c1 || !c2) return null;
             return {
                 text: textInput.value,
-                c1: startHex.value.toUpperCase(),
-                c2: endHex.value.toUpperCase(),
+                c1: c1,
+                c2: c2,
                 priority: parseInt(prioritySlider.value, 10),
                 conc: parseInt(concentrationSlider.value, 10),
                 vf: previewFormat.value,
@@ -929,6 +945,7 @@
 
         function addHistoryEntry() {
             const cfg = currentConfig();
+            if (!cfg) return;
             const key = JSON.stringify(cfg);
             if (history.length && history[0].key === key) return;
             history.unshift({ key, cfg });
@@ -971,6 +988,8 @@
                 const c1 = parseHex(entry.cfg.c1);
                 const c2 = parseHex(entry.cfg.c2);
                 if (!c1 || !c2) return;
+                const prior = isNaN(parseInt(entry.cfg.priority, 10)) ? 0 : parseInt(entry.cfg.priority, 10);
+                const cons = isNaN(parseInt(entry.cfg.conc, 10)) ? 0 : parseInt(entry.cfg.conc, 10);
 
                 const item = document.createElement('div');
                 item.className = 'hist-item';
@@ -979,11 +998,11 @@
                 cv.className = 'hist-ramp';
                 cv.width = 300;
                 cv.height = 8;
-                drawRampOn(cv, c1, c2, entry.cfg.priority, entry.cfg.conc);
+                drawRampOn(cv, c1, c2, prior, cons);
 
                 const textEl = document.createElement('div');
                 textEl.className = 'hist-text';
-                const pieces = colorize(entry.cfg.text, entry.cfg.priority, entry.cfg.conc, c1, c2);
+                const pieces = colorize(entry.cfg.text, prior, cons, c1, c2);
                 const big = pieces.length > 44;
                 const shown = big ? pieces.slice(0, 44) : pieces;
                 let txt = '';
@@ -1014,24 +1033,33 @@
         }
 
         function applyConfig(cfg) {
-            textInput.value = cfg.text;
-            startHex.value = cfg.c1;
-            startColor.value = '#' + cfg.c1;
-            endHex.value = cfg.c2;
-            endColor.value = '#' + cfg.c2;
-            prioritySlider.value = cfg.priority;
-            concentrationSlider.value = cfg.conc || 0;
-            previewFormat.value = cfg.vf || 'rich';
-            fontSelect.value = cfg.font;
-            sizeSelect.value = String(cfg.size);
-            boldCheck.checked = cfg.bold;
-            italicCheck.checked = cfg.italic;
-            richPrefixInput.value = cfg.rpf;
-            richSuffixInput.value = cfg.rsf;
-            htmlPrefixInput.value = cfg.hpf;
-            htmlSuffixInput.value = cfg.hsf;
-            bbcodePrefixInput.value = cfg.bpf;
-            bbcodeSuffixInput.value = cfg.bsf;
+            if (!cfg || typeof cfg !== 'object') return;
+            textInput.value = cfg.text || '';
+            const c1 = normHex(cfg.c1);
+            const c2 = normHex(cfg.c2);
+            if (c1) {
+                startHex.value = '#' + c1;
+                startColor.value = '#' + c1;
+            }
+            if (c2) {
+                endHex.value = '#' + c2;
+                endColor.value = '#' + c2;
+            }
+            const p = parseInt(cfg.priority, 10);
+            prioritySlider.value = clamp(isNaN(p) ? 0 : p, -100, 100);
+            const cn = parseInt(cfg.conc, 10);
+            concentrationSlider.value = clamp(isNaN(cn) ? 0 : cn, -100, 100);
+            previewFormat.value = ['rich', 'html', 'bbcode'].includes(cfg.vf) ? cfg.vf : 'rich';
+            setSelectValue(fontSelect, cfg.font, 'Roboto');
+            setSelectValue(sizeSelect, cfg.size, 0);
+            boldCheck.checked = !!cfg.bold;
+            italicCheck.checked = !!cfg.italic;
+            richPrefixInput.value = cfg.rpf || '';
+            richSuffixInput.value = cfg.rsf || '';
+            htmlPrefixInput.value = cfg.hpf || '';
+            htmlSuffixInput.value = cfg.hsf || '';
+            bbcodePrefixInput.value = cfg.bpf || '';
+            bbcodeSuffixInput.value = cfg.bsf || '';
             update();
             historySidebar.classList.remove('open');
         }

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title es-translation="Invitación de Steam">Steam Invite</title>
+    <link rel="icon" type="image/png" href="/Image/Icon.png">
+    <meta name="theme-color" content="#1b2838">
+    <meta content="Bertogim" property="og:title" />
+    <meta content="Steam Invite" property="og:description" />
+    <meta content="https://bertogim.github.io" property="og:url" />
+    <meta content="https://bertogim.github.io/Image/Icon.png" property="og:image" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --blue: #66c0f4;
+            --blue-dark: #1a9fff;
+            --panel: #1b2838;
+            --panel-2: #16202d;
+            --line: #2a475e;
+        }
+
+        body {
+            background: radial-gradient(1200px 600px at 50% -10%, #1b2838 0%, #121212 60%);
+            color: #c7d5e0;
+            font-family: 'Segoe UI', Roboto, Tahoma, sans-serif;
+            min-height: 100vh;
+            padding: 24px 16px 60px;
+            line-height: 1.5;
+        }
+
+        main {
+            max-width: 560px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: .3px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .45);
+        }
+
+        .art {
+            position: relative;
+            display: block;
+            width: 100%;
+            aspect-ratio: 460 / 215;
+            background: #0e1620;
+            object-fit: cover;
+        }
+
+        .art.hidden {
+            display: none;
+        }
+
+        .body {
+            padding: 18px 20px 20px;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: .72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--blue);
+            border: 1px solid var(--line);
+            background: rgba(102, 192, 244, .08);
+            border-radius: 999px;
+            padding: 3px 10px;
+        }
+
+        h2 {
+            color: #fff;
+            font-size: 1.35rem;
+            margin: 10px 0 4px;
+        }
+
+        .sub {
+            font-size: .85rem;
+            color: #8fa3b5;
+            word-break: break-all;
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            margin-top: 16px;
+            padding: 15px 18px;
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: #0d1117;
+            text-align: center;
+            text-decoration: none;
+            background: linear-gradient(90deg, var(--blue) 0%, var(--blue-dark) 100%);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 6px 18px rgba(26, 159, 255, .25);
+            transition: transform .12s ease, filter .12s ease;
+        }
+
+        .btn:hover {
+            filter: brightness(1.08);
+        }
+
+        .btn:active {
+            transform: translateY(1px) scale(.995);
+        }
+
+        .btn.ghost {
+            background: #2a475e;
+            color: #c7d5e0;
+            box-shadow: none;
+        }
+
+        .btn.ghost:hover {
+            background: #33556f;
+        }
+
+        .note {
+            margin-top: 12px;
+            font-size: .82rem;
+            color: #8fa3b5;
+            text-align: center;
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .row .btn {
+            margin-top: 0;
+            padding: 11px 10px;
+            font-size: .85rem;
+            font-weight: 600;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            margin-top: 12px;
+            padding: 13px 14px;
+            font-family: inherit;
+            font-size: .9rem;
+            color: #fff;
+            background: #10171f;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: var(--blue);
+        }
+
+        textarea {
+            min-height: 84px;
+            resize: vertical;
+        }
+
+        .out {
+            display: none;
+            margin-top: 16px;
+        }
+
+        .out.show {
+            display: block;
+        }
+
+        .btn.link {
+            font-family: ui-monospace, Consolas, monospace;
+            font-size: .82rem;
+            font-weight: 600;
+            letter-spacing: 0;
+            word-break: break-all;
+        }
+
+        code.link {
+            display: block;
+            margin: 10px 0 2px;
+            padding: 9px 11px;
+            font-family: ui-monospace, Consolas, monospace;
+            font-size: .78rem;
+            color: var(--blue);
+            text-align: center;
+            background: #10171f;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            word-break: break-all;
+            user-select: all;
+        }
+
+        .long {
+            display: block;
+            margin-top: 10px;
+            font-size: .7rem;
+            color: #56646f;
+            word-break: break-all;
+            user-select: all;
+        }
+
+        .out b:first-child {
+            margin-top: 0;
+        }
+
+        .out code {
+            display: block;
+            font-family: ui-monospace, Consolas, monospace;
+            font-size: .82rem;
+            color: var(--blue);
+            word-break: break-all;
+            margin-top: 4px;
+            user-select: all;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            font-size: .78rem;
+            color: #8fa3b5;
+            margin-top: 10px;
+        }
+
+        .stat span:last-child {
+            color: #6ee7a8;
+            font-weight: 600;
+        }
+
+        details {
+            border-top: 1px solid var(--line);
+        }
+
+        summary {
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: .9rem;
+            color: var(--blue);
+            user-select: none;
+        }
+
+        details .body {
+            padding-top: 0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .err {
+            border-color: #7a2f2f;
+        }
+
+        .err .tag {
+            color: #ff8f8f;
+            border-color: #7a2f2f;
+            background: rgba(255, 90, 90, .08);
+        }
+
+        .opened {
+            text-align: center;
+            padding: 18px 0 6px;
+            animation: pop .35s ease;
+        }
+
+        .opened .ok {
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 8px;
+        }
+
+        .opened .big {
+            font-size: clamp(1.45rem, 5.5vw, 1.95rem);
+            font-weight: 800;
+            line-height: 1.15;
+            color: #fff;
+            text-shadow: 0 0 24px rgba(102, 192, 244, .5);
+        }
+
+        .opened .btn {
+            width: auto;
+            display: inline-flex;
+            margin-top: 18px;
+            padding: 9px 20px;
+            font-size: .8rem;
+            font-weight: 600;
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: scale(.94);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .foot {
+            text-align: center;
+            font-size: .74rem;
+            color: #56646f;
+        }
+
+        .foot a {
+            color: #56646f;
+        }
+    </style>
+
+    <script defer src="/translations.js"></script>
+    <script defer src="/header.js"></script>
+</head>
+
+<body>
+    <main>
+        <h1 es-translation="Invitación de Steam">Steam Invite</h1>
+
+        <section class="card hidden" id="join">
+            <img class="art" id="art" alt="" referrerpolicy="no-referrer">
+            <div class="body">
+                <span class="tag" id="tag" es-translation="Invitación a un lobby">Lobby invite</span>
+                <h2 id="game">…</h2>
+                <div class="sub" id="ids"></div>
+                <a class="btn" id="joinBtn" href="#">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.8l-12-7.5A1 1 0 0 0 7 4.5Z" />
+                    </svg>
+                    <span id="joinTxt" es-translation="Unirse al lobby">Join lobby</span>
+                </a>
+                <p class="note" id="joinNote" es-translation="Abriendo Steam…">Opening Steam…</p>
+
+                <div class="opened hidden" id="opened">
+                    <p class="ok" es-translation="Invitación aceptada">Invite accepted</p>
+                    <p class="big" es-translation="Abre el juego">Open the game</p>
+                    <button class="btn ghost" id="joinBack" es-translation="Cerrar">Close</button>
+                </div>
+
+                <div class="row" id="joinRow">
+                    <a class="btn ghost" id="copyShort" href="#" es-translation="Copiar enlace">Copy link</a>
+                    <a class="btn ghost" id="openStore" href="#" target="_blank" rel="noopener"
+                        es-translation="Ver en la tienda">Store page</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="card err hidden" id="bad">
+            <div class="body">
+                <span class="tag" es-translation="Enlace no válido">Invalid link</span>
+                <h2 id="badTxt" es-translation="No se pudo leer la invitación">The invite could not be read</h2>
+                <p class="note" id="badWhy"></p>
+            </div>
+        </section>
+
+        <section class="card" id="maker">
+            <div class="body">
+                <h2 es-translation="Genera tu enlace">Generate your link</h2>
+                <p class="sub" es-translation="Pega el enlace de invitación de un lobby de Steam para generar el enlace corto.">
+                    Paste a Steam lobby invite link to generate the short link</p>
+                <input id="paste" spellcheck="false" autocomplete="off"
+                    placeholder="steam://joinlobby/&lt;juego&gt;/&lt;lobby&gt;/&lt;steamid64&gt;">
+                <p class="note" id="hint" hidden></p>
+
+                <div class="out" id="out">
+                    <button class="btn" id="bShort" es-translation="Copiar">Copy</button>
+                    <code class="link" id="oShort"></code>
+                    <div class="row">
+                        <button class="btn ghost" id="bLong" es-translation="Copiar enlace de la web">Copy
+                            website link</button>
+                        <button class="btn ghost" id="bGo" es-translation="Abrir">Open</button>
+                    </div>
+                    <div class="stat">
+                        <span id="oStat"></span>
+                        <span id="oSaved"></span>
+                    </div>
+                    <code class="long" id="oLong"></code>
+                </div>
+            </div>
+            <details>
+                <summary es-translation="¿Cómo funciona?">How does it work?</summary>
+                <div class="body">
+                    <p class="sub" id="how"></p>
+                </div>
+            </details>
+        </section>
+
+        <p class="foot" id="foot"></p>
+    </main>
+
+    <script>
+        /* ---------- codec ---------- */
+        const A = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+        const BASE = 76561197960265728n;
+        const SITE = location.origin + location.pathname.replace(/\.html$/, '');
+        const ALIAS = 'https://tinyurl.com/bertinvite?';
+
+        // 36 juegos verificados con su AppID: el indice base36 ocupa 1 solo caracter
+        const GAMES = [1966720, 3241660, 3527290, 3164500, 2881650, 552100, 440, 550, 730, 570, 49520,
+            232090, 218620, 393380, 221100, 346110, 275850, 548430, 322330, 4000, 620, 220, 632360,
+            1794680, 1086940, 1091500, 1245620, 252490, 108600, 892970, 105600, 413150, 1237970,
+            1621690, 427410, 1145360];
+        const NAMES = {
+            1966720: 'Lethal Company', 3241660: 'R.E.P.O.', 3527290: 'PEAK', 3164500: 'Schedule I',
+            2881650: 'Content Warning', 552100: 'Brick Rigs', 440: 'Team Fortress 2', 550: 'Left 4 Dead 2',
+            730: 'Counter-Strike 2', 570: 'Dota 2', 49520: 'Borderlands 2', 232090: 'Killing Floor 2',
+            218620: 'PAYDAY 2', 393380: 'Squad', 221100: 'DayZ', 346110: 'ARK: Survival Evolved',
+            275850: "No Man's Sky", 548430: 'Deep Rock Galactic', 322330: "Don't Starve Together",
+            4000: "Garry's Mod", 620: 'Portal 2', 220: 'Half-Life 2', 632360: 'Risk of Rain 2',
+            1794680: 'Vampire Survivors', 1086940: "Baldur's Gate 3", 1091500: 'Cyberpunk 2077',
+            1245620: 'ELDEN RING', 252490: 'Rust', 108600: 'Project Zomboid', 892970: 'Valheim',
+            105600: 'Terraria', 413150: 'Stardew Valley', 1237970: 'Titanfall 2', 1621690: 'Core Keeper',
+            427410: 'Abiotic Factor', 1145360: 'Hades'
+        };
+
+        // lobby (64 bits) + accountID (32 bits) -> base64url sin ceros delante
+        function b64(n) {
+            let s = '';
+            for (n = BigInt(n); n > 0n; n /= 64n) s = A[Number(n % 64n)] + s;
+            return s || '0';
+        }
+
+        function unb64(s) {
+            let n = 0n;
+            for (const c of s) {
+                const i = A.indexOf(c);
+                if (i < 0) throw new Error('char');
+                n = n * 64n + BigInt(i);
+            }
+            return n;
+        }
+
+        function pack(app, lobby, sid) {
+            const acc = BigInt(sid) - BASE;
+            if (acc < 0n || acc > 0xFFFFFFFFn) throw new Error('steamid');
+            const i = GAMES.indexOf(+app);
+            return (i >= 0 ? i.toString(36) : '!' + app + ':') + b64(BigInt(lobby) * 4294967296n + acc);
+        }
+
+        function unpack(code) {
+            const c = code[0];
+            let app, rest;
+            if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z') {
+                const i = parseInt(c, 36);
+                rest = code.slice(1);
+                if (i >= GAMES.length || !rest) throw new Error('game');
+                app = GAMES[i];
+            } else {
+                const k = code.indexOf(':');
+                if (c !== '!' || k < 2) throw new Error('game');
+                app = +code.slice(1, k);
+                rest = code.slice(k + 1);
+                if (!/^[1-9]\d*$/.test(String(app))) throw new Error('appid');
+            }
+            const n = unb64(rest);
+            const lobby = n / 4294967296n, acc = n % 4294967296n;
+            if (lobby <= 0n) throw new Error('lobby');
+            return { app, lobby, sid: BASE + acc };
+        }
+
+        // steam://joinlobby/<appid>/<lobbyid>/<steamid64>  (o solo el AppID)
+        function parse(text) {
+            const m = text.trim().match(/joinlobby\/(\d+)\/(\d+)\/(\d+)/i);
+            if (m) return { app: m[1], lobby: m[2], sid: m[3] };
+            if (/^\d+$/.test(text.trim())) throw new Error('appid');
+            throw new Error('nolink');
+        }
+
+        const steamURL = d => 'steam://joinlobby/' + d.app + '/' + d.lobby + '/' + d.sid;
+        const $ = id => document.getElementById(id);
+
+        function txt(id, es, en) {
+            const el = $(id);
+            if (!el) return;
+            el.setAttribute('es-translation', es);
+            el.setAttribute('en-translation', en);
+            el.textContent = (localStorage.getItem('selectedLanguage') || 'es') === 'en' ? en : es;
+        }
+
+        function copy(text, id) {
+            const b = $(id);
+            const done = () => {
+                if (!b || b.dataset.busy) return;
+                b.dataset.label = b.textContent;
+                b.dataset.busy = 1;
+                b.textContent = '✓';
+                setTimeout(() => { const l = b.dataset.label; delete b.dataset.busy; b.textContent = l; }, 1200);
+            };
+            if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, done);
+            else {
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
+                } catch (_) { }
+                done();
+            }
+        }
+
+        /* ---------- mostrar invitación ---------- */
+        const MSGS = {
+            char: ['el código contiene caracteres no válidos', 'the code contains invalid characters'],
+            game: ['el juego no está en la lista de juegos conocidos', 'the game is not in the known games list'],
+            appid: ['falta el lobby: comparte la invitación desde Steam y pega el enlace completo',
+                'missing lobby: share the invite from Steam and paste the full link'],
+            lobby: ['ese lobby no es válido', 'that lobby is not valid'],
+            steamid: ['el SteamID no es válido', 'the SteamID is not valid'],
+            nolink: ['el enlace no es válido: se espera un enlace de invitación de Steam',
+                'invalid link: a Steam invite link was expected']
+        };
+
+        function say(id, key) {
+            const m = MSGS[key] || ['', ''];
+            const el = $(id);
+            el.textContent = (localStorage.getItem('selectedLanguage') || 'es') === 'en' ? m[1] : m[0];
+            el.hidden = !el.textContent;
+        }
+
+        // el request a steam ya ha salido: solo queda la imagen y el aviso
+        const CARD = ['tag', 'game', 'ids', 'joinBtn', 'joinRow'];
+
+        function opening() {
+            CARD.forEach(id => $(id).classList.add('hidden'));
+            $('joinNote').hidden = true;
+            $('opened').classList.remove('hidden');
+        }
+
+        function closing() {
+            CARD.forEach(id => $(id).classList.remove('hidden'));
+            $('opened').classList.add('hidden');
+        }
+
+        function show(d, code) {
+            $('join').classList.remove('hidden');
+            const name = NAMES[+d.app];
+            txt('game', name || 'Juego ' + d.app, name || 'Game ' + d.app);
+            $('ids').textContent = 'AppID ' + d.app;
+            $('joinBtn').href = steamURL(d);
+            $('openStore').href = 'https://store.steampowered.com/app/' + d.app;
+            $('joinBtn').addEventListener('click', e => {
+                e.preventDefault();
+                opening();
+                try { location.href = steamURL(d); } catch (_) { }
+            });
+            $('joinBack').onclick = () => closing();
+
+            const art = $('art');
+            art.addEventListener('error', () => art.classList.add('hidden'));
+            art.src = 'https://media.steampowered.com/steam/apps/' + d.app + '/header.jpg';
+
+            $('copyShort').href = SITE + '?' + code;
+            $('copyShort').addEventListener('click', e => { e.preventDefault(); copy(SITE + '?' + code, 'copyShort'); });
+
+            // intento automatico al abrir la pagina
+            let gone = false;
+            document.addEventListener('visibilitychange', () => { if (document.hidden) gone = true; });
+            window.addEventListener('pagehide', () => gone = true);
+            setTimeout(() => { if (!gone) $('joinBtn').click(); }, 500);
+        }
+
+        /* ---------- error ---------- */
+        function fail(err) {
+            $('bad').classList.remove('hidden');
+            say('badWhy', err.message);
+        }
+
+        /* ---------- generador ---------- */
+        txt('how', 'El enlace completo de Steam ocupa unos 60 caracteres. Aquí el juego se guarda en 1 carácter (base36 de 36 juegos), al SteamID se le resta su base para quedarnos solo con los bits útiles, y todo se empaqueta en base64 sin relleno: 16-17 caracteres en total, un 74% menos.',
+            'A full Steam link is around 60 characters long. Here the game is stored in a single character (base36 of 36 games), the base is subtracted from the SteamID so only the useful bits are kept, and everything is packed into base64 with no padding: 16-17 characters in total, 74% shorter.');
+        txt('foot', 'Hecho por Bertogim', 'Made by Bertogim');
+
+        function convert() {
+            let d, code, raw;
+            try {
+                d = parse($('paste').value);
+                code = pack(d.app, d.lobby, d.sid);
+                raw = steamURL(d);
+            } catch (e) {
+                $('out').classList.remove('show');
+                say('hint', e.message);
+                return;
+            }
+            $('hint').hidden = true;
+            const short = ALIAS + code, long = SITE + '?' + code;
+            $('oShort').textContent = short;
+            $('bShort').onclick = () => copy(short, 'bShort');
+            $('oLong').textContent = long;
+            $('oStat').textContent = raw.length + ' → ' + code.length + ' caracteres';
+            $('oSaved').textContent = '−' + Math.round((1 - code.length / raw.length) * 100) + '%';
+            $('bLong').onclick = () => copy(long, 'bLong');
+            $('bGo').onclick = () => { location.href = long; };
+            $('out').classList.add('show');
+        }
+
+        $('paste').addEventListener('paste', () => setTimeout(convert, 0));
+        $('paste').addEventListener('change', convert);
+        $('paste').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); convert(); } });
+
+        /* ---------- arranque ---------- */
+        const code = decodeURIComponent(location.search.replace(/^\?/, '').split('&')[0]).trim();
+        if (code) {
+            try { show(unpack(code), code); }
+            catch (e) { fail(e); }
+        }
+    </script>
+</body>
+
+</html>

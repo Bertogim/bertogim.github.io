@@ -7,10 +7,6 @@
     <title es-translation="Invitación de Steam">Steam Invite</title>
     <link rel="icon" type="image/png" href="/Image/Icon.png">
     <meta name="theme-color" content="#1b2838">
-    <meta content="Bertogim" property="og:title" />
-    <meta content="Steam Invite" property="og:description" />
-    <meta content="https://bertogim.github.io" property="og:url" />
-    <meta content="https://bertogim.github.io/Image/Icon.png" property="og:image" />
 
     <style>
         * {
@@ -629,7 +625,8 @@
         $('paste').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); convert(); } });
 
         /* ---------- arranque ---------- */
-        const code = decodeURIComponent(location.search.replace(/^\?/, '').split('&')[0]).trim();
+        // tinyurl añade un '=' al final de la query, hay que ignorarlo
+        const code = decodeURIComponent(location.search.replace(/^\?/, '').split('&')[0]).trim().replace(/=+$/, '');
         if (code) {
             try { show(unpack(code), code); }
             catch (e) { fail(e); }

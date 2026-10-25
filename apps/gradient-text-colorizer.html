@@ -12,7 +12,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', Arial, sans-serif;
         }
 
         body {
@@ -57,7 +57,7 @@
             color: #e0e0e0;
             padding: 10px;
             resize: vertical;
-            font-family: Consolas, monospace;
+            font-family: 'Roboto', Arial, sans-serif;
         }
 
         textarea[readonly] {
@@ -100,7 +100,7 @@
             border-radius: 6px;
             color: #e0e0e0;
             padding: 5px 8px;
-            font-family: Consolas, monospace;
+            font-family: 'Roboto', Arial, sans-serif;
             font-size: 13px;
         }
 
@@ -254,7 +254,7 @@
             border-radius: 6px;
             color: #e0e0e0;
             padding: 6px 8px;
-            font-family: Consolas, monospace;
+            font-family: 'Roboto', Arial, sans-serif;
             font-size: 13px;
         }
 
@@ -536,6 +536,9 @@
                 </div>
                 <button id="swapBtn" title="Intercambiar colores">⇄ Intercambiar</button>
             </div>
+            <p style="color: #aaa; font-size: 13px; margin-top: 10px;">El degradado va de borde a borde: cada letra toma el color de su centro, sin forzar los colores extremos en la primera y última letra.</p>
+            <div id="intermediateColors" class="color-row" style="margin-top: 12px;"></div>
+            <button id="addColorBtn" style="margin-top: 10px;">Añadir color intermedio</button>
 
             <div class="slider-row">
                 <span>A la izquierda: color inicial</span>
@@ -680,6 +683,106 @@
         const importBtn = document.getElementById('importBtn');
         const importStatus = document.getElementById('importStatus');
         const previewFormat = document.getElementById('previewFormat');
+        const intermediateColors = document.getElementById('intermediateColors');
+        const addColorBtn = document.getElementById('addColorBtn');
+        let intermediateStops = [];
+
+        function gradientStops(c1, c2, stops = intermediateStops) {
+            return [
+                { position: 0, color: c1 },
+                ...stops.map(s => ({ position: s.position, color: parseHex(s.hex) }))
+                    .filter(s => s.color && Number.isFinite(s.position) && s.position > 0 && s.position < 1),
+                { position: 1, color: c2 }
+            ].sort((a, b) => a.position - b.position);
+        }
+
+        function sampleGradient(u, stops) {
+            u = clamp(u, 0, 1);
+            for (let i = 1; i < stops.length; i++) {
+                if (u <= stops[i].position) {
+                    const left = stops[i - 1];
+                    const right = stops[i];
+                    const width = right.position - left.position;
+                    return colorAt(width ? (u - left.position) / width : 1, left.color, right.color);
+                }
+            }
+            return stops[stops.length - 1].color;
+        }
+
+        function renderIntermediateColors() {
+            intermediateColors.replaceChildren();
+            intermediateStops.forEach((stop, index) => {
+                const block = document.createElement('div');
+                block.className = 'color-block';
+                const label = document.createElement('label');
+                label.textContent = 'Color intermedio ' + (index + 1);
+                const color = document.createElement('input');
+                color.type = 'color';
+                color.value = '#' + stop.hex;
+                color.setAttribute('aria-label', label.textContent);
+                const hex = document.createElement('input');
+                hex.type = 'text';
+                hex.className = 'hex-input';
+                hex.value = '#' + stop.hex;
+                hex.setAttribute('aria-label', 'Color hexadecimal');
+                const positionLabel = document.createElement('label');
+                positionLabel.textContent = 'Posición: ' + Math.round(stop.position * 100) + '%';
+                const position = document.createElement('input');
+                position.type = 'range';
+                position.style.flex = 'none';
+                position.style.width = '150px';
+                position.min = '0.001';
+                position.max = '99.999';
+                position.step = 'any';
+                position.value = String(stop.position * 100);
+                position.setAttribute('aria-label', 'Posición del color en porcentaje');
+                const remove = document.createElement('button');
+                remove.textContent = 'Eliminar';
+                color.addEventListener('input', () => {
+                    stop.hex = normHex(color.value);
+                    hex.value = '#' + stop.hex;
+                    update();
+                });
+                hex.addEventListener('input', () => {
+                    const normalized = normHex(hex.value);
+                    if (!normalized) return;
+                    stop.hex = normalized;
+                    color.value = '#' + normalized;
+                    update();
+                });
+                position.addEventListener('input', () => {
+                    const value = position.valueAsNumber;
+                    if (!Number.isFinite(value) || value <= 0 || value >= 100) return;
+                    stop.position = value / 100;
+                    positionLabel.textContent = 'Posición: ' + Math.round(value) + '%';
+                    update();
+                });
+                remove.addEventListener('click', () => {
+                    intermediateStops.splice(index, 1);
+                    renderIntermediateColors();
+                    update();
+                });
+                block.append(label, color, hex, positionLabel, position, remove);
+                intermediateColors.appendChild(block);
+            });
+        }
+
+        addColorBtn.addEventListener('click', () => {
+            const c1 = parseHex(startHex.value);
+            const c2 = parseHex(endHex.value);
+            if (!c1 || !c2) return;
+            const stops = gradientStops(c1, c2);
+            let gap = 1;
+            for (let i = 2; i < stops.length; i++) {
+                if (stops[i].position - stops[i - 1].position >
+                    stops[gap].position - stops[gap - 1].position) gap = i;
+            }
+            const position = (stops[gap - 1].position + stops[gap].position) / 2;
+            intermediateStops.push({ position, hex: rgbToHex(sampleGradient(position, stops)) });
+            intermediateStops.sort((a, b) => a.position - b.position);
+            renderIntermediateColors();
+            update();
+        });
 
         const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
         const cutHex = h => h.startsWith('#') ? h.slice(1) : h;
@@ -756,18 +859,20 @@
             return /\s/.test(ch);
         }
 
-        function colorize(text, sliderVal, conc, c1, c2) {
-            const len = text.length;
+        function colorize(text, sliderVal, conc, c1, c2, stops = intermediateStops) {
+            const chars = Array.from(text);
+            const len = chars.length;
+            const palette = gradientStops(c1, c2, stops);
             const pieces = [];
             for (let i = 0; i < len; i++) {
-                const ch = text[i];
+                const ch = chars[i];
                 if (isWhitespace(ch)) {
                     pieces.push({ ch, hex: null });
                     continue;
                 }
-                const t = len > 1 ? i / (len - 1) : 0.5;
+                const t = (i + 0.5) / len;
                 const u = distribution(t, sliderVal, conc);
-                pieces.push({ ch, hex: rgbToHex(colorAt(u, c1, c2)) });
+                pieces.push({ ch, hex: rgbToHex(sampleGradient(u, palette)) });
             }
             return pieces;
         }
@@ -893,15 +998,16 @@
             scheduleHistorySave();
         }
 
-        function drawRampOn(cv, c1, c2, sliderVal, conc) {
+        function drawRampOn(cv, c1, c2, sliderVal, conc, stops = intermediateStops) {
             cv.width = 320;
             cv.height = 16;
             const ctx = cv.getContext('2d');
             const w = cv.width;
+            const palette = gradientStops(c1, c2, stops);
             for (let x = 0; x < w; x++) {
                 const t = x / (w - 1);
                 const u = distribution(t, sliderVal, conc);
-                const col = colorAt(u, c1, c2);
+                const col = sampleGradient(u, palette);
                 ctx.fillStyle = 'rgb(' + Math.round(col.r) + ',' + Math.round(col.g) + ',' + Math.round(col.b) + ')';
                 ctx.fillRect(x, 0, 1, cv.height);
             }
@@ -922,6 +1028,7 @@
                 text: textInput.value,
                 c1: c1,
                 c2: c2,
+                stops: intermediateStops.map(s => ({ position: s.position, hex: s.hex })),
                 priority: parseInt(prioritySlider.value, 10),
                 conc: parseInt(concentrationSlider.value, 10),
                 vf: previewFormat.value,
@@ -998,11 +1105,11 @@
                 cv.className = 'hist-ramp';
                 cv.width = 300;
                 cv.height = 8;
-                drawRampOn(cv, c1, c2, prior, cons);
+                drawRampOn(cv, c1, c2, prior, cons, entry.cfg.stops || []);
 
                 const textEl = document.createElement('div');
                 textEl.className = 'hist-text';
-                const pieces = colorize(entry.cfg.text, prior, cons, c1, c2);
+                const pieces = colorize(entry.cfg.text, prior, cons, c1, c2, entry.cfg.stops || []);
                 const big = pieces.length > 44;
                 const shown = big ? pieces.slice(0, 44) : pieces;
                 let txt = '';
@@ -1034,6 +1141,12 @@
 
         function applyConfig(cfg) {
             if (!cfg || typeof cfg !== 'object') return;
+            intermediateStops = Array.isArray(cfg.stops)
+                ? cfg.stops.filter(s => s && normHex(s.hex) && Number.isFinite(s.position) &&
+                    s.position > 0 && s.position < 1)
+                    .map(s => ({ position: s.position, hex: normHex(s.hex) }))
+                : [];
+            renderIntermediateColors();
             textInput.value = cfg.text || '';
             const c1 = normHex(cfg.c1);
             const c2 = normHex(cfg.c2);
@@ -1097,7 +1210,9 @@
             let lastIndex = 0;
             const re = /<color\s*=\s*#?([0-9A-Fa-f]{6})>([\s\S]*?)<\/color>|\[color\s*=\s*#?([0-9A-Fa-f]{6})\]([\s\S]*?)\[\/color\]|<span[^>]*style=["'][^"']*color:\s*#?([0-9A-Fa-f]{6})[^"']*["'][^>]*>([\s\S]*?)<\/span>/gi;
             function add(text, hex) {
-                const clean = stripTags(text);
+                const decoder = document.createElement('textarea');
+                decoder.innerHTML = stripTags(text);
+                const clean = decoder.value;
                 for (const ch of clean) tokens.push({ ch, hex });
             }
             let m;
@@ -1111,6 +1226,72 @@
             return tokens;
         }
 
+        function inferImportedGradient(tokens) {
+            const samples = tokens.flatMap((token, index) =>
+                token.hex && !isWhitespace(token.ch)
+                    ? [{ position: (index + 0.5) / tokens.length, color: parseHex(token.hex) }]
+                    : []);
+            if (!samples.length) return null;
+            const channels = ['r', 'g', 'b'];
+            const tolerance = 2;
+            const meanPosition = samples.reduce((sum, s) => sum + s.position, 0) / samples.length;
+            const variance = samples.reduce((sum, s) => sum + (s.position - meanPosition) ** 2, 0);
+            const first = {};
+            const last = {};
+            for (const channel of channels) {
+                const mean = samples.reduce((sum, s) => sum + s.color[channel], 0) / samples.length;
+                const slope = variance ? samples.reduce((sum, s) =>
+                    sum + (s.position - meanPosition) * (s.color[channel] - mean), 0) / variance : 0;
+                first[channel] = clamp(mean - slope * meanPosition, 0, 255);
+                last[channel] = clamp(mean + slope * (1 - meanPosition), 0, 255);
+            }
+            const start = rgbToHex(first);
+            const end = rgbToHex(last);
+            const fittedStart = parseHex(start);
+            const fittedEnd = parseHex(end);
+            const linear = samples.every(sample => {
+                const predicted = colorAt(sample.position, fittedStart, fittedEnd);
+                return channels.every(channel =>
+                    Math.abs(sample.color[channel] - predicted[channel]) <= tolerance);
+            });
+            if (linear) return { start, end, stops: [] };
+
+            const points = [
+                { position: 0, color: samples[0].color },
+                ...samples,
+                { position: 1, color: samples[samples.length - 1].color }
+            ];
+            const kept = new Set([0, points.length - 1]);
+            const pending = [[0, points.length - 1]];
+            while (pending.length) {
+                const [left, right] = pending.pop();
+                let largestError = tolerance;
+                let selected = -1;
+                for (let i = left + 1; i < right; i++) {
+                    const t = (points[i].position - points[left].position) /
+                        (points[right].position - points[left].position);
+                    const predicted = colorAt(t, points[left].color, points[right].color);
+                    const error = Math.max(...channels.map(channel =>
+                        Math.abs(points[i].color[channel] - predicted[channel])));
+                    if (error > largestError) {
+                        largestError = error;
+                        selected = i;
+                    }
+                }
+                if (selected !== -1) {
+                    kept.add(selected);
+                    pending.push([left, selected], [selected, right]);
+                }
+            }
+            return {
+                start: rgbToHex(points[0].color),
+                end: rgbToHex(points[points.length - 1].color),
+                stops: [...kept].sort((a, b) => a - b)
+                    .filter(i => i > 0 && i < points.length - 1)
+                    .map(i => ({ position: points[i].position, hex: rgbToHex(points[i].color) }))
+            };
+        }
+
         importBtn.addEventListener('click', () => {
             const tokens = parseColoredCode(importInput.value);
             const text = tokens.map(t => t.ch).join('');
@@ -1120,11 +1301,22 @@
                 if (t.hex && !start) start = t.hex;
                 if (t.hex) end = t.hex;
             }
-            if (!text.trim()) {
+            if (!text.trim() || !start) {
                 importStatus.textContent = 'No se ha detectado texto coloreado válido.';
                 return;
             }
-            if (textInput.value !== text) textInput.value = text.trim();
+            textInput.value = text;
+            const inferred = inferImportedGradient(tokens);
+            if (!inferred) {
+                importStatus.textContent = 'No se han detectado letras con color.';
+                return;
+            }
+            start = inferred.start;
+            end = inferred.end;
+            intermediateStops = inferred.stops;
+            prioritySlider.value = '0';
+            concentrationSlider.value = '0';
+            renderIntermediateColors();
             if (start && startHex.value !== '#' + start) {
                 startHex.value = '#' + start;
                 startColor.value = '#' + start;
@@ -1134,8 +1326,10 @@
                 endColor.value = '#' + end;
             }
             update();
-            importStatus.textContent = 'Importado: ' + text.trim().length + ' caracteres y ' +
-                tokens.filter(t => t.hex).length + ' con color.';
+            importStatus.textContent = 'Importado: ' + tokens.length + ' caracteres y ' +
+                (intermediateStops.length
+                    ? intermediateStops.length + ' colores intermedios necesarios.'
+                    : 'degradado simple, sin colores intermedios.');
         });
 
         startColor.addEventListener('input', () => {
@@ -1157,6 +1351,10 @@
             update();
         });
         swapBtn.addEventListener('click', () => {
+            intermediateStops = intermediateStops.map(s => ({
+                position: 1 - s.position, hex: s.hex
+            })).sort((a, b) => a.position - b.position);
+            renderIntermediateColors();
             const tmp = startColor.value;
             startColor.value = endColor.value;
             endColor.value = tmp;
